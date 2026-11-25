@@ -1,0 +1,139 @@
+{
+  "jobs": [
+    {
+      "id": 1001,
+      "title": "Frontend Engineer Intern",
+      "company_name": "GoTo Group (Gojek & Tokopedia)",
+      "category": "Software Development",
+      "candidate_required_location": "Jakarta (Hybrid)",
+      "salary": "Rp 5.000.000",
+      "tags": ["React", "TypeScript", "CSS", "Next.js"]
+    },
+    {
+      "id": 1002,
+      "title": "Software Engineer Intern (Web & Core Banking)",
+      "company_name": "DKatalis (Bank Jago)",
+      "category": "Software Development",
+      "candidate_required_location": "Jakarta (Hybrid)",
+      "salary": "Rp 5.500.000",
+      "tags": ["React", "TypeScript", "Node.js", "Docker"]
+    },
+    {
+      "id": 1003,
+      "title": "Software Development Engineer in Test (SDET) Intern",
+      "company_name": "tiket.com",
+      "category": "QA / Testing",
+      "candidate_required_location": "Jakarta (Hybrid)",
+      "salary": "Rp 4.500.000",
+      "tags": ["TypeScript", "Playwright", "REST API", "Git"]
+    },
+    {
+      "id": 1004,
+      "title": "Developer Intern - E-Commerce Platform",
+      "company_name": "Blibli (PT Global Digital Niaga Tbk)",
+      "category": "Software Development",
+      "candidate_required_location": "Jakarta (Hybrid)",
+      "salary": "Rp 4.500.000",
+      "tags": ["Java", "Spring Boot", "Vue.js", "SQL"]
+    },
+    {
+      "id": 1005,
+      "title": "Software Engineer Intern - InsurTech",
+      "company_name": "Qoala Indonesia",
+      "category": "Software Development",
+      "candidate_required_location": "Jakarta (Hybrid)",
+      "salary": "Rp 4.200.000",
+      "tags": ["React", "TypeScript", "CSS", "GraphQL"]
+    },
+    {
+      "id": 1006,
+      "title": "Software Engineer Intern (Remote)",
+      "company_name": "GudangAda",
+      "category": "Software Development",
+      "candidate_required_location": "Indonesia (Remote)",
+      "salary": "Rp 4.000.000",
+      "tags": ["React", "JavaScript", "Node.js", "PostgreSQL"]
+    },
+    {
+      "id": 1007,
+      "title": "Frontend Web Developer Intern",
+      "company_name": "Traveloka",
+      "category": "Software Development",
+      "candidate_required_location": "Tangerang (Hybrid)",
+      "salary": "Rp 5.200.000",
+      "tags": ["React", "TypeScript", "Tailwind CSS", "Redux"]
+    },
+    {
+      "id": 1008,
+      "title": "Shopee & Monee Apprentice - Backend Engineering",
+      "company_name": "Shopee Indonesia",
+      "category": "Backend Engineering",
+      "candidate_required_location": "Jakarta (Onsite)",
+      "salary": "Rp 6.000.000",
+      "tags": ["Go", "Python", "MySQL", "Redis", "Docker"]
+    },
+    {
+      "id": 1009,
+      "title": "Product Engineering Intern (Payment Gateway)",
+      "company_name": "Xendit",
+      "category": "Software Development",
+      "candidate_required_location": "Jakarta (Hybrid)",
+      "salary": "Rp 5.500.000",
+      "tags": ["TypeScript", "Node.js", "React", "AWS"]
+    },
+    {
+      "id": 1010,
+      "title": "Frontend & Smart TV App Intern",
+      "company_name": "Vidio (PT Vidio Dot Com)",
+      "category": "Software Development",
+      "candidate_required_location": "Jakarta (Hybrid)",
+      "salary": "Rp 4.300.000",
+      "tags": ["React", "TypeScript", "CSS", "HTML5"]
+    },
+    {
+      "id": 1011,
+      "title": "Backend Developer Intern (Node.js)",
+      "company_name": "Ruangguru",
+      "category": "Backend Engineering",
+      "candidate_required_location": "Jakarta (Onsite)",
+      "salary": "Rp 3.800.000",
+      "tags": ["Node.js", "TypeScript", "PostgreSQL", "REST API"]
+    },
+    {
+      "id": 1012,
+      "title": "Data Analytics & BI Intern",
+      "company_name": "Bukalapak",
+      "category": "Data & AI",
+      "candidate_required_location": "Jakarta (Hybrid)",
+      "salary": "Rp 4.000.000",
+      "tags": ["Python", "SQL", "BigQuery", "Tableau"]
+    },
+    {
+      "id": 1013,
+      "title": "Game Backend & Cloud Infrastructure Intern",
+      "company_name": "AccelByte Indonesia",
+      "category": "DevOps / Cloud",
+      "candidate_required_location": "Yogyakarta (Hybrid)",
+      "salary": "Rp 4.500.000",
+      "tags": ["Go", "Docker", "Kubernetes", "Linux"]
+    },
+    {
+      "id": 1014,
+      "title": "Mobile & Web Frontend Intern",
+      "company_name": "Flip (PT Fliptech Lentera Inspirasi Pertiwi)",
+      "category": "Software Development",
+      "candidate_required_location": "Depok (Remote)",
+      "salary": "Rp 4.500.000",
+      "tags": ["React", "React Native", "TypeScript", "CSS"]
+    },
+    {
+      "id": 1015,
+      "title": "IT Software Development Intern (Surabaya Hub)",
+      "company_name": "Telkom Indonesia (Digital Amoeba)",
+      "category": "Software Development",
+      "candidate_required_location": "Surabaya (Hybrid)",
+      "salary": "Rp 3.500.000",
+      "tags": ["React", "CSS", "Express.js", "MySQL"]
+    }
+  ]
+}

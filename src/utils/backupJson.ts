@@ -129,6 +129,7 @@ function parseApplication(raw: unknown): Application | null {
     workMode: raw.workMode as WorkMode,
     status: raw.status as ApplicationStatus,
     requiredSkills: raw.requiredSkills,
+    jobUrl: typeof raw.jobUrl === "string" ? raw.jobUrl : undefined,
     cvVersion: typeof raw.cvVersion === "string" ? raw.cvVersion : undefined,
     cvAttachment: parseCvAttachment(raw.cvAttachment),
     appliedDate:
@@ -188,6 +189,9 @@ export function parseBackupJson(rawText: string): ParseBackupResult {
   }
 
   const validApplications: Application[] = [];
+  const seenIds = new Set<string>();
+  const seenCompanyRoles = new Set<string>();
+
   for (const item of parsed.applications) {
     const validated = parseApplication(item);
     if (!validated) {
@@ -196,7 +200,36 @@ export function parseBackupJson(rawText: string): ParseBackupResult {
         error: "Terdapat item lamaran yang tidak sesuai skema Application.",
       };
     }
+
+    if (seenIds.has(validated.id)) {
+      return {
+        ok: false,
+        error: `Terdapat ID lamaran duplikat (${validated.id}) pada file backup.`,
+      };
+    }
+
+    const pairKey = `${validated.company.trim().toLowerCase()}::${validated.role.trim().toLowerCase()}`;
+    if (seenCompanyRoles.has(pairKey)) {
+      return {
+        ok: false,
+        error: `Terdapat lamaran duplikat (${validated.company} - ${validated.role}) pada file backup.`,
+      };
+    }
+
+    seenIds.add(validated.id);
+    seenCompanyRoles.add(pairKey);
     validApplications.push(validated);
+  }
+
+  const dedupedSkills: string[] = [];
+  const seenSkills = new Set<string>();
+  for (const rawSkill of parsed.kaptenSkills) {
+    const trimmed = rawSkill.trim();
+    const normalized = trimmed.toLowerCase();
+    if (trimmed.length > 0 && !seenSkills.has(normalized)) {
+      seenSkills.add(normalized);
+      dedupedSkills.push(trimmed);
+    }
   }
 
   return {
@@ -207,9 +240,7 @@ export function parseBackupJson(rawText: string): ParseBackupResult {
         typeof parsed.exportedAt === "string"
           ? parsed.exportedAt
           : new Date().toISOString(),
-      kaptenSkills: parsed.kaptenSkills
-        .map((skill) => skill.trim())
-        .filter((skill) => skill.length > 0),
+      kaptenSkills: dedupedSkills,
       applications: validApplications,
     },
   };

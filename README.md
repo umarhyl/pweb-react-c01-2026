@@ -1,13 +1,73 @@
 # Aku Mw Magang - Praktikum Pemrograman Web Modul 5 (`pweb-react-c01-2026`)
 
-Aplikasi Frontend React untuk membantu Kapten mengelola seluruh proses pencarian magang secara terarah, mulai dari eksplorasi lowongan, pelacakan pipeline lamaran, hingga perbandingan offer.
+Aplikasi Frontend React untuk membantu Kapten mengelola seluruh proses pencarian magang secara terarah, mulai dari eksplorasi lowongan, pelacakan pipeline lamaran, latihan interview, hingga perbandingan offer.
 
-## Ringkasan Fitur
+---
+
+## Cara Menjalankan Project
+
+Pastikan **Node.js (v20/v24 LTS)** sudah terpasang, lalu jalankan perintah berikut di dalam folder `pweb-react-c01-2026`:
+
+```bash
+# 1. Clone repository
+git clone https://github.com/umarhyl/pweb-react-c01-2026.git
+cd pweb-react-c01-2026
+
+# 2. Install dependencies
+npm install
+
+# 3. Jalankan development server (buka http://localhost:5173)
+npm run dev
+```
+
+### Perintah Validasi & Build
+
+```bash
+# Cek TypeScript strict mode (wajib lolos tanpa error)
+npx tsc --noEmit
+
+# Cek ESLint
+npm run lint
+
+# Build production ke folder dist/
+npm run build
+
+# Preview hasil build production secara lokal
+npm run preview
+```
+
+### Cara Reset & Backup Data (`localStorage`)
+
+Aplikasi menyimpan data secara otomatis di `localStorage` dengan key:
+- `aku-mw-magang:applications` (daftar seluruh lamaran, checklist, dan activity log)
+- `aku-mw-magang:kapten-skills` (daftar skill Kapten)
+
+Untuk me-reset data (misalnya sebelum demo ulang):
+1. **Lewat tombol di aplikasi (paling cepat)**: klik tombol **`Reset`** di menu bar atas, lalu konfirmasi dialog. Seluruh lamaran akan dikosongkan dan skill Kapten kembali ke default (`React, TypeScript, CSS, Git, REST API`).
+2. **Lewat Browser DevTools**: buka `F12` -> tab **Application** -> **Local Storage** -> hapus key `aku-mw-magang:applications` & `aku-mw-magang:kapten-skills` (atau jalankan `localStorage.clear(); location.reload();` di Console).
+3. **Backup & Pulihkan Data**: klik **`Export JSON`** di menu bar untuk mengunduh file backup `.json`, dan klik **`Import JSON`** untuk memulihkan data kapan saja (sudah dilengkapi validasi skema runtime).
+
+---
+
+## Fitur Nilai Tambahan (Bonus)
+
+Tanpa melanggar aturan library (tanpa Redux, Zustand, TanStack Query, React Hook Form, maupun Formik), kelompok kami menambahkan 2 fitur bonus yang relevan untuk alur kerja Kapten dan demo praktikum:
+
+1. **Export / Import Backup JSON + Reset Data (`src/utils/backupJson.ts`)**:
+   - **Export JSON**: mengunduh seluruh state `applications` (termasuk `checklist` & `activityLogs`) dan `kaptenSkills` ke file `aku-mw-magang-backup-YYYY-MM-DD.json`.
+   - **Import JSON**: membaca file `.json` memakai `FileReader`, memvalidasi seluruh field menggunakan type guard ketat (`unknown` narrowing, tanpa `any`), lalu memulihkan data ke state `useLocalStorage`.
+   - **Reset Data**: tombol cepat dengan konfirmasi untuk membersihkan data uji saat demo.
+2. **Keyboard Shortcut `/` Fokus Search Bar via `useRef`**:
+   - Menekan tombol **`/`** (saat kursor tidak sedang berada di dalam input/textarea/select) langsung memfokuskan kolom pencarian di tab **Eksplorasi Lowongan** (`JobExplorer.tsx`) maupun tab **Pipeline Lamaran** (`WarRoomPipeline.tsx`) menggunakan `useRef` + cleanup `removeEventListener` di `useEffect`.
+
+---
+
+## Ringkasan 7 Fitur Utama
 
 1. **Profil Skill Kapten & Eksplorasi Lowongan**:
    - Manajemen daftar skill Kapten (default 5 skill: `React`, `TypeScript`, `CSS`, `Git`, `REST API`), menolak skill duplikat, dan tersimpan di `localStorage`.
    - Pengambilan data lowongan dengan `useEffect` + `fetch()` + `AbortController`, lengkap dengan state Loading, Error (tombol Coba Lagi & Fallback Lokal), dan Empty state.
-   - Pencarian dengan Custom Hook `useDebounce(keyword, 400)`, filter kategori, pengurutan berdasarkan Skill Match tertinggi/terendah, serta **keyboard shortcut `/`** via `useRef` untuk langsung memfokuskan search bar.
+   - Pencarian dengan Custom Hook `useDebounce(keyword, 400)`, filter kategori, dan pengurutan berdasarkan Skill Match tertinggi/terendah.
    - Badge Match Score (%) (hijau >= 70%, kuning 40-69%, merah < 40%), pembedaan skill cocok vs missing skill, dan tombol Simpan ke Wishlist yang otomatis berubah menjadi `"Sudah Dilamar"` (disabled) jika sudah ada di pipeline.
 2. **Form Tambah Lamaran Manual**:
    - Controlled form penuh (`value` + `onChange`) untuk Perusahaan, Posisi/Role, Mode Kerja (`Remote`/`Hybrid`/`Onsite`), Status Awal (`WISHLIST`/`APPLIED`), dan Required Skills (dipisah koma).
@@ -40,29 +100,8 @@ Aplikasi Frontend React untuk membantu Kapten mengelola seluruh proses pencarian
 
 - **React 19** + **TypeScript** (`strict: true`, tanpa tipe `any`)
 - **Vite** (template `react-ts`)
-- **Tailwind CSS v4** + tema Windows XP / Retro '98 + aset ikon pixel-art lokal + `lucide-react`
+- **Tailwind CSS v4** + tema Windows XP / Retro '98 + aset ikon pixel-art & font lokal (`W95FA`, `VT323`) + `lucide-react`
 - **Tanpa library state/form eksternal** (tidak menggunakan Redux, Zustand, TanStack Query, React Hook Form, maupun Formik). Seluruh state, fetch, form, timer, dan penyimpanan lokal ditulis dengan React Hooks bawaan dan Custom Hooks buatan sendiri.
-
----
-
-## Cara Menjalankan Project
-
-```bash
-# 1. Install dependencies
-npm install
-
-# 2. Jalankan development server
-npm run dev
-
-# 3. Cek TypeScript (wajib lolos tanpa error)
-npx tsc --noEmit
-
-# 4. Cek ESLint
-npm run lint
-
-# 5. Build production
-npm run build
-```
 
 ---
 
@@ -106,8 +145,9 @@ pweb-react-c01-2026/
     │   ├── skillMatch.ts              # Hitung Skill Match Score (%), matched/missing skills, duplikat skill
     │   ├── scheduleConflict.ts        # Deteksi bentrok jadwal interview (< 60 menit)
     │   ├── applicationHelpers.ts      # Anti-duplikat lamaran, Rawan Ghosting (> 14 hari), Offer Comparator
+    │   ├── backupJson.ts              # Bonus: Export & validasi Import backup JSON
     │   └── index.ts                   # Barrel export helper
-    ├── App.tsx                        # Komponen utama, navigasi tab, & state terpusat
+    ├── App.tsx                        # Komponen utama, navigasi tab, state terpusat, & Export/Import/Reset
     ├── index.css                      # Token tema Windows XP / Retro '98 & Tailwind CSS v4
     └── main.tsx
 ```

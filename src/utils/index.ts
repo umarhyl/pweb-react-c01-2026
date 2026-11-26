@@ -38,3 +38,11 @@ export type {
 
 export { createBackupJson, parseBackupJson } from "./backupJson";
 export type { BackupPayload, ParseBackupResult } from "./backupJson";
+
+export {
+  MAX_CV_FILE_SIZE_BYTES,
+  formatFileSize,
+  openCvPreview,
+  readCvFile,
+} from "./cvFile";
+export type { ReadCvFileResult } from "./cvFile";

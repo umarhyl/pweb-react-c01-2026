@@ -4,6 +4,7 @@ export type {
   ApplicationSortBy,
   ApplicationStatus,
   ChecklistItem,
+  CvAttachment,
   InitialApplicationStatus,
   StatusTransitionPayload,
   TransitionValidationResult,

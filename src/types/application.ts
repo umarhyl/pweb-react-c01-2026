@@ -31,6 +31,13 @@ export interface ActivityLog {
   message: string;
 }
 
+export interface CvAttachment {
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  dataUrl: string;
+}
+
 export interface Application {
   id: string;
   company: string;
@@ -39,6 +46,7 @@ export interface Application {
   status: ApplicationStatus;
   requiredSkills: string[];
   cvVersion?: string;
+  cvAttachment?: CvAttachment;
   appliedDate?: string;
   interviewDateTime?: string;
   salaryOffer?: number;
@@ -49,6 +57,7 @@ export interface Application {
 
 export interface StatusTransitionPayload {
   cvVersion?: string;
+  cvAttachment?: CvAttachment;
   appliedDate?: string;
   interviewDateTime?: string;
   salaryOffer?: number;

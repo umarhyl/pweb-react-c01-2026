@@ -3,6 +3,7 @@ import type {
   Application,
   ApplicationStatus,
   ChecklistItem,
+  CvAttachment,
   WorkMode,
 } from "../types";
 
@@ -80,6 +81,26 @@ function parseActivityLogs(value: unknown): ActivityLog[] | null {
   return logs;
 }
 
+function parseCvAttachment(raw: unknown): CvAttachment | undefined {
+  if (!isRecord(raw)) return undefined;
+  if (
+    typeof raw.fileName !== "string" ||
+    typeof raw.mimeType !== "string" ||
+    typeof raw.sizeBytes !== "number" ||
+    !Number.isFinite(raw.sizeBytes) ||
+    typeof raw.dataUrl !== "string"
+  ) {
+    return undefined;
+  }
+
+  return {
+    fileName: raw.fileName,
+    mimeType: raw.mimeType,
+    sizeBytes: raw.sizeBytes,
+    dataUrl: raw.dataUrl,
+  };
+}
+
 function parseApplication(raw: unknown): Application | null {
   if (!isRecord(raw)) return null;
 
@@ -109,6 +130,7 @@ function parseApplication(raw: unknown): Application | null {
     status: raw.status as ApplicationStatus,
     requiredSkills: raw.requiredSkills,
     cvVersion: typeof raw.cvVersion === "string" ? raw.cvVersion : undefined,
+    cvAttachment: parseCvAttachment(raw.cvAttachment),
     appliedDate:
       typeof raw.appliedDate === "string" ? raw.appliedDate : undefined,
     interviewDateTime:

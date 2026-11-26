@@ -34,6 +34,10 @@ export function StatsDashboard({ applications }: StatsDashboardProps) {
       isGhostingRisk(app),
     ).length;
 
+    const ghostedCount = applications.filter(
+      (app) => app.status === "GHOSTED",
+    ).length;
+
     const offers = applications.filter((app) => app.status === "OFFER").length;
 
     const responseRate = total > 0 ? Math.round((responded / total) * 100) : 0;
@@ -46,6 +50,7 @@ export function StatsDashboard({ applications }: StatsDashboardProps) {
       responded,
       interviewed,
       ghostingRisk,
+      ghostedCount,
       offers,
       responseRate,
       interviewRate,
@@ -55,115 +60,146 @@ export function StatsDashboard({ applications }: StatsDashboardProps) {
   return (
     <section aria-label="Ringkasan Statistik Lamaran">
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-        {/* 1. Total Lamaran */}
-        <article className="xp-paper p-4 flex flex-col justify-between gap-2">
+        {/* 1. Total Lamaran (flat solid white, tanpa shadow & gradien) */}
+        <article className="craft-card-flat bg-white p-4 flex flex-col justify-between gap-2.5">
           <div className="flex items-center justify-between gap-2">
-            <span className="xp-eyebrow">Total Lamaran</span>
-            <img
-              src={RETRO_ICONS.briefcase}
-              alt=""
-              width={16}
-              height={16}
-              className="xp-pixel shrink-0"
-            />
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+              Total Lamaran
+            </span>
+            <span className="w-7 h-7 rounded-xl bg-sky-soft border border-sky/80 flex items-center justify-center shrink-0">
+              <img
+                src={RETRO_ICONS.briefcase}
+                alt=""
+                width={15}
+                height={15}
+                className="pixel-art"
+              />
+            </span>
           </div>
-          <p className="font-retro text-4xl leading-none text-xp-deep">
+          <p className="font-pixel text-3xl font-bold leading-none text-leaf-deep">
             {stats.total}
           </p>
-          <p className="text-[11px] text-slate-600">
+          <p className="text-[11.5px] text-muted">
             {stats.activeInPipeline} aktif di pipeline
           </p>
         </article>
 
         {/* 2. Response Rate % */}
-        <article className="xp-paper p-4 flex flex-col justify-between gap-2">
+        <article className="craft-card-flat bg-white p-4 flex flex-col justify-between gap-2.5">
           <div className="flex items-center justify-between gap-2">
-            <span className="xp-eyebrow">Response Rate</span>
-            <img
-              src={RETRO_ICONS.stats}
-              alt=""
-              width={16}
-              height={16}
-              className="xp-pixel shrink-0"
-            />
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+              Response Rate
+            </span>
+            <span className="w-7 h-7 rounded-xl bg-sky-soft border border-sky/80 flex items-center justify-center shrink-0">
+              <img
+                src={RETRO_ICONS.stats}
+                alt=""
+                width={15}
+                height={15}
+                className="pixel-art"
+              />
+            </span>
           </div>
-          <p className="font-retro text-4xl leading-none text-xp-bar">
+          <p className="font-pixel text-3xl font-bold leading-none text-leaf">
             {stats.responseRate}%
           </p>
-          <p className="text-[11px] text-slate-600">
+          <p className="text-[11.5px] text-muted">
             {stats.responded} dari {stats.total} diproses
           </p>
         </article>
 
         {/* 3. Interview Rate % */}
-        <article className="xp-paper p-4 flex flex-col justify-between gap-2">
+        <article className="craft-card-flat bg-white p-4 flex flex-col justify-between gap-2.5">
           <div className="flex items-center justify-between gap-2">
-            <span className="xp-eyebrow">Interview Rate</span>
-            <img
-              src={RETRO_ICONS.timer}
-              alt=""
-              width={16}
-              height={16}
-              className="xp-pixel shrink-0"
-            />
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+              Interview Rate
+            </span>
+            <span className="w-7 h-7 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center shrink-0">
+              <img
+                src={RETRO_ICONS.timer}
+                alt=""
+                width={15}
+                height={15}
+                className="pixel-art"
+              />
+            </span>
           </div>
-          <p className="font-retro text-4xl leading-none text-indigo-800">
+          <p className="font-pixel text-3xl font-bold leading-none text-indigo-700">
             {stats.interviewRate}%
           </p>
-          <p className="text-[11px] text-slate-600">
+          <p className="text-[11.5px] text-muted">
             {stats.interviewed} masuk wawancara
           </p>
         </article>
 
         {/* 4. Rawan Ghosting */}
         <article
-          className={`xp-paper p-4 flex flex-col justify-between gap-2 ${
-            stats.ghostingRisk > 0 ? "bg-red-50/75 !border-xp-danger" : ""
+          className={`craft-card-flat p-4 flex flex-col justify-between gap-2.5 ${
+            stats.ghostingRisk > 0
+              ? "bg-danger-soft/75 border-danger/45"
+              : "bg-white"
           }`}
         >
           <div className="flex items-center justify-between gap-2">
-            <span className="xp-eyebrow">Rawan Ghosting</span>
-            <img
-              src={RETRO_ICONS.ghost}
-              alt=""
-              width={16}
-              height={16}
-              className="xp-pixel shrink-0"
-            />
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+              Rawan Ghosting
+            </span>
+            <span
+              className={`w-7 h-7 rounded-xl border flex items-center justify-center shrink-0 ${
+                stats.ghostingRisk > 0
+                  ? "bg-white border-danger/35"
+                  : "bg-cream-soft border-line"
+              }`}
+            >
+              <img
+                src={RETRO_ICONS.ghost}
+                alt=""
+                width={15}
+                height={15}
+                className="pixel-art"
+              />
+            </span>
           </div>
           <p
-            className={`font-retro text-4xl leading-none ${
-              stats.ghostingRisk > 0 ? "text-xp-danger" : "text-slate-700"
+            className={`font-pixel text-3xl font-bold leading-none ${
+              stats.ghostingRisk > 0 ? "text-danger" : "text-ink"
             }`}
           >
             {stats.ghostingRisk}
           </p>
-          <p className="text-[11px] text-slate-600">&gt; 14 hari tanpa kabar</p>
+          <p className="text-[11.5px] text-muted">
+            &gt; 14 hari tanpa kabar
+            {stats.ghostedCount > 0 ? ` (${stats.ghostedCount} ghosted)` : ""}
+          </p>
         </article>
 
         {/* 5. Offer Diterima */}
         <article
-          className={`xp-paper p-4 flex flex-col justify-between gap-2 col-span-2 sm:col-span-1 ${
-            stats.offers >= 2 ? "bg-emerald-50/70 !border-xp-green" : ""
+          className={`craft-card-flat p-4 flex flex-col justify-between gap-2.5 col-span-2 sm:col-span-1 ${
+            stats.offers >= 2 ? "bg-leaf-soft border-leaf/55" : "bg-white"
           }`}
         >
           <div className="flex items-center justify-between gap-2">
-            <span className="xp-eyebrow">Offer Diterima</span>
-            <img
-              src={RETRO_ICONS.trophy}
-              alt=""
-              width={16}
-              height={16}
-              className="xp-pixel shrink-0"
-            />
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+              Offer Diterima
+            </span>
+            <span className="w-7 h-7 rounded-xl bg-sky-soft border border-sky/80 flex items-center justify-center shrink-0">
+              <img
+                src={RETRO_ICONS.trophy}
+                alt=""
+                width={15}
+                height={15}
+                className="pixel-art"
+              />
+            </span>
           </div>
-          <p className="font-retro text-4xl leading-none text-xp-green">
+          <p className="font-pixel text-3xl font-bold leading-none text-leaf-deep">
             {stats.offers}
           </p>
-          <p className="text-[11px] text-slate-600">
+          <p className="text-[11.5px] text-muted">
             {stats.offers >= 2
-              ? "Siap dibandingkan"
-              : "Butuh min. 2 untuk bandingkan"}
+              ? "Siap dibandingkan!"
+              : "Min. 2 untuk bandingkan"}
           </p>
         </article>
       </div>

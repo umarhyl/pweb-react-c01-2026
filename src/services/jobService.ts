@@ -9,6 +9,18 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
+function stripHtmlToPlainText(raw: string): string {
+  return raw
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function parseJobListing(item: unknown): JobListing | null {
   if (!isRecord(item)) return null;
 
@@ -21,6 +33,7 @@ function parseJobListing(item: unknown): JobListing | null {
     salary,
     tags,
     url,
+    description,
     publication_date,
   } = item;
 
@@ -39,6 +52,11 @@ function parseJobListing(item: unknown): JobListing | null {
         .filter((tag) => tag.length > 0)
     : [];
 
+  const cleanedDescription =
+    typeof description === "string" && description.trim().length > 0
+      ? stripHtmlToPlainText(description)
+      : undefined;
+
   return {
     id,
     title,
@@ -50,7 +68,8 @@ function parseJobListing(item: unknown): JobListing | null {
         : "Remote",
     salary: typeof salary === "string" ? salary : "",
     tags: normalizedTags,
-    url: typeof url === "string" ? url : undefined,
+    url: typeof url === "string" && url.trim().length > 0 ? url : undefined,
+    description: cleanedDescription,
     publication_date:
       typeof publication_date === "string" ? publication_date : undefined,
   };

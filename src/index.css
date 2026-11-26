@@ -1,5 +1,30 @@
 @import "tailwindcss";
 
+/* Local bundled fonts (100% offline-ready saat demo) */
+@font-face {
+  font-family: "Inter";
+  src: url("./assets/retro/fonts/Inter-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("./assets/retro/fonts/Inter-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("./assets/retro/fonts/Inter-900.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 @font-face {
   font-family: "W95FA";
   src: url("./assets/retro/fonts/W95FA-Regular.woff2") format("woff2");
@@ -17,27 +42,40 @@
 }
 
 @theme {
-  /* Windows XP + Retro98 Editorial Paper palette (Modul 1 & Retro98) */
-  --color-xp-bar: #0050ee;
-  --color-xp-deep: #003399;
-  --color-xp-select: #316ac5;
-  --color-xp-cream: #ece9d8;
-  --color-xp-cream-border: #c4c1b0;
-  --color-xp-soft: #d2ecff;
-  --color-xp-paper: #fffef7;
-  --color-xp-ink: #101827;
-  --color-xp-border: #7f9db9;
-  --color-xp-green: #267c08;
-  --color-xp-green-hover: #008d00;
-  --color-xp-danger: #c93b1a;
-  --color-xp-warn: #ffcc00;
-  --color-xp-focus: #e68b2c;
+  /* Windows XP / Retro '98 Blue x Cozy Craft Palette */
+  --color-leaf: #1b6be0;
+  --color-leaf-hover: #1356be;
+  --color-leaf-deep: #0b3d91;
+  --color-leaf-soft: #e6f1ff;
 
-  --font-sans: Tahoma, Verdana, "Segoe UI", sans-serif;
-  --font-display: Georgia, "Times New Roman", serif;
-  --font-os: "W95FA", Tahoma, Verdana, sans-serif;
+  --color-wood: #5b7ea8;
+  --color-wood-deep: #2f4f77;
+
+  --color-cream: #e8eff8;
+  --color-cream-soft: #f3f7fc;
+
+  --color-sky: #a7d8ff;
+  --color-sky-soft: #eaf4ff;
+  --color-sky-deep: #15539e;
+
+  --color-paper: #fbfdff;
+  --color-canvas: #f5f8fc;
+  --color-ink: #1b2430;
+  --color-muted: #586575;
+  --color-line: #dce5f1;
+  --color-line-strong: #c2d2e6;
+
+  --color-danger: #c94a38;
+  --color-danger-soft: #fdece9;
+  --color-warn: #d9921a;
+  --color-warn-soft: #fff6dc;
+
+  /* 2 Core Fonts + Retro Timer Mono */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-pixel: "Pixelify Sans", "W95FA", sans-serif;
+  --font-os: "W95FA", "Pixelify Sans", sans-serif;
   --font-retro: "VT323", "Courier New", ui-monospace, monospace;
-  --font-mono: "Courier New", ui-monospace, Consolas, monospace;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 @layer base {
@@ -48,13 +86,17 @@
   body {
     margin: 0;
     min-height: 100vh;
-    color: var(--color-xp-ink);
+    color: var(--color-ink);
     font-family: var(--font-sans);
     font-size: 14px;
-    line-height: 1.6;
-    background-color: #4f94e8;
+    line-height: 1.55;
+    background-color: #255ca8;
     background-image:
-      linear-gradient(rgb(16 24 39 / 0.04), rgb(16 24 39 / 0.08)),
+      linear-gradient(
+        180deg,
+        rgb(10 28 64 / 0.22) 0%,
+        rgb(8 24 54 / 0.3) 100%
+      ),
       url("./assets/retro/background.jpg");
     background-size: cover;
     background-position: center bottom;
@@ -62,277 +104,345 @@
   }
 
   ::selection {
-    background: var(--color-xp-select);
+    background: var(--color-leaf);
     color: #ffffff;
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-xp-focus);
+    outline: 2px solid var(--color-leaf);
     outline-offset: 2px;
   }
 }
 
 @layer components {
-  .xp-pixel {
+  .pixel-art {
     image-rendering: pixelated;
     image-rendering: crisp-edges;
   }
 
-  /* Main Windows XP Editorial Frame (matches Modul 1 reference) */
-  .xp-desktop {
-    background: var(--color-xp-paper);
-    border: 2px solid var(--color-xp-deep);
-    border-radius: 8px 8px 0 0;
+  /* Floating Cozy Rounded Window over Windows XP wallpaper */
+  .craft-sheet {
+    background: var(--color-paper);
+    border: 1px solid rgb(255 255 255 / 0.85);
+    border-radius: 28px;
     box-shadow:
-      0 18px 42px rgb(0 28 96 / 0.34),
-      0 2px 6px rgb(0 0 0 / 0.18);
-  }
-
-  /* Dialog Window (used ONLY for Modals & Toasts - not nested inside page cards) */
-  .xp-window {
-    background: var(--color-xp-cream);
-    border: 2px solid var(--color-xp-deep);
-    border-radius: 6px 6px 2px 2px;
-    box-shadow: 0 16px 40px rgb(0 24 72 / 0.38);
+      0 24px 60px rgb(8 36 96 / 0.28),
+      0 4px 16px rgb(8 36 96 / 0.12),
+      inset 0 1px 0 #ffffff;
     overflow: hidden;
   }
 
-  /* Clean Editorial Paper Surface inside the main window */
-  .xp-paper {
-    background: var(--color-xp-paper);
-    border: 1px solid var(--color-xp-ink);
-  }
-
-  .xp-card-soft {
-    background: #f8f6ec;
-    border: 1px solid var(--color-xp-cream-border);
-  }
-
-  .xp-eyebrow {
-    font-family: var(--font-os);
-    font-size: 11px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #475569;
-  }
-
-  .xp-highlight {
-    background: var(--color-xp-warn);
-    color: var(--color-xp-deep);
-    padding: 0.04em 0.32em;
-    box-decoration-break: clone;
-  }
-
-  .xp-titlebar {
+  /* Lively Glossy Windows XP / Retro '98 Top Mini-Strip */
+  .craft-topbar-98 {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.5rem;
-    padding: 0.45rem 0.75rem;
-    color: #ffffff;
-    font-family: var(--font-sans);
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.01em;
+    gap: 0.75rem;
+    padding: 0.55rem 1.25rem;
     background: linear-gradient(
       180deg,
-      #3f8cf3 0%,
-      #0058e6 14%,
-      var(--color-xp-bar) 74%,
-      var(--color-xp-deep) 100%
+      #59acff 0%,
+      #257bf4 34%,
+      #0f5fd8 80%,
+      #1e72ed 100%
     );
-    text-shadow: 0 1px 1px rgb(0 20 80 / 0.55);
-  }
-
-  .xp-grid-bg {
-    background-color: var(--color-xp-soft);
-    background-image:
-      linear-gradient(rgb(255 255 255 / 0.58) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(255 255 255 / 0.58) 1px, transparent 1px);
-    background-size: 44px 44px;
-  }
-
-  .xp-win-ctrl {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 22px;
-    height: 20px;
-    border: 1px solid var(--color-xp-deep);
-    background: var(--color-xp-cream);
-    color: var(--color-xp-ink);
-    font-size: 11px;
-    font-weight: 700;
-    line-height: 1;
-    cursor: pointer;
-    box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #b5b3a5;
-  }
-
-  .xp-win-ctrl:hover {
-    background: var(--color-xp-soft);
-  }
-
-  .xp-win-ctrl-close:hover {
-    background: var(--color-xp-danger);
-    color: #ffffff;
-  }
-
-  /* Sharp, crisp Retro98/XP Buttons */
-  .xp-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    padding: 0.5rem 0.95rem;
-    border: 1px solid var(--color-xp-ink);
-    background: var(--color-xp-cream);
-    color: var(--color-xp-ink);
+    border-bottom: 1px solid #0d47a8;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.52);
+    font-family: var(--font-os);
     font-size: 12px;
-    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #ffffff;
+    text-shadow: 0 1px 1px rgb(0 25 85 / 0.45);
+  }
+
+  /* Miniature tactile Retro '98 window controls */
+  .craft-win-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 19px;
+    height: 17px;
+    border-radius: 4px;
+    border: 1px solid rgb(255 255 255 / 0.55);
+    background: rgb(255 255 255 / 0.18);
+    color: #ffffff;
+    font-family: var(--font-os);
+    font-size: 10px;
+    line-height: 1;
+    box-shadow: inset 1px 1px 0 rgb(255 255 255 / 0.35);
+    user-select: none;
+  }
+
+  /* Scenic Blockfolio x XP Hero with full-bleed voxel world + luminous left fade */
+  .craft-hero {
+    position: relative;
+    min-height: 315px;
+    background-color: #e6f2ff;
+    background-image:
+      linear-gradient(
+        90deg,
+        #fbfdff 0%,
+        rgb(251 253 255 / 0.94) 29%,
+        rgb(251 253 255 / 0.72) 47%,
+        rgb(251 253 255 / 0.14) 68%,
+        rgb(251 253 255 / 0) 86%
+      ),
+      linear-gradient(
+        180deg,
+        rgb(251 253 255 / 0.4) 0%,
+        rgb(251 253 255 / 0) 22%
+      ),
+      url("./assets/retro/hero-kapten-world.jpg");
+    background-size: 100% 100%, 100% 100%, cover;
+    background-position: left center, top center, right center;
+  }
+
+  /* Ambient Image-Tinted Shadow cast softly underneath the Hero wave */
+  .craft-hero-img-shadow {
+    position: absolute;
+    left: 4%;
+    right: 4%;
+    bottom: -18px;
+    height: 54px;
+    background-image: url("./assets/retro/hero-kapten-world.jpg");
+    background-size: cover;
+    background-position: right bottom;
+    filter: blur(22px) saturate(1.25);
+    opacity: 0.34;
+    pointer-events: none;
+    border-radius: 9999px;
+  }
+
+  /* Panoramic Voxel Mountains & Tech Campus Footer Banner (tucks softly behind bottom cards) */
+  .craft-footer-horizon {
+    position: relative;
+    z-index: 0;
+    margin-top: -150px;
+    padding-top: 176px;
+    min-height: 360px;
+    background-color: #eaf4ff;
+    background-image:
+      linear-gradient(
+        180deg,
+        #fbfdff 0%,
+        rgb(251 253 255 / 0.94) 16%,
+        rgb(251 253 255 / 0.48) 38%,
+        rgb(251 253 255 / 0.08) 62%,
+        rgb(251 253 255 / 0) 80%
+      ),
+      linear-gradient(
+        90deg,
+        rgb(251 253 255 / 0.9) 0%,
+        rgb(251 253 255 / 0.65) 26%,
+        rgb(251 253 255 / 0.08) 52%,
+        rgb(251 253 255 / 0) 72%
+      ),
+      url("./assets/retro/footer-kapten-horizon.jpg");
+    background-size: 100% 100%, 100% 100%, cover;
+    background-position: top center, left center, right bottom;
+  }
+
+  /* Soft Rounded Cards */
+  .craft-card {
+    background: #ffffff;
+    border: 1px solid var(--color-line);
+    border-radius: 20px;
+    box-shadow: 0 3px 12px rgb(15 44 95 / 0.045);
+    transition:
+      transform 0.16s ease,
+      box-shadow 0.16s ease,
+      border-color 0.16s ease;
+  }
+
+  .craft-card-flat {
+    background: #ffffff;
+    border: 1px solid var(--color-line);
+    border-radius: 20px;
+    box-shadow: none;
+  }
+
+  .craft-card-hover:hover {
+    transform: translateY(-2px);
+    border-color: #9ec4f5;
+    box-shadow: 0 12px 28px rgb(27 107 224 / 0.12);
+  }
+
+  .craft-card-warm {
+    background: var(--color-cream-soft);
+    border: 1px solid var(--color-line);
+    border-radius: 18px;
+  }
+
+  .craft-eyebrow {
+    font-family: var(--font-os);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-wood-deep);
+  }
+
+  /* Tactile Pill Buttons (Blockfolio shape + Retro '98 bevel feel in XP Blue) */
+  .craft-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.5rem 1.05rem;
+    border-radius: 9999px;
+    border: 1px solid var(--color-line-strong);
+    background: #ffffff;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    font-weight: 600;
     cursor: pointer;
-    box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #b5b3a5;
-    transition: background-color 0.14s ease, transform 0.08s ease, opacity 0.14s ease;
+    box-shadow:
+      inset 0 1px 0 #ffffff,
+      0 2px 0 #d1dceb;
+    transition:
+      background-color 0.14s ease,
+      border-color 0.14s ease,
+      transform 0.1s ease,
+      box-shadow 0.14s ease;
   }
 
-  .xp-btn:hover:not(:disabled) {
-    background: var(--color-xp-soft);
+  .craft-btn:hover:not(:disabled) {
+    background: var(--color-sky-soft);
+    border-color: #8cb8f0;
   }
 
-  .xp-btn:active:not(:disabled) {
-    box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff;
+  .craft-btn:active:not(:disabled) {
     transform: translateY(1px);
+    box-shadow: inset 0 1px 2px rgb(15 44 95 / 0.14);
   }
 
-  .xp-btn:disabled {
-    opacity: 0.52;
+  .craft-btn:disabled {
+    opacity: 0.5;
     cursor: not-allowed;
+    box-shadow: none;
   }
 
-  .xp-btn-green {
-    background: var(--color-xp-green);
+  .craft-btn-primary {
+    background: linear-gradient(180deg, #3385f0 0%, var(--color-leaf) 100%);
     color: #ffffff;
-    border-color: #164e05;
-    box-shadow: inset 1px 1px 0 rgb(255 255 255 / 0.25), inset -1px -1px 0 #164e05;
+    border-color: #1250b3;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.35),
+      0 2px 0 #0e4194;
   }
 
-  .xp-btn-green:hover:not(:disabled) {
-    background: var(--color-xp-green-hover);
+  .craft-btn-primary:hover:not(:disabled) {
+    background: linear-gradient(180deg, #2877e3 0%, var(--color-leaf-hover) 100%);
+    border-color: #0d3e8f;
   }
 
-  .xp-btn-danger {
-    background: var(--color-xp-danger);
+  .craft-btn-danger {
+    background: #fff5f4;
+    color: var(--color-danger);
+    border-color: #f0b8b0;
+    box-shadow:
+      inset 0 1px 0 #ffffff,
+      0 2px 0 #edc3bc;
+  }
+
+  .craft-btn-danger:hover:not(:disabled) {
+    background: var(--color-danger);
     color: #ffffff;
-    border-color: #7c1f0c;
-    box-shadow: inset 1px 1px 0 rgb(255 255 255 / 0.22), inset -1px -1px 0 #7c1f0c;
+    border-color: #a13425;
   }
 
-  .xp-btn-danger:hover:not(:disabled) {
-    background: #a82e12;
-  }
-
-  .xp-input {
+  /* Clean Rounded Inputs with delicate Retro '98 inset top edge */
+  .craft-input {
     width: 100%;
-    padding: 0.5rem 0.7rem;
-    border: 1px solid var(--color-xp-ink);
+    padding: 0.55rem 0.85rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-line-strong);
     background: #ffffff;
-    color: var(--color-xp-ink);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
     font-size: 13px;
-    box-shadow: inset 1px 1px 0 #d4d0c8;
+    box-shadow: inset 0 1px 2px rgb(15 44 95 / 0.05);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
-  /* Retro98 Segmented Progress Bar */
-  .xp-progress {
+  .craft-input:focus {
+    outline: none;
+    border-color: var(--color-leaf);
+    box-shadow:
+      inset 0 1px 2px rgb(15 44 95 / 0.04),
+      0 0 0 3px rgb(27 107 224 / 0.18);
+  }
+
+  /* Retro '98 Segmented Progress Bar inside a Soft Pill Track (XP Blue) */
+  .craft-progress {
     height: 12px;
-    background: #ffffff;
-    border: 1px solid var(--color-xp-ink);
+    border-radius: 9999px;
+    background: #e9f0fa;
+    border: 1px solid #c9d9ee;
     padding: 2px;
     overflow: hidden;
+    box-shadow: inset 0 1px 2px rgb(15 44 95 / 0.08);
   }
 
-  .xp-progress-fill {
+  .craft-progress-fill {
     height: 100%;
+    border-radius: 9999px;
     background: repeating-linear-gradient(
       90deg,
-      var(--color-xp-bar) 0px,
-      var(--color-xp-bar) 8px,
-      transparent 8px,
-      transparent 10px
+      var(--color-leaf) 0px,
+      var(--color-leaf) 8px,
+      #4d98f5 8px,
+      #4d98f5 10px
     );
     transition: width 0.25s ease;
   }
 
-  /* Authentic Windows XP Taskbar */
-  .xp-taskbar {
+  /* Soft Dialog / Modal Window (Cozy Rounded + XP Blue Retro Header) */
+  .craft-modal {
+    background: var(--color-paper);
+    border: 1px solid #b8cde8;
+    border-radius: 22px;
+    box-shadow: 0 24px 64px rgb(10 34 84 / 0.3);
+    overflow: hidden;
+  }
+
+  .craft-modal-header {
     display: flex;
     align-items: center;
-    height: 44px;
-    color: #ffffff;
-    border-top: 2px solid #8caae6;
-    box-shadow: 0 -2px 10px rgb(0 30 100 / 0.32);
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.8rem 1.25rem;
     background: linear-gradient(
       180deg,
-      #3f8cf3 0%,
-      #0062e3 14%,
-      var(--color-xp-bar) 72%,
-      var(--color-xp-deep) 100%
+      #59acff 0%,
+      #257bf4 34%,
+      #0f5fd8 80%,
+      #1e72ed 100%
     );
+    border-bottom: 1px solid #0d47a8;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.48);
+    color: #ffffff;
+    text-shadow: 0 1px 1px rgb(0 25 85 / 0.4);
   }
 
-  .xp-start {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    align-self: stretch;
-    padding: 0 1.35rem 0 0.85rem;
-    border-radius: 0 16px 16px 0;
-    background: linear-gradient(#5edb5e, #31a431 16%, #008d00 68%, #267c08);
-    box-shadow: inset 0 2px 3px rgb(255 255 255 / 0.55);
-    font-style: italic;
-    font-weight: 700;
-    font-size: 18px;
-    text-shadow: 1px 1px #1b5c05;
-    cursor: pointer;
+  /* Subtle Cozy Scrollbar */
+  .craft-scroll::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
   }
 
-  .xp-start:hover {
-    filter: brightness(1.07);
+  .craft-scroll::-webkit-scrollbar-track {
+    background: #eef4fb;
+    border-radius: 9999px;
   }
 
-  .xp-task {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    padding: 0.32rem 0.8rem;
-    border: 1px solid #8caae6;
-    border-radius: 3px;
-    font-size: 12px;
-    background: linear-gradient(#4985df, var(--color-xp-select));
-    box-shadow: inset 0 1px rgb(255 255 255 / 0.28);
-    cursor: pointer;
+  .craft-scroll::-webkit-scrollbar-thumb {
+    background: #b8cbe3;
+    border-radius: 9999px;
+    border: 2px solid #eef4fb;
   }
 
-  .xp-task:hover {
-    background: #0066ff;
-  }
-
-  .xp-task-active {
-    background: var(--color-xp-deep);
-    border-color: #002775;
-    box-shadow: inset 1px 2px 3px #002266;
-    font-weight: 700;
-  }
-
-  .xp-tray {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    align-self: stretch;
-    margin-left: auto;
-    padding: 0 1rem;
-    background: linear-gradient(#149fea, #0c80d4);
-    border-left: 1px solid var(--color-xp-deep);
-    box-shadow: inset 1px 0 #8caae6;
-    font-size: 11px;
-    white-space: nowrap;
+  .craft-scroll::-webkit-scrollbar-thumb:hover {
+    background: #93b2d8;
   }
 }

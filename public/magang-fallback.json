@@ -7,7 +7,9 @@
       "category": "Software Development",
       "candidate_required_location": "Jakarta (Hybrid)",
       "salary": "Rp 5.000.000",
-      "tags": ["React", "TypeScript", "CSS", "Next.js"]
+      "tags": ["React", "TypeScript", "CSS", "Next.js"],
+      "url": "https://www.gotocompany.com/careers",
+      "description": "Bergabung dengan tim Consumer Web GoTo untuk membangun antarmuka web responsif menggunakan React, TypeScript, dan Next.js. Kamu akan berkolaborasi langsung dengan product designer dan backend engineer dalam sprint mingguan."
     },
     {
       "id": 1002,
@@ -16,7 +18,9 @@
       "category": "Software Development",
       "candidate_required_location": "Jakarta (Hybrid)",
       "salary": "Rp 5.500.000",
-      "tags": ["React", "TypeScript", "Node.js", "Docker"]
+      "tags": ["React", "TypeScript", "Node.js", "Docker"],
+      "url": "https://www.dkatalis.com/careers",
+      "description": "Membantu pengembangan portal web internal dan layanan API digital banking untuk ekosistem Bank Jago dengan standar keamanan tinggi, automated testing, dan containerization menggunakan Docker."
     },
     {
       "id": 1003,
@@ -25,7 +29,9 @@
       "category": "QA / Testing",
       "candidate_required_location": "Jakarta (Hybrid)",
       "salary": "Rp 4.500.000",
-      "tags": ["TypeScript", "Playwright", "REST API", "Git"]
+      "tags": ["TypeScript", "Playwright", "REST API", "Git"],
+      "url": "https://careers.tiket.com/",
+      "description": "Merancang dan menjalankan pengujian end-to-end serta validasi kontrak REST API menggunakan Playwright dan TypeScript guna menjaga keandalan fitur pemesanan tiket dan hotel."
     },
     {
       "id": 1004,
@@ -34,7 +40,9 @@
       "category": "Software Development",
       "candidate_required_location": "Jakarta (Hybrid)",
       "salary": "Rp 4.500.000",
-      "tags": ["Java", "Spring Boot", "Vue.js", "SQL"]
+      "tags": ["Java", "Spring Boot", "Vue.js", "SQL"],
+      "url": "https://careers.blibli.com/",
+      "description": "Terlibat dalam pengembangan modul katalog produk dan dashboard seller pada platform e-commerce Blibli menggunakan Java Spring Boot, Vue.js, dan database relasional SQL."
     },
     {
       "id": 1005,
@@ -43,7 +51,9 @@
       "category": "Software Development",
       "candidate_required_location": "Jakarta (Hybrid)",
       "salary": "Rp 4.200.000",
-      "tags": ["React", "TypeScript", "CSS", "GraphQL"]
+      "tags": ["React", "TypeScript", "CSS", "GraphQL"],
+      "url": "https://www.qoala.app/id/careers",
+      "description": "Membangun alur klaim dan pembelian polis digital berbasis React, TypeScript, dan GraphQL dengan fokus pada performa halaman mobile web serta pengalaman pengguna yang mulus."
     },
     {
       "id": 1006,
@@ -52,7 +62,9 @@
       "category": "Software Development",
       "candidate_required_location": "Indonesia (Remote)",
       "salary": "Rp 4.000.000",
-      "tags": ["React", "JavaScript", "Node.js", "PostgreSQL"]
+      "tags": ["React", "JavaScript", "Node.js", "PostgreSQL"],
+      "url": "https://gudangada.com/career",
+      "description": "Bekerja secara remote penuh dalam tim full-stack untuk mengembangkan fitur supply chain B2B menggunakan React, Node.js, dan PostgreSQL."
     },
     {
       "id": 1007,
@@ -61,7 +73,9 @@
       "category": "Software Development",
       "candidate_required_location": "Tangerang (Hybrid)",
       "salary": "Rp 5.200.000",
-      "tags": ["React", "TypeScript", "Tailwind CSS", "Redux"]
+      "tags": ["React", "TypeScript", "Tailwind CSS", "Redux"],
+      "url": "https://www.traveloka.com/en-id/careers",
+      "description": "Mengimplementasikan komponen UI reusable dan halaman promo perjalanan berskala besar di Traveloka menggunakan React, TypeScript, Tailwind CSS, dan state management terstruktur."
     },
     {
       "id": 1008,
@@ -70,7 +84,9 @@
       "category": "Backend Engineering",
       "candidate_required_location": "Jakarta (Onsite)",
       "salary": "Rp 6.000.000",
-      "tags": ["Go", "Python", "MySQL", "Redis", "Docker"]
+      "tags": ["Go", "Python", "MySQL", "Redis", "Docker"],
+      "url": "https://careers.shopee.co.id/",
+      "description": "Program magang intensif untuk membangun layanan backend ber-throughput tinggi menggunakan Go, Python, MySQL, dan Redis cache untuk sistem transaksi Shopee dan layanan finansial."
     },
     {
       "id": 1009,
@@ -79,7 +95,9 @@
       "category": "Software Development",
       "candidate_required_location": "Jakarta (Hybrid)",
       "salary": "Rp 5.500.000",
-      "tags": ["TypeScript", "Node.js", "React", "AWS"]
+      "tags": ["TypeScript", "Node.js", "React", "AWS"],
+      "url": "https://www.xendit.co/en/careers/",
+      "description": "Berkontribusi pada dashboard merchant dan integrasi payment gateway Xendit menggunakan TypeScript, React, Node.js, dan layanan cloud AWS."
     },
     {
       "id": 1010,
@@ -88,7 +106,9 @@
       "category": "Software Development",
       "candidate_required_location": "Jakarta (Hybrid)",
       "salary": "Rp 4.300.000",
-      "tags": ["React", "TypeScript", "CSS", "HTML5"]
+      "tags": ["React", "TypeScript", "CSS", "HTML5"],
+      "url": "https://career.vidio.com/",
+      "description": "Mengembangkan antarmuka streaming web dan aplikasi Smart TV berbasis HTML5, React, dan TypeScript dengan optimasi navigasi remote dan pemutaran video."
     },
     {
       "id": 1011,
@@ -97,7 +117,9 @@
       "category": "Backend Engineering",
       "candidate_required_location": "Jakarta (Onsite)",
       "salary": "Rp 3.800.000",
-      "tags": ["Node.js", "TypeScript", "PostgreSQL", "REST API"]
+      "tags": ["Node.js", "TypeScript", "PostgreSQL", "REST API"],
+      "url": "https://career.ruangguru.com/",
+      "description": "Merancang endpoint REST API untuk sistem pembelajaran online dan analitik progres belajar siswa menggunakan Node.js, TypeScript, dan PostgreSQL."
     },
     {
       "id": 1012,
@@ -106,7 +128,9 @@
       "category": "Data & AI",
       "candidate_required_location": "Jakarta (Hybrid)",
       "salary": "Rp 4.000.000",
-      "tags": ["Python", "SQL", "BigQuery", "Tableau"]
+      "tags": ["Python", "SQL", "BigQuery", "Tableau"],
+      "url": "https://careers.bukalapak.com/",
+      "description": "Mengolah data transaksi mitra menggunakan SQL dan BigQuery, membuat skrip otomatisasi Python, serta menyusun dashboard performa bisnis di Tableau."
     },
     {
       "id": 1013,
@@ -115,7 +139,9 @@
       "category": "DevOps / Cloud",
       "candidate_required_location": "Yogyakarta (Hybrid)",
       "salary": "Rp 4.500.000",
-      "tags": ["Go", "Docker", "Kubernetes", "Linux"]
+      "tags": ["Go", "Docker", "Kubernetes", "Linux"],
+      "url": "https://accelbyte.io/careers",
+      "description": "Mendukung infrastruktur layanan multiplayer game global berbasis Go, Docker, Kubernetes, dan Linux dengan pemantauan observability serta pipeline CI/CD."
     },
     {
       "id": 1014,
@@ -124,7 +150,9 @@
       "category": "Software Development",
       "candidate_required_location": "Depok (Remote)",
       "salary": "Rp 4.500.000",
-      "tags": ["React", "React Native", "TypeScript", "CSS"]
+      "tags": ["React", "React Native", "TypeScript", "CSS"],
+      "url": "https://career.flip.id/",
+      "description": "Membangun fitur transfer antarbank dan tampilan web produk Flip secara remote bersama tim engineering menggunakan React, React Native, dan TypeScript."
     },
     {
       "id": 1015,
@@ -133,7 +161,9 @@
       "category": "Software Development",
       "candidate_required_location": "Surabaya (Hybrid)",
       "salary": "Rp 3.500.000",
-      "tags": ["React", "CSS", "Express.js", "MySQL"]
+      "tags": ["React", "CSS", "Express.js", "MySQL"],
+      "url": "https://internship.ddbtelkom.id/",
+      "description": "Mengembangkan produk inovasi digital BUMN di Surabaya Hub mulai dari prototipe UI dengan React & CSS hingga integrasi backend Express.js dan MySQL."
     }
   ]
 }

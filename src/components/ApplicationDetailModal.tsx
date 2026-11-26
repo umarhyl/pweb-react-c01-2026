@@ -236,7 +236,7 @@ export function ApplicationDetailModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-xp-ink/60 backdrop-blur-[1px] flex items-center justify-center p-2.5 sm:p-5 overflow-y-auto"
+      className="fixed inset-0 z-50 bg-ink/45 backdrop-blur-[2px] flex items-center justify-center p-2.5 sm:p-5 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby="detail-modal-title"
@@ -244,57 +244,57 @@ export function ApplicationDetailModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="xp-window w-full max-w-5xl max-h-[92vh] flex flex-col">
-        {/* Titlebar XP */}
-        <div className="xp-titlebar shrink-0">
+      <div className="craft-modal w-full max-w-5xl max-h-[92vh] flex flex-col">
+        {/* Header Modal */}
+        <div className="craft-modal-header shrink-0">
           <span
             id="detail-modal-title"
-            className="truncate flex items-center gap-2"
+            className="truncate flex items-center gap-2 font-pixel font-bold text-base text-white"
           >
             <img
               src={RETRO_ICONS.checklist}
               alt=""
-              width={15}
-              height={15}
-              className="xp-pixel shrink-0"
+              width={16}
+              height={16}
+              className="pixel-art shrink-0"
             />
-            Detail Lamaran - {application.role} ({application.company})
+            Detail Lamaran: {application.role} ({application.company})
           </span>
           <button
             type="button"
             onClick={onClose}
             aria-label="Tutup detail lamaran"
-            className="xp-win-ctrl xp-win-ctrl-close shrink-0"
+            className="craft-win-dot cursor-pointer hover:bg-danger hover:border-danger hover:text-white shrink-0"
           >
             <X className="w-3 h-3" aria-hidden="true" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-4 sm:p-6 overflow-y-auto space-y-5 bg-xp-cream">
+        <div className="p-4 sm:p-6 overflow-y-auto craft-scroll space-y-5 bg-cream-soft/55">
           {/* Ringkasan Header Lamaran */}
-          <div className="xp-paper p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-1.5">
+          <div className="craft-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="font-display text-lg sm:text-xl font-bold text-xp-deep">
-                  {application.role} - {application.company}
+                <h2 className="font-pixel text-xl font-bold text-ink">
+                  {application.role} &middot; {application.company}
                 </h2>
-                <span className="px-2 py-0.5 text-[11px] font-bold bg-xp-soft text-xp-deep border border-xp-ink">
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-sky-soft text-sky-deep border border-sky">
                   {STATUS_LABELS[application.status]}
                 </span>
-                <span className="px-2 py-0.5 text-[11px] font-bold font-mono bg-xp-cream border border-xp-ink">
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-leaf-soft text-leaf-deep border border-leaf/40">
                   {skillMatch.score}% Match
                 </span>
               </div>
 
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-700">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted">
                 <span>
-                  Mode: <strong>{application.workMode}</strong>
+                  Mode: <strong className="text-ink">{application.workMode}</strong>
                 </span>
                 {application.cvVersion && (
                   <span className="inline-flex items-center gap-1.5 flex-wrap">
                     <span>
-                      CV: <strong>{application.cvVersion}</strong>
+                      CV: <strong className="text-ink">{application.cvVersion}</strong>
                     </span>
                     {application.cvAttachment && (
                       <>
@@ -305,7 +305,7 @@ export function ApplicationDetailModal({
                               openCvPreview(application.cvAttachment);
                             }
                           }}
-                          className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[11px] font-bold bg-xp-soft text-xp-deep border border-xp-border hover:bg-xp-cream cursor-pointer"
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sky-soft text-sky-deep border border-sky hover:bg-white cursor-pointer"
                         >
                           <ExternalLink className="w-3 h-3" aria-hidden="true" />
                           Preview
@@ -313,7 +313,7 @@ export function ApplicationDetailModal({
                         <a
                           href={application.cvAttachment.dataUrl}
                           download={application.cvAttachment.fileName}
-                          className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[11px] font-bold bg-xp-cream text-xp-ink border border-xp-border hover:bg-xp-soft"
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-cream-soft text-ink border border-line-strong hover:bg-white"
                         >
                           <Download className="w-3 h-3" aria-hidden="true" />
                           Unduh ({formatFileSize(application.cvAttachment.sizeBytes)})
@@ -325,7 +325,7 @@ export function ApplicationDetailModal({
                 {application.appliedDate && (
                   <span>
                     Applied:{" "}
-                    <strong className="font-mono">
+                    <strong className="font-mono text-ink">
                       {application.appliedDate}
                     </strong>
                   </span>
@@ -333,44 +333,55 @@ export function ApplicationDetailModal({
                 {application.interviewDateTime && (
                   <span className="inline-flex items-center gap-1">
                     <CalendarClock
-                      className="w-3.5 h-3.5 text-xp-deep"
+                      className="w-3.5 h-3.5 text-leaf-deep"
                       aria-hidden="true"
                     />
-                    <strong className="font-mono">
+                    <strong className="font-mono text-ink">
                       {formatLogTimestamp(application.interviewDateTime)}
                     </strong>
                   </span>
                 )}
                 {typeof application.salaryOffer === "number" &&
                   application.salaryOffer > 0 && (
-                    <span className="text-xp-green font-bold">
+                    <span className="text-emerald-700 font-semibold">
                       Offer: {formatCurrency(application.salaryOffer)}
                     </span>
                   )}
+                {application.jobUrl && (
+                  <a
+                    href={application.jobUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 font-semibold text-leaf hover:underline"
+                  >
+                    <ExternalLink className="w-3 h-3" aria-hidden="true" />
+                    Web Lowongan Asli
+                  </a>
+                )}
               </div>
 
               {(ghostRisk || hasConflict) && (
                 <div className="flex flex-wrap gap-2 pt-1">
                   {ghostRisk && (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold bg-[#ffe0b2] text-[#7a2e00] border border-xp-ink">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-300">
                       <img
                         src={RETRO_ICONS.ghost}
                         alt=""
                         width={13}
                         height={13}
-                        className="xp-pixel"
+                        className="pixel-art"
                       />
                       Rawan Ghosting ({daysSinceUpdate} hari tanpa update)
                     </span>
                   )}
                   {hasConflict && (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold bg-[#fff3a0] text-red-900 border border-xp-ink">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-semibold bg-danger-soft text-danger border border-danger/40">
                       <img
                         src={RETRO_ICONS.conflict}
                         alt=""
                         width={13}
                         height={13}
-                        className="xp-pixel"
+                        className="pixel-art"
                       />
                       Bentrok dengan jadwal interview lain (&lt; 60 menit)
                     </span>
@@ -384,14 +395,14 @@ export function ApplicationDetailModal({
                 <button
                   type="button"
                   onClick={() => onSimulateGhosting(application.id)}
-                  className="xp-btn"
+                  className="craft-btn py-1.5 px-3"
                 >
                   <img
                     src={RETRO_ICONS.ghost}
                     alt=""
                     width={14}
                     height={14}
-                    className="xp-pixel"
+                    className="pixel-art"
                   />
                   Simulasi +15 Hari
                 </button>
@@ -402,7 +413,7 @@ export function ApplicationDetailModal({
                   onDeleteApplication(application.id);
                   onClose();
                 }}
-                className="xp-btn xp-btn-danger"
+                className="craft-btn craft-btn-danger py-1.5 px-3.5"
               >
                 <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
                 Hapus
@@ -416,12 +427,12 @@ export function ApplicationDetailModal({
             <div className="lg:col-span-7 space-y-5">
               {/* State Machine */}
               <section
-                className="xp-paper p-4 sm:p-5 space-y-4"
+                className="craft-card p-5 space-y-4"
                 aria-label="Tahap Seleksi dan Transisi Status"
               >
-                <div className="border-b border-xp-cream-border pb-2">
-                  <span className="xp-eyebrow">STATE_MACHINE.SYS</span>
-                  <h3 className="font-display text-base font-bold text-xp-deep">
+                <div className="border-b border-line pb-2.5">
+                  <span className="craft-eyebrow">State Machine</span>
+                  <h3 className="font-pixel text-lg font-bold text-ink">
                     Tahap Seleksi &amp; Transisi Status
                   </h3>
                 </div>
@@ -435,21 +446,21 @@ export function ApplicationDetailModal({
                     return (
                       <li key={step} className="space-y-1.5">
                         <div
-                          className={`h-2 border border-xp-ink ${
+                          className={`h-2 rounded-full ${
                             isCurrent
-                              ? "bg-xp-bar"
+                              ? "bg-leaf"
                               : isPassed
-                                ? "bg-xp-green"
-                                : "bg-xp-cream"
+                                ? "bg-leaf/60"
+                                : "bg-cream"
                           }`}
                         />
                         <span
                           className={`block truncate ${
                             isCurrent
-                              ? "font-bold text-xp-bar"
+                              ? "font-bold text-leaf-deep"
                               : isPassed
-                                ? "font-bold text-xp-ink"
-                                : "text-slate-500"
+                                ? "font-semibold text-ink"
+                                : "text-muted"
                           }`}
                         >
                           {index + 1}. {STATUS_LABELS[step]}
@@ -461,19 +472,19 @@ export function ApplicationDetailModal({
 
                 {(application.status === "REJECTED" ||
                   application.status === "GHOSTED") && (
-                  <p className="text-xs px-3 py-2 bg-xp-cream border border-xp-ink text-xp-ink">
+                  <p className="text-xs px-3.5 py-2.5 rounded-xl bg-cream-soft border border-line text-ink">
                     Status saat ini:{" "}
-                    <strong>{STATUS_LABELS[application.status]}</strong>
+                    <strong>{STATUS_LABELS[application.status]}</strong>.{" "}
                     {application.status === "GHOSTED"
-                      ? " - Khusus GHOSTED masih boleh kembali ke SCREENING jika HRD menghubungi lagi."
-                      : " - Status ini bersifat final."}
+                      ? "Khusus GHOSTED masih boleh kembali ke SCREENING jika HRD menghubungi lagi."
+                      : "Status ini bersifat final."}
                   </p>
                 )}
 
                 {finalStatus ? (
-                  <div className="flex items-center gap-2.5 p-3 bg-emerald-50 border border-xp-green text-xs text-slate-800">
+                  <div className="flex items-center gap-2.5 p-3.5 rounded-2xl bg-leaf-soft border border-leaf/40 text-xs text-leaf-deep">
                     <CheckCircle2
-                      className="w-4 h-4 text-xp-green shrink-0"
+                      className="w-4 h-4 text-leaf shrink-0"
                       aria-hidden="true"
                     />
                     <span>
@@ -486,11 +497,11 @@ export function ApplicationDetailModal({
                 ) : (
                   <form
                     onSubmit={handleConfirmTransition}
-                    className="space-y-3.5 xp-card-soft p-3.5"
+                    className="space-y-3.5 craft-card-warm p-4"
                     noValidate
                   >
                     <div className="space-y-2">
-                      <span className="block text-xs font-bold text-xp-ink">
+                      <span className="block text-xs font-semibold text-ink">
                         Pindahkan status ke:
                       </span>
                       <div className="flex flex-wrap gap-2">
@@ -504,10 +515,8 @@ export function ApplicationDetailModal({
                                 setChosenNextStatus(nextStatus);
                                 setTransitionErrors([]);
                               }}
-                              className={`xp-btn ${
-                                isSelected
-                                  ? "!bg-xp-bar !text-white !border-xp-deep"
-                                  : ""
+                              className={`craft-btn py-1.5 px-3.5 ${
+                                isSelected ? "craft-btn-primary" : ""
                               }`}
                             >
                               <ArrowRight
@@ -528,7 +537,7 @@ export function ApplicationDetailModal({
                           <div>
                             <label
                               htmlFor="transition-cv-version"
-                              className="block text-[11px] font-bold mb-1"
+                              className="block text-[11.5px] font-semibold text-ink mb-1"
                             >
                               Versi CV *
                             </label>
@@ -538,13 +547,13 @@ export function ApplicationDetailModal({
                               value={cvVersion}
                               onChange={(e) => setCvVersion(e.target.value)}
                               placeholder="mis. Kapten-CV-v2.pdf"
-                              className="xp-input text-xs"
+                              className="craft-input text-xs"
                             />
                           </div>
                           <div>
                             <label
                               htmlFor="transition-applied-date"
-                              className="block text-[11px] font-bold mb-1"
+                              className="block text-[11.5px] font-semibold text-ink mb-1"
                             >
                               Tanggal Melamar *
                             </label>
@@ -553,20 +562,20 @@ export function ApplicationDetailModal({
                               type="date"
                               value={appliedDate}
                               onChange={(e) => setAppliedDate(e.target.value)}
-                              className="xp-input text-xs"
+                              className="craft-input text-xs"
                             />
                           </div>
                         </div>
 
                         <div className="space-y-1.5">
                           <div className="flex flex-wrap items-center justify-between gap-2">
-                            <span className="text-[11px] text-slate-700">
+                            <span className="text-[11px] text-muted">
                               Upload file CV lokal (opsional, PDF/DOC/DOCX maks. 500 KB)
                             </span>
                             <button
                               type="button"
                               onClick={() => cvFileInputRef.current?.click()}
-                              className="xp-btn py-1 px-2.5 text-[11px]"
+                              className="craft-btn py-1 px-3 text-[11px]"
                             >
                               <Upload className="w-3 h-3" aria-hidden="true" />
                               Upload File CV
@@ -584,11 +593,16 @@ export function ApplicationDetailModal({
                           </div>
 
                           {cvAttachment && (
-                            <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 bg-xp-paper border border-xp-border text-[11px]">
+                            <div className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-white border border-line text-[11px]">
                               <span className="inline-flex items-center gap-1.5 min-w-0 truncate">
-                                <Paperclip className="w-3 h-3 text-xp-deep shrink-0" aria-hidden="true" />
-                                <strong className="truncate">{cvAttachment.fileName}</strong>
-                                <span className="font-mono text-slate-500 shrink-0">
+                                <Paperclip
+                                  className="w-3 h-3 text-leaf-deep shrink-0"
+                                  aria-hidden="true"
+                                />
+                                <strong className="truncate text-ink">
+                                  {cvAttachment.fileName}
+                                </strong>
+                                <span className="font-mono text-muted shrink-0">
                                   ({formatFileSize(cvAttachment.sizeBytes)})
                                 </span>
                               </span>
@@ -596,7 +610,7 @@ export function ApplicationDetailModal({
                                 type="button"
                                 onClick={() => setCvAttachment(undefined)}
                                 aria-label="Hapus lampiran file CV"
-                                className="text-slate-500 hover:text-xp-danger cursor-pointer"
+                                className="text-muted hover:text-danger cursor-pointer"
                               >
                                 <X className="w-3.5 h-3.5" aria-hidden="true" />
                               </button>
@@ -604,7 +618,7 @@ export function ApplicationDetailModal({
                           )}
 
                           {cvUploadError && (
-                            <p role="alert" className="text-[11px] font-bold text-red-700">
+                            <p role="alert" className="text-[11px] font-medium text-danger">
                               {cvUploadError}
                             </p>
                           )}
@@ -617,7 +631,7 @@ export function ApplicationDetailModal({
                       <div>
                         <label
                           htmlFor="transition-interview-datetime"
-                          className="block text-[11px] font-bold mb-1"
+                          className="block text-[11.5px] font-semibold text-ink mb-1"
                         >
                           Jadwal Interview (YYYY-MM-DDTHH:mm) *
                         </label>
@@ -626,7 +640,7 @@ export function ApplicationDetailModal({
                           type="datetime-local"
                           value={interviewDateTime}
                           onChange={(e) => setInterviewDateTime(e.target.value)}
-                          className="xp-input text-xs"
+                          className="craft-input text-xs"
                         />
                       </div>
                     )}
@@ -637,7 +651,7 @@ export function ApplicationDetailModal({
                         <div>
                           <label
                             htmlFor="transition-salary-offer"
-                            className="block text-[11px] font-bold mb-1"
+                            className="block text-[11.5px] font-semibold text-ink mb-1"
                           >
                             Nominal Gaji / Uang Saku (Rp) *
                           </label>
@@ -651,13 +665,13 @@ export function ApplicationDetailModal({
                               setSalaryOfferInput(e.target.value)
                             }
                             placeholder="mis. 5500000"
-                            className="xp-input text-xs"
+                            className="craft-input text-xs"
                           />
                         </div>
                         <div>
                           <label
                             htmlFor="transition-work-mode"
-                            className="block text-[11px] font-bold mb-1"
+                            className="block text-[11.5px] font-semibold text-ink mb-1"
                           >
                             Mode Kerja *
                           </label>
@@ -667,7 +681,7 @@ export function ApplicationDetailModal({
                             onChange={(e) =>
                               setOfferWorkMode(e.target.value as WorkMode)
                             }
-                            className="xp-input text-xs"
+                            className="craft-input text-xs"
                           >
                             {WORK_MODES.map((mode) => (
                               <option key={mode} value={mode}>
@@ -682,7 +696,7 @@ export function ApplicationDetailModal({
                     {transitionErrors.length > 0 && (
                       <ul
                         role="alert"
-                        className="text-xs font-bold text-red-800 bg-red-50 border border-xp-danger p-2.5 space-y-0.5"
+                        className="text-xs font-medium text-danger bg-danger-soft border border-danger/35 rounded-xl p-3 space-y-0.5"
                       >
                         {transitionErrors.map((err) => (
                           <li key={err}>• {err}</li>
@@ -694,7 +708,7 @@ export function ApplicationDetailModal({
                       <button
                         type="submit"
                         disabled={!selectedNextStatus}
-                        className="xp-btn xp-btn-green"
+                        className="craft-btn craft-btn-primary"
                       >
                         Konfirmasi Pindah ke{" "}
                         {selectedNextStatus
@@ -708,7 +722,7 @@ export function ApplicationDetailModal({
 
               {/* Nested Checklist Persiapan */}
               <section
-                className="xp-paper p-4 sm:p-5 space-y-3.5"
+                className="craft-card p-5 space-y-3.5"
                 aria-label="Daftar Persiapan"
               >
                 <div className="flex items-center justify-between gap-2">
@@ -718,20 +732,20 @@ export function ApplicationDetailModal({
                       alt=""
                       width={16}
                       height={16}
-                      className="xp-pixel"
+                      className="pixel-art"
                     />
-                    <h3 className="font-display text-base font-bold text-xp-deep">
+                    <h3 className="font-pixel text-lg font-bold text-ink">
                       Daftar Persiapan
                     </h3>
                   </div>
-                  <span className="font-mono text-xs font-bold text-xp-deep">
+                  <span className="font-mono text-xs font-semibold text-leaf-deep">
                     {completedChecklist} / {totalChecklist} selesai (
                     {checklistPercent}%)
                   </span>
                 </div>
 
                 <div
-                  className="xp-progress"
+                  className="craft-progress"
                   role="progressbar"
                   aria-valuenow={checklistPercent}
                   aria-valuemin={0}
@@ -739,13 +753,13 @@ export function ApplicationDetailModal({
                   aria-label="Progress checklist persiapan"
                 >
                   <div
-                    className="xp-progress-fill"
+                    className="craft-progress-fill"
                     style={{ width: `${checklistPercent}%` }}
                   />
                 </div>
 
                 {application.checklist.length === 0 ? (
-                  <p className="text-xs text-slate-600 italic bg-xp-cream/50 border border-dashed border-xp-border p-3">
+                  <p className="text-xs text-muted italic bg-cream-soft border border-dashed border-line-strong rounded-xl p-3">
                     Belum ada item persiapan. Tambahkan tugas pertamamu di
                     bawah.
                   </p>
@@ -754,7 +768,7 @@ export function ApplicationDetailModal({
                     {application.checklist.map((item) => (
                       <li
                         key={item.id}
-                        className="flex items-center justify-between gap-2 p-2.5 bg-white border border-xp-ink"
+                        className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-cream-soft/60 border border-line"
                       >
                         <label className="flex items-center gap-2.5 text-xs flex-1 cursor-pointer">
                           <input
@@ -763,13 +777,13 @@ export function ApplicationDetailModal({
                             onChange={() =>
                               onToggleChecklistItem(application.id, item.id)
                             }
-                            className="accent-xp-bar"
+                            className="accent-leaf"
                           />
                           <span
                             className={
                               item.done
-                                ? "line-through text-slate-400"
-                                : "text-xp-ink"
+                                ? "line-through text-muted"
+                                : "text-ink"
                             }
                           >
                             {item.text}
@@ -781,7 +795,7 @@ export function ApplicationDetailModal({
                             onDeleteChecklistItem(application.id, item.id)
                           }
                           aria-label={`Hapus checklist ${item.text}`}
-                          className="p-1 text-slate-500 hover:text-xp-danger cursor-pointer"
+                          className="p-1 text-muted hover:text-danger cursor-pointer"
                         >
                           <X className="w-3.5 h-3.5" aria-hidden="true" />
                         </button>
@@ -804,12 +818,12 @@ export function ApplicationDetailModal({
                     value={newChecklistText}
                     onChange={(e) => setNewChecklistText(e.target.value)}
                     placeholder="Tambah tugas persiapan baru..."
-                    className="xp-input flex-1 text-xs"
+                    className="craft-input flex-1 text-xs"
                   />
                   <button
                     type="submit"
                     disabled={newChecklistText.trim().length === 0}
-                    className="xp-btn xp-btn-green shrink-0"
+                    className="craft-btn craft-btn-primary shrink-0"
                   >
                     <Plus className="w-3.5 h-3.5" aria-hidden="true" />
                     Tambah
@@ -824,21 +838,21 @@ export function ApplicationDetailModal({
 
               {/* Activity Log */}
               <section
-                className="xp-paper p-4 space-y-3.5"
+                className="craft-card p-5 space-y-3.5"
                 aria-label="Riwayat Aktivitas"
               >
-                <div className="flex items-center justify-between border-b border-xp-cream-border pb-2">
-                  <span className="inline-flex items-center gap-1.5 xp-eyebrow text-xp-deep">
+                <div className="flex items-center justify-between border-b border-line pb-2.5">
+                  <span className="inline-flex items-center gap-1.5 craft-eyebrow text-leaf-deep">
                     <img
                       src={RETRO_ICONS.activityLog}
                       alt=""
                       width={15}
                       height={15}
-                      className="xp-pixel"
+                      className="pixel-art"
                     />
-                    RIWAYAT_AKTIVITAS.LOG
+                    Riwayat Aktivitas
                   </span>
-                  <span className="font-mono text-[11px] text-slate-600">
+                  <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-cream-soft border border-line text-muted">
                     {application.activityLogs.length} catatan
                   </span>
                 </div>
@@ -857,12 +871,12 @@ export function ApplicationDetailModal({
                     value={manualNote}
                     onChange={(e) => setManualNote(e.target.value)}
                     placeholder="Tulis catatan manual (mis. Follow up HRD)..."
-                    className="xp-input flex-1 text-xs"
+                    className="craft-input flex-1 text-xs"
                   />
                   <button
                     type="submit"
                     disabled={manualNote.trim().length === 0}
-                    className="xp-btn shrink-0"
+                    className="craft-btn shrink-0"
                   >
                     <Send className="w-3.5 h-3.5" aria-hidden="true" />
                     Catat
@@ -870,20 +884,20 @@ export function ApplicationDetailModal({
                 </form>
 
                 {application.activityLogs.length === 0 ? (
-                  <p className="text-xs text-slate-600 italic">
+                  <p className="text-xs text-muted italic">
                     Belum ada riwayat aktivitas.
                   </p>
                 ) : (
-                  <ul className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+                  <ul className="space-y-2.5 max-h-60 overflow-y-auto craft-scroll pr-1">
                     {application.activityLogs.map((log) => (
                       <li
                         key={log.id}
-                        className="border-l-2 border-xp-bar pl-3 py-0.5 space-y-0.5"
+                        className="border-l-2 border-leaf/70 pl-3 py-0.5 space-y-0.5"
                       >
-                        <span className="block font-mono text-[10px] text-slate-500">
+                        <span className="block font-mono text-[10px] text-muted">
                           {formatLogTimestamp(log.timestamp)}
                         </span>
-                        <p className="text-xs text-xp-ink leading-snug">
+                        <p className="text-xs text-ink leading-snug">
                           {log.message}
                         </p>
                       </li>

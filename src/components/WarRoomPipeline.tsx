@@ -2,9 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   CalendarClock,
   Clock,
+  ExternalLink,
   Eye,
   FileText,
+  Plus,
   RotateCcw,
+  Search,
   Trash2,
 } from "lucide-react";
 import { RETRO_ICONS } from "../assets/retro";
@@ -45,19 +48,19 @@ const ALL_STATUSES: readonly ApplicationStatus[] = [
 ];
 
 const STATUS_BADGE_CLASS: Readonly<Record<ApplicationStatus, string>> = {
-  WISHLIST: "bg-xp-cream text-xp-ink border-xp-ink",
-  APPLIED: "bg-sky-100 text-sky-950 border-sky-700",
-  SCREENING: "bg-indigo-100 text-indigo-950 border-indigo-700",
-  INTERVIEW: "bg-amber-100 text-amber-950 border-amber-700",
-  OFFER: "bg-emerald-100 text-emerald-950 border-emerald-700",
-  REJECTED: "bg-rose-100 text-rose-950 border-rose-700",
-  GHOSTED: "bg-purple-100 text-purple-950 border-purple-700 border-dashed",
+  WISHLIST: "bg-cream-soft text-ink border-line-strong",
+  APPLIED: "bg-sky-soft text-sky-deep border-sky",
+  SCREENING: "bg-indigo-50 text-indigo-800 border-indigo-200",
+  INTERVIEW: "bg-warn-soft text-amber-900 border-amber-300",
+  OFFER: "bg-emerald-50 text-emerald-800 border-emerald-300",
+  REJECTED: "bg-danger-soft text-danger border-danger/35",
+  GHOSTED: "bg-purple-50 text-purple-800 border-purple-300 border-dashed",
 };
 
 const MATCH_BADGE_CLASS: Readonly<Record<MatchLevel, string>> = {
-  high: "bg-emerald-100 text-emerald-900 border-emerald-700",
-  medium: "bg-amber-100 text-amber-950 border-amber-600",
-  low: "bg-rose-100 text-rose-900 border-rose-700",
+  high: "bg-emerald-50 text-emerald-800 border-emerald-300",
+  medium: "bg-warn-soft text-amber-900 border-amber-300",
+  low: "bg-danger-soft text-danger border-danger/35",
 };
 
 function formatCurrency(amount: number): string {
@@ -112,15 +115,16 @@ export function WarRoomPipeline({
         target instanceof HTMLSelectElement ||
         target?.isContentEditable === true;
 
-      if (isEditable) return;
+      if (isEditable || document.querySelector('[role="dialog"]')) return;
 
       event.preventDefault();
+      event.stopPropagation();
       searchInputRef.current?.focus();
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown, true);
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown, true);
     };
   }, []);
 
@@ -173,14 +177,21 @@ export function WarRoomPipeline({
 
     return [...filtered].sort((a, b) => {
       if (sortBy === "interviewSoonest") {
-        const timeA =
-          a.status === "INTERVIEW" && a.interviewDateTime
-            ? Date.parse(a.interviewDateTime)
-            : Number.POSITIVE_INFINITY;
-        const timeB =
-          b.status === "INTERVIEW" && b.interviewDateTime
-            ? Date.parse(b.interviewDateTime)
-            : Number.POSITIVE_INFINITY;
+        const isActiveInterviewA =
+          a.status === "INTERVIEW" && Boolean(a.interviewDateTime);
+        const isActiveInterviewB =
+          b.status === "INTERVIEW" && Boolean(b.interviewDateTime);
+
+        if (isActiveInterviewA !== isActiveInterviewB) {
+          return isActiveInterviewA ? -1 : 1;
+        }
+
+        const timeA = a.interviewDateTime
+          ? Date.parse(a.interviewDateTime)
+          : Number.POSITIVE_INFINITY;
+        const timeB = b.interviewDateTime
+          ? Date.parse(b.interviewDateTime)
+          : Number.POSITIVE_INFINITY;
 
         const safeA = Number.isNaN(timeA) ? Number.POSITIVE_INFINITY : timeA;
         const safeB = Number.isNaN(timeB) ? Number.POSITIVE_INFINITY : timeB;
@@ -212,7 +223,7 @@ export function WarRoomPipeline({
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {showConflictBanner && (
         <ConflictBanner
           conflicts={conflicts}
@@ -220,24 +231,24 @@ export function WarRoomPipeline({
         />
       )}
 
-      {/* Clean Editorial Toolbar */}
-      <section className="xp-paper p-5 space-y-4" aria-label="Filter Pipeline Lamaran">
+      {/* Filter Toolbar */}
+      <section className="craft-card p-5 space-y-4" aria-label="Filter Pipeline Lamaran">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <span className="xp-eyebrow">WAR_ROOM_PIPELINE.EXE</span>
-            <h2 className="font-display text-xl font-bold text-xp-deep flex items-center gap-2">
+            <span className="craft-eyebrow">War Room Pipeline</span>
+            <h2 className="font-pixel text-xl font-bold text-ink flex items-center gap-2">
               <img
                 src={RETRO_ICONS.pipeline}
                 alt=""
                 width={18}
                 height={18}
-                className="xp-pixel"
+                className="pixel-art"
               />
               Pipeline Lamaran Kapten
             </h2>
           </div>
 
-          <span className="font-mono text-xs font-bold text-xp-deep bg-xp-soft px-2.5 py-1 border border-xp-border">
+          <span className="text-xs font-semibold text-leaf-deep bg-leaf-soft px-3 py-1 rounded-full border border-leaf/30">
             {filteredApplications.length} / {applications.length} lamaran
           </span>
         </div>
@@ -247,12 +258,9 @@ export function WarRoomPipeline({
             <label htmlFor="warroom-search" className="sr-only">
               Cari lamaran
             </label>
-            <img
-              src={RETRO_ICONS.search}
-              alt=""
-              width={14}
-              height={14}
-              className="xp-pixel absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+            <Search
+              className="w-3.5 h-3.5 text-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+              aria-hidden="true"
             />
             <input
               ref={searchInputRef}
@@ -260,8 +268,8 @@ export function WarRoomPipeline({
               type="text"
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              placeholder="Cari perusahaan, posisi, CV, atau skill... (tekan /)"
-              className="xp-input pl-8 text-xs"
+              placeholder="Cari perusahaan, posisi, CV, atau skill... (/)"
+              className="craft-input pl-9 text-xs"
             />
           </div>
 
@@ -275,7 +283,7 @@ export function WarRoomPipeline({
               onChange={(e) =>
                 setStatusFilter(e.target.value as "ALL" | ApplicationStatus)
               }
-              className="xp-input text-xs"
+              className="craft-input text-xs"
             >
               <option value="ALL">Semua Status</option>
               {ALL_STATUSES.map((status) => (
@@ -294,7 +302,7 @@ export function WarRoomPipeline({
               id="warroom-sort"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as ApplicationSortBy)}
-              className="xp-input text-xs"
+              className="craft-input text-xs"
             >
               <option value="newest">Urutkan: Terbaru</option>
               <option value="interviewSoonest">
@@ -305,14 +313,14 @@ export function WarRoomPipeline({
           </div>
 
           <div className="md:col-span-2 flex items-center md:justify-end">
-            <label className="inline-flex items-center gap-1.5 text-xs font-bold text-xp-ink cursor-pointer select-none">
+            <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-cream-soft border border-line text-xs font-semibold text-ink cursor-pointer select-none hover:border-danger/50 transition-colors">
               <input
                 type="checkbox"
                 checked={onlyGhostingRisk}
                 onChange={(e) => setOnlyGhostingRisk(e.target.checked)}
-                className="accent-xp-danger"
+                className="accent-danger"
               />
-              <span>Rawan Ghosting ({ghostingCount})</span>
+              <span>Ghosting ({ghostingCount})</span>
             </label>
           </div>
         </div>
@@ -320,50 +328,44 @@ export function WarRoomPipeline({
 
       {/* Daftar Lamaran */}
       {applications.length === 0 ? (
-        <div className="xp-paper p-10 text-center space-y-3">
+        <div className="craft-card p-10 text-center space-y-3.5">
           <img
             src={RETRO_ICONS.pipeline}
             alt=""
-            width={32}
-            height={32}
-            className="xp-pixel mx-auto opacity-80"
+            width={36}
+            height={36}
+            className="pixel-art mx-auto opacity-85"
           />
           <div className="space-y-1 max-w-md mx-auto">
-            <p className="font-display text-lg font-bold text-xp-deep">
+            <p className="font-pixel text-xl font-bold text-ink">
               Belum ada lamaran di War Room Kapten
             </p>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Simpan lowongan dari tab Eksplorasi Lowongan atau catat lamaran
-              secara manual untuk mulai melacak status dan jadwal interview.
+            <p className="text-xs text-muted leading-relaxed">
+              Simpan lowongan dari tab Eksplorasi atau catat lamaran secara
+              manual untuk mulai melacak status dan jadwal interview.
             </p>
           </div>
           {onOpenCreateModal && (
             <button
               type="button"
               onClick={onOpenCreateModal}
-              className="xp-btn xp-btn-green"
+              className="craft-btn craft-btn-primary"
             >
-              <img
-                src={RETRO_ICONS.plus}
-                alt=""
-                width={13}
-                height={13}
-                className="xp-pixel brightness-200"
-              />
+              <Plus className="w-3.5 h-3.5" aria-hidden="true" />
               Catat Lamaran Pertama
             </button>
           )}
         </div>
       ) : filteredApplications.length === 0 ? (
-        <div className="xp-paper p-8 text-center space-y-3">
-          <p className="font-display text-base font-bold text-xp-deep">
+        <div className="craft-card p-8 text-center space-y-3">
+          <p className="font-pixel text-lg font-bold text-ink">
             Tidak ada lamaran yang cocok dengan filter saat ini.
           </p>
           {hasActiveFilter && (
             <button
               type="button"
               onClick={handleResetFilters}
-              className="xp-btn"
+              className="craft-btn"
             >
               <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
               Reset Filter
@@ -391,20 +393,20 @@ export function WarRoomPipeline({
             return (
               <article
                 key={app.id}
-                className={`xp-paper p-5 flex flex-col justify-between gap-4 hover:shadow-[4px_4px_0_#003399] transition-shadow ${
-                  isConflicting ? "!border-2 !border-xp-danger" : ""
+                className={`craft-card craft-card-hover p-5 flex flex-col justify-between gap-4 ${
+                  isConflicting ? "border-danger/60 ring-2 ring-danger/15" : ""
                 }`}
               >
                 <div className="space-y-3.5">
                   {/* Header Kartu */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <h3 className="font-display text-lg font-bold text-xp-deep leading-snug">
+                      <h3 className="font-pixel text-lg font-bold text-ink leading-snug">
                         {app.role}
                       </h3>
-                      <p className="text-xs text-slate-700 font-bold mt-0.5">
+                      <p className="text-xs text-ink font-semibold mt-0.5">
                         {app.company}{" "}
-                        <span className="font-normal text-slate-500">
+                        <span className="font-normal text-muted">
                           &middot; {app.workMode}
                         </span>
                       </p>
@@ -412,12 +414,12 @@ export function WarRoomPipeline({
 
                     <div className="flex flex-wrap items-center justify-end gap-1.5 shrink-0">
                       <span
-                        className={`px-2 py-0.5 text-[11px] font-bold border ${STATUS_BADGE_CLASS[app.status]}`}
+                        className={`px-2.5 py-0.5 text-[11px] font-semibold rounded-full border ${STATUS_BADGE_CLASS[app.status]}`}
                       >
                         {STATUS_LABELS[app.status]}
                       </span>
                       <span
-                        className={`px-2 py-0.5 text-[11px] font-bold border font-mono ${MATCH_BADGE_CLASS[match.level]}`}
+                        className={`px-2.5 py-0.5 text-[11px] font-semibold rounded-full border ${MATCH_BADGE_CLASS[match.level]}`}
                       >
                         {match.score}%
                       </span>
@@ -428,25 +430,25 @@ export function WarRoomPipeline({
                   {(ghostRisk || isConflicting) && (
                     <div className="flex flex-wrap gap-2">
                       {ghostRisk && (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold bg-[#ffe0b2] text-[#7a2e00] border border-xp-ink">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-300">
                           <img
                             src={RETRO_ICONS.ghost}
                             alt=""
                             width={13}
                             height={13}
-                            className="xp-pixel"
+                            className="pixel-art"
                           />
                           Rawan Ghosting ({daysSinceUpdate} hari)
                         </span>
                       )}
                       {isConflicting && (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold bg-[#fff3a0] text-red-900 border border-xp-ink">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-danger-soft text-danger border border-danger/40">
                           <img
                             src={RETRO_ICONS.conflict}
                             alt=""
                             width={13}
                             height={13}
-                            className="xp-pixel"
+                            className="pixel-art"
                           />
                           Jadwal Bentrok (&lt; 60 mnt)
                         </span>
@@ -455,22 +457,22 @@ export function WarRoomPipeline({
                   )}
 
                   {/* Metadata Strip */}
-                  <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-[11px] text-slate-700 xp-card-soft px-3 py-2">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-[11.5px] text-muted craft-card-warm px-3.5 py-2.5">
                     <span className="inline-flex items-center gap-1">
                       <FileText
-                        className="w-3 h-3 text-xp-deep"
+                        className="w-3.5 h-3.5 text-wood"
                         aria-hidden="true"
                       />
-                      CV: <strong>{app.cvVersion || "-"}</strong>
+                      CV: <strong className="text-ink">{app.cvVersion || "-"}</strong>
                     </span>
 
                     {app.interviewDateTime && (
                       <span className="inline-flex items-center gap-1">
                         <CalendarClock
-                          className="w-3 h-3 text-xp-deep"
+                          className="w-3.5 h-3.5 text-leaf-deep"
                           aria-hidden="true"
                         />
-                        <strong className="font-mono">
+                        <strong className="font-mono text-ink">
                           {formatDateTime(app.interviewDateTime)}
                         </strong>
                       </span>
@@ -478,12 +480,24 @@ export function WarRoomPipeline({
 
                     {typeof app.salaryOffer === "number" &&
                       app.salaryOffer > 0 && (
-                        <span className="inline-flex items-center gap-1 text-xp-green font-bold">
+                        <span className="inline-flex items-center gap-1 text-emerald-700 font-semibold">
                           Offer: {formatCurrency(app.salaryOffer)}
                         </span>
                       )}
 
-                    <span className="inline-flex items-center gap-1 ml-auto text-slate-500">
+                    {app.jobUrl && (
+                      <a
+                        href={app.jobUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 font-semibold text-leaf hover:underline"
+                      >
+                        <ExternalLink className="w-3 h-3" aria-hidden="true" />
+                        Web Asli
+                      </a>
+                    )}
+
+                    <span className="inline-flex items-center gap-1 ml-auto text-muted">
                       <Clock className="w-3 h-3" aria-hidden="true" />
                       {daysSinceUpdate === 0
                         ? "Hari ini"
@@ -491,26 +505,26 @@ export function WarRoomPipeline({
                     </span>
                   </div>
 
-                  {/* Checklist Progress (Win98 Segmented Bar) */}
+                  {/* Checklist Progress (Soft Track + Retro Segmented Fill) */}
                   <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="inline-flex items-center gap-1.5 font-bold text-slate-700">
+                    <div className="flex items-center justify-between text-[11.5px]">
+                      <span className="inline-flex items-center gap-1.5 font-semibold text-ink">
                         <img
                           src={RETRO_ICONS.checklist}
                           alt=""
                           width={13}
                           height={13}
-                          className="xp-pixel"
+                          className="pixel-art"
                         />
                         Checklist Persiapan
                       </span>
-                      <span className="font-mono font-bold text-xp-deep">
+                      <span className="font-mono text-[11px] font-semibold text-leaf-deep">
                         {completedChecklist}/{totalChecklist} selesai
                       </span>
                     </div>
-                    <div className="xp-progress">
+                    <div className="craft-progress">
                       <div
-                        className="xp-progress-fill"
+                        className="craft-progress-fill"
                         style={{ width: `${checklistPercent}%` }}
                       />
                     </div>
@@ -518,11 +532,11 @@ export function WarRoomPipeline({
                 </div>
 
                 {/* Action Footer */}
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-xp-cream-border">
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-line">
                   <button
                     type="button"
                     onClick={() => onSelectApplication(app.id)}
-                    className="xp-btn xp-btn-green"
+                    className="craft-btn craft-btn-primary py-1.5 px-3.5"
                   >
                     <Eye className="w-3.5 h-3.5" aria-hidden="true" />
                     Buka Detail
@@ -533,7 +547,7 @@ export function WarRoomPipeline({
                       <button
                         type="button"
                         onClick={() => onSimulateGhosting(app.id)}
-                        className="xp-btn text-[11px]"
+                        className="craft-btn py-1.5 px-3 text-[11.5px]"
                         title="Mundurkan lastUpdatedAt 15 hari untuk uji Rawan Ghosting"
                       >
                         <img
@@ -541,7 +555,7 @@ export function WarRoomPipeline({
                           alt=""
                           width={13}
                           height={13}
-                          className="xp-pixel"
+                          className="pixel-art"
                         />
                         Simulasi +15 Hari
                       </button>
@@ -551,7 +565,7 @@ export function WarRoomPipeline({
                       type="button"
                       onClick={() => onDeleteApplication(app.id)}
                       aria-label={`Hapus lamaran ${app.company}`}
-                      className="xp-btn xp-btn-danger px-3"
+                      className="craft-btn craft-btn-danger py-1.5 px-3"
                     >
                       <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
                       Hapus

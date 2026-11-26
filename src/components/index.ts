@@ -4,6 +4,8 @@ export type { ManualApplicationInput } from "./ApplicationFormModal";
 export { ConflictBanner } from "./ConflictBanner";
 export { InterviewPrepTimer } from "./InterviewPrepTimer";
 export { JobExplorer } from "./JobExplorer";
+export { OfferComparator } from "./OfferComparator";
 export { SkillProfile } from "./SkillProfile";
+export { StatsDashboard } from "./StatsDashboard";
 export { UndoToast } from "./UndoToast";
 export { WarRoomPipeline } from "./WarRoomPipeline";

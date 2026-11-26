@@ -1,0 +1,754 @@
+import { useEffect, useState } from "react";
+import type { FormEvent } from "react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  CalendarClock,
+  CheckCircle2,
+  CheckSquare,
+  FileText,
+  Ghost,
+  History,
+  Plus,
+  Send,
+  Trash2,
+  X,
+} from "lucide-react";
+import type {
+  Application,
+  ApplicationStatus,
+  StatusTransitionPayload,
+  WorkMode,
+} from "../types";
+import {
+  STATUS_LABELS,
+  calculateSkillMatch,
+  getAllowedNextStatuses,
+  getDaysSinceUpdate,
+  isFinalStatus,
+  isGhostingRisk,
+  validateStatusTransition,
+} from "../utils";
+import { InterviewPrepTimer } from "./InterviewPrepTimer";
+
+interface ApplicationDetailModalProps {
+  application: Application;
+  userSkills: readonly string[];
+  hasConflict: boolean;
+  onClose: () => void;
+  onTransitionStatus: (
+    applicationId: string,
+    nextStatus: ApplicationStatus,
+    payload: StatusTransitionPayload,
+  ) => void;
+  onAddChecklistItem: (applicationId: string, text: string) => void;
+  onToggleChecklistItem: (applicationId: string, itemId: string) => void;
+  onDeleteChecklistItem: (applicationId: string, itemId: string) => void;
+  onAddActivityNote: (applicationId: string, message: string) => void;
+  onSimulateGhosting: (applicationId: string) => void;
+  onDeleteApplication: (applicationId: string) => void;
+}
+
+const PIPELINE_STEPS: readonly ApplicationStatus[] = [
+  "WISHLIST",
+  "APPLIED",
+  "SCREENING",
+  "INTERVIEW",
+  "OFFER",
+];
+
+const WORK_MODES: readonly WorkMode[] = ["Remote", "Hybrid", "Onsite"];
+
+function getTodayDateString(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function formatLogTimestamp(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+export function ApplicationDetailModal({
+  application,
+  userSkills,
+  hasConflict,
+  onClose,
+  onTransitionStatus,
+  onAddChecklistItem,
+  onToggleChecklistItem,
+  onDeleteChecklistItem,
+  onAddActivityNote,
+  onSimulateGhosting,
+  onDeleteApplication,
+}: ApplicationDetailModalProps) {
+  const allowedNextStatuses = getAllowedNextStatuses(application.status);
+  const finalStatus = isFinalStatus(application.status);
+  const ghostRisk = isGhostingRisk(application);
+  const daysSinceUpdate = getDaysSinceUpdate(application.lastUpdatedAt);
+  const skillMatch = calculateSkillMatch(userSkills, application.requiredSkills);
+
+  const [chosenNextStatus, setChosenNextStatus] =
+    useState<ApplicationStatus | null>(null);
+  const selectedNextStatus: ApplicationStatus | null =
+    chosenNextStatus && allowedNextStatuses.includes(chosenNextStatus)
+      ? chosenNextStatus
+      : (allowedNextStatuses[0] ?? null);
+
+  const [cvVersion, setCvVersion] = useState(application.cvVersion ?? "");
+  const [appliedDate, setAppliedDate] = useState(
+    application.appliedDate ?? getTodayDateString(),
+  );
+  const [interviewDateTime, setInterviewDateTime] = useState(
+    application.interviewDateTime ?? "",
+  );
+  const [salaryOfferInput, setSalaryOfferInput] = useState(
+    application.salaryOffer ? String(application.salaryOffer) : "",
+  );
+  const [offerWorkMode, setOfferWorkMode] = useState<WorkMode>(
+    application.workMode,
+  );
+  const [transitionErrors, setTransitionErrors] = useState<string[]>([]);
+
+  const [newChecklistText, setNewChecklistText] = useState("");
+  const [manualNote, setManualNote] = useState("");
+
+  // Tutup modal dengan tombol Escape
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
+
+  const handleConfirmTransition = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!selectedNextStatus) return;
+
+    const payload: StatusTransitionPayload = {};
+    if (selectedNextStatus === "APPLIED") {
+      payload.cvVersion = cvVersion.trim();
+      payload.appliedDate = appliedDate.trim();
+    } else if (selectedNextStatus === "INTERVIEW") {
+      payload.interviewDateTime = interviewDateTime.trim();
+    } else if (selectedNextStatus === "OFFER") {
+      const parsedSalary = Number(salaryOfferInput);
+      payload.salaryOffer = Number.isFinite(parsedSalary) ? parsedSalary : 0;
+      payload.workMode = offerWorkMode;
+    }
+
+    const validation = validateStatusTransition(
+      application.status,
+      selectedNextStatus,
+      payload,
+    );
+
+    if (!validation.valid) {
+      setTransitionErrors(validation.errors);
+      return;
+    }
+
+    setTransitionErrors([]);
+    setChosenNextStatus(null);
+    onTransitionStatus(application.id, selectedNextStatus, payload);
+  };
+
+  const handleChecklistSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const trimmed = newChecklistText.trim();
+    if (trimmed.length === 0) return;
+
+    onAddChecklistItem(application.id, trimmed);
+    setNewChecklistText("");
+  };
+
+  const handleNoteSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const trimmed = manualNote.trim();
+    if (trimmed.length === 0) return;
+
+    onAddActivityNote(application.id, trimmed);
+    setManualNote("");
+  };
+
+  const completedChecklist = application.checklist.filter(
+    (item) => item.done,
+  ).length;
+  const totalChecklist = application.checklist.length;
+  const checklistPercent =
+    totalChecklist > 0
+      ? Math.round((completedChecklist / totalChecklist) * 100)
+      : 0;
+
+  const currentStepIndex = PIPELINE_STEPS.indexOf(application.status);
+  const canSimulateGhosting =
+    application.status === "APPLIED" || application.status === "SCREENING";
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-slate-950/60 flex items-center justify-center p-2 sm:p-4 overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="detail-modal-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="xp-window w-full max-w-5xl max-h-[92vh] flex flex-col shadow-2xl">
+        {/* Titlebar XP */}
+        <div className="xp-titlebar shrink-0">
+          <span
+            id="detail-modal-title"
+            className="truncate flex items-center gap-1.5"
+          >
+            <FileText className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            Detail Lamaran — {application.role} ({application.company})
+          </span>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Tutup detail lamaran"
+            className="xp-win-ctrl xp-win-ctrl-close shrink-0"
+          >
+            <X className="w-3 h-3" aria-hidden="true" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="p-3.5 sm:p-4 overflow-y-auto space-y-4">
+          {/* Ringkasan Header Lamaran */}
+          <div className="xp-paper p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-base sm:text-lg font-bold text-xp-deep">
+                  {application.role} — {application.company}
+                </h2>
+                <span className="px-2 py-0.5 text-[11px] font-bold bg-xp-soft text-xp-deep border border-xp-border rounded-sm">
+                  {STATUS_LABELS[application.status]}
+                </span>
+                <span className="px-2 py-0.5 text-[11px] font-bold font-mono bg-xp-cream border border-xp-border rounded-sm">
+                  {skillMatch.score}% Skill Match
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-700">
+                <span>
+                  Mode: <strong>{application.workMode}</strong>
+                </span>
+                {application.cvVersion && (
+                  <span>
+                    CV: <strong>{application.cvVersion}</strong>
+                  </span>
+                )}
+                {application.appliedDate && (
+                  <span>
+                    Applied:{" "}
+                    <strong className="font-mono">
+                      {application.appliedDate}
+                    </strong>
+                  </span>
+                )}
+                {application.interviewDateTime && (
+                  <span className="inline-flex items-center gap-1">
+                    <CalendarClock
+                      className="w-3.5 h-3.5 text-xp-deep"
+                      aria-hidden="true"
+                    />
+                    Interview:{" "}
+                    <strong className="font-mono">
+                      {formatLogTimestamp(application.interviewDateTime)}
+                    </strong>
+                  </span>
+                )}
+                {typeof application.salaryOffer === "number" &&
+                  application.salaryOffer > 0 && (
+                    <span className="text-xp-green font-bold">
+                      Offer: {formatCurrency(application.salaryOffer)}
+                    </span>
+                  )}
+              </div>
+
+              {(ghostRisk || hasConflict) && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {ghostRisk && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-bold bg-red-100 text-red-900 border border-xp-danger rounded-sm">
+                      <Ghost className="w-3 h-3" aria-hidden="true" />
+                      Rawan Ghosting ({daysSinceUpdate} hari tanpa update)
+                    </span>
+                  )}
+                  {hasConflict && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-bold bg-amber-100 text-red-900 border border-xp-danger rounded-sm">
+                      <AlertTriangle className="w-3 h-3" aria-hidden="true" />
+                      Bentrok dengan jadwal interview lain (&lt; 60 menit)
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+              {canSimulateGhosting && (
+                <button
+                  type="button"
+                  onClick={() => onSimulateGhosting(application.id)}
+                  className="xp-btn"
+                >
+                  <Ghost className="w-3.5 h-3.5" aria-hidden="true" />
+                  Simulasi +15 Hari
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  onDeleteApplication(application.id);
+                  onClose();
+                }}
+                className="xp-btn xp-btn-danger"
+              >
+                <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+                Hapus
+              </button>
+            </div>
+          </div>
+
+          {/* Grid Utama 2 Kolom */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+            {/* Kolom Kiri: State Machine + Nested Checklist */}
+            <div className="lg:col-span-7 space-y-4">
+              {/* Tahap Seleksi & State Machine */}
+              <section
+                className="xp-paper p-3.5 space-y-3"
+                aria-label="Tahap Seleksi dan Transisi Status"
+              >
+                <h3 className="text-xs font-bold uppercase tracking-wide text-xp-deep border-b border-xp-cream-border pb-1.5">
+                  Tahap Seleksi (State Machine)
+                </h3>
+
+                {/* Visual Stepper */}
+                <ol className="grid grid-cols-5 gap-1.5 text-[11px]">
+                  {PIPELINE_STEPS.map((step, index) => {
+                    const isPassed =
+                      currentStepIndex >= 0 && index <= currentStepIndex;
+                    const isCurrent = application.status === step;
+                    return (
+                      <li key={step} className="space-y-1">
+                        <div
+                          className={`h-1.5 rounded-xs ${
+                            isCurrent
+                              ? "bg-xp-bar"
+                              : isPassed
+                                ? "bg-xp-green"
+                                : "bg-xp-cream-border"
+                          }`}
+                        />
+                        <span
+                          className={`block truncate ${
+                            isCurrent
+                              ? "font-bold text-xp-bar"
+                              : isPassed
+                                ? "font-bold text-xp-ink"
+                                : "text-slate-500"
+                          }`}
+                        >
+                          {index + 1}. {STATUS_LABELS[step]}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ol>
+
+                {(application.status === "REJECTED" ||
+                  application.status === "GHOSTED") && (
+                  <p className="text-xs font-bold px-2.5 py-1.5 bg-xp-cream border border-xp-border text-xp-ink">
+                    Status saat ini:{" "}
+                    <strong>{STATUS_LABELS[application.status]}</strong>
+                    {application.status === "GHOSTED"
+                      ? " — Khusus GHOSTED masih boleh kembali ke SCREENING jika HRD menghubungi lagi."
+                      : " — Status ini bersifat final."}
+                  </p>
+                )}
+
+                {finalStatus ? (
+                  <div className="flex items-center gap-2 p-2.5 bg-emerald-50 border border-xp-border text-xs text-slate-800">
+                    <CheckCircle2
+                      className="w-4 h-4 text-xp-green shrink-0"
+                      aria-hidden="true"
+                    />
+                    <span>
+                      Status <strong>{STATUS_LABELS[application.status]}</strong>{" "}
+                      bersifat <strong>final</strong> sesuai Diagram State
+                      Machine dan tidak dapat dipindahkan lagi.
+                    </span>
+                  </div>
+                ) : (
+                  <form
+                    onSubmit={handleConfirmTransition}
+                    className="space-y-3 bg-xp-cream/60 border border-xp-cream-border p-3"
+                    noValidate
+                  >
+                    <div className="space-y-1.5">
+                      <span className="block text-xs font-bold text-xp-ink">
+                        Pindahkan status ke:
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {allowedNextStatuses.map((nextStatus) => {
+                          const isSelected = selectedNextStatus === nextStatus;
+                          return (
+                            <button
+                              key={nextStatus}
+                              type="button"
+                              onClick={() => {
+                                setChosenNextStatus(nextStatus);
+                                setTransitionErrors([]);
+                              }}
+                              className={`xp-btn ${
+                                isSelected
+                                  ? "!bg-xp-bar !text-white !border-xp-deep"
+                                  : ""
+                              }`}
+                            >
+                              <ArrowRight
+                                className="w-3 h-3"
+                                aria-hidden="true"
+                              />
+                              {STATUS_LABELS[nextStatus]}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Input Kondisional: APPLIED */}
+                    {selectedNextStatus === "APPLIED" && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div>
+                          <label
+                            htmlFor="transition-cv-version"
+                            className="block text-[11px] font-bold mb-1"
+                          >
+                            Versi CV *
+                          </label>
+                          <input
+                            id="transition-cv-version"
+                            type="text"
+                            value={cvVersion}
+                            onChange={(e) => setCvVersion(e.target.value)}
+                            placeholder="mis. Kapten-CV-v2.pdf"
+                            className="xp-input text-xs"
+                          />
+                        </div>
+                        <div>
+                          <label
+                            htmlFor="transition-applied-date"
+                            className="block text-[11px] font-bold mb-1"
+                          >
+                            Tanggal Melamar *
+                          </label>
+                          <input
+                            id="transition-applied-date"
+                            type="date"
+                            value={appliedDate}
+                            onChange={(e) => setAppliedDate(e.target.value)}
+                            className="xp-input text-xs"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Input Kondisional: INTERVIEW */}
+                    {selectedNextStatus === "INTERVIEW" && (
+                      <div>
+                        <label
+                          htmlFor="transition-interview-datetime"
+                          className="block text-[11px] font-bold mb-1"
+                        >
+                          Jadwal Interview (YYYY-MM-DDTHH:mm) *
+                        </label>
+                        <input
+                          id="transition-interview-datetime"
+                          type="datetime-local"
+                          value={interviewDateTime}
+                          onChange={(e) => setInterviewDateTime(e.target.value)}
+                          className="xp-input text-xs"
+                        />
+                      </div>
+                    )}
+
+                    {/* Input Kondisional: OFFER */}
+                    {selectedNextStatus === "OFFER" && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div>
+                          <label
+                            htmlFor="transition-salary-offer"
+                            className="block text-[11px] font-bold mb-1"
+                          >
+                            Nominal Gaji / Uang Saku (Rp) *
+                          </label>
+                          <input
+                            id="transition-salary-offer"
+                            type="number"
+                            min={1}
+                            step={100000}
+                            value={salaryOfferInput}
+                            onChange={(e) =>
+                              setSalaryOfferInput(e.target.value)
+                            }
+                            placeholder="mis. 5500000"
+                            className="xp-input text-xs"
+                          />
+                        </div>
+                        <div>
+                          <label
+                            htmlFor="transition-work-mode"
+                            className="block text-[11px] font-bold mb-1"
+                          >
+                            Mode Kerja *
+                          </label>
+                          <select
+                            id="transition-work-mode"
+                            value={offerWorkMode}
+                            onChange={(e) =>
+                              setOfferWorkMode(e.target.value as WorkMode)
+                            }
+                            className="xp-input text-xs"
+                          >
+                            {WORK_MODES.map((mode) => (
+                              <option key={mode} value={mode}>
+                                {mode}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    )}
+
+                    {transitionErrors.length > 0 && (
+                      <ul
+                        role="alert"
+                        className="text-xs font-bold text-red-700 bg-red-50 border border-xp-danger p-2 space-y-0.5"
+                      >
+                        {transitionErrors.map((err) => (
+                          <li key={err}>• {err}</li>
+                        ))}
+                      </ul>
+                    )}
+
+                    <div className="flex justify-end">
+                      <button
+                        type="submit"
+                        disabled={!selectedNextStatus}
+                        className="xp-btn xp-btn-green"
+                      >
+                        Konfirmasi Pindah ke{" "}
+                        {selectedNextStatus
+                          ? STATUS_LABELS[selectedNextStatus]
+                          : "..."}
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </section>
+
+              {/* Nested Checklist Persiapan */}
+              <section
+                className="xp-paper p-3.5 space-y-3"
+                aria-label="Daftar Persiapan"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-xp-deep">
+                    <CheckSquare className="w-4 h-4" aria-hidden="true" />
+                    Daftar Persiapan (Checklist)
+                  </h3>
+                  <span className="font-mono text-xs font-bold text-xp-deep">
+                    {completedChecklist} / {totalChecklist} selesai (
+                    {checklistPercent}%)
+                  </span>
+                </div>
+
+                <div
+                  className="w-full h-2 bg-xp-cream border border-xp-border overflow-hidden"
+                  role="progressbar"
+                  aria-valuenow={checklistPercent}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label="Progress checklist persiapan"
+                >
+                  <div
+                    className="h-full bg-xp-bar transition-all duration-200"
+                    style={{ width: `${checklistPercent}%` }}
+                  />
+                </div>
+
+                {application.checklist.length === 0 ? (
+                  <p className="text-xs text-slate-600 italic bg-xp-cream/50 border border-dashed border-xp-border p-2.5">
+                    Belum ada item persiapan. Tambahkan tugas pertamamu di
+                    bawah.
+                  </p>
+                ) : (
+                  <ul className="space-y-1.5">
+                    {application.checklist.map((item) => (
+                      <li
+                        key={item.id}
+                        className="flex items-center justify-between gap-2 p-2 bg-white border border-xp-border"
+                      >
+                        <label className="flex items-center gap-2 text-xs flex-1 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={item.done}
+                            onChange={() =>
+                              onToggleChecklistItem(application.id, item.id)
+                            }
+                            className="accent-xp-bar"
+                          />
+                          <span
+                            className={
+                              item.done
+                                ? "line-through text-slate-400"
+                                : "text-xp-ink"
+                            }
+                          >
+                            {item.text}
+                          </span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            onDeleteChecklistItem(application.id, item.id)
+                          }
+                          aria-label={`Hapus checklist ${item.text}`}
+                          className="p-1 text-slate-500 hover:text-xp-danger cursor-pointer"
+                        >
+                          <X className="w-3.5 h-3.5" aria-hidden="true" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                <form
+                  onSubmit={handleChecklistSubmit}
+                  className="flex gap-1.5"
+                  noValidate
+                >
+                  <label htmlFor="new-checklist-item" className="sr-only">
+                    Tambah tugas persiapan baru
+                  </label>
+                  <input
+                    id="new-checklist-item"
+                    type="text"
+                    value={newChecklistText}
+                    onChange={(e) => setNewChecklistText(e.target.value)}
+                    placeholder="Tambah tugas persiapan baru..."
+                    className="xp-input flex-1 text-xs"
+                  />
+                  <button
+                    type="submit"
+                    disabled={newChecklistText.trim().length === 0}
+                    className="xp-btn xp-btn-green shrink-0"
+                  >
+                    <Plus className="w-3.5 h-3.5" aria-hidden="true" />
+                    Tambah
+                  </button>
+                </form>
+              </section>
+            </div>
+
+            {/* Kolom Kanan: Latihan Interview Timer + Riwayat Aktivitas */}
+            <div className="lg:col-span-5 space-y-4">
+              <InterviewPrepTimer />
+
+              {/* Activity Log */}
+              <section
+                className="xp-paper p-3.5 space-y-3"
+                aria-label="Riwayat Aktivitas"
+              >
+                <div className="flex items-center justify-between border-b border-xp-cream-border pb-1.5">
+                  <h3 className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-xp-deep">
+                    <History className="w-4 h-4" aria-hidden="true" />
+                    Riwayat Aktivitas
+                  </h3>
+                  <span className="font-mono text-[11px] text-slate-600">
+                    {application.activityLogs.length} catatan
+                  </span>
+                </div>
+
+                <form
+                  onSubmit={handleNoteSubmit}
+                  className="flex gap-1.5"
+                  noValidate
+                >
+                  <label htmlFor="manual-activity-note" className="sr-only">
+                    Tambah catatan manual Kapten
+                  </label>
+                  <input
+                    id="manual-activity-note"
+                    type="text"
+                    value={manualNote}
+                    onChange={(e) => setManualNote(e.target.value)}
+                    placeholder="Tulis catatan manual (mis. Follow up HRD)..."
+                    className="xp-input flex-1 text-xs"
+                  />
+                  <button
+                    type="submit"
+                    disabled={manualNote.trim().length === 0}
+                    className="xp-btn shrink-0"
+                  >
+                    <Send className="w-3.5 h-3.5" aria-hidden="true" />
+                    Catat
+                  </button>
+                </form>
+
+                {application.activityLogs.length === 0 ? (
+                  <p className="text-xs text-slate-600 italic">
+                    Belum ada riwayat aktivitas.
+                  </p>
+                ) : (
+                  <ul className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                    {application.activityLogs.map((log) => (
+                      <li
+                        key={log.id}
+                        className="border-l-2 border-xp-bar pl-2.5 py-0.5 space-y-0.5"
+                      >
+                        <span className="block font-mono text-[10px] text-slate-500">
+                          {formatLogTimestamp(log.timestamp)}
+                        </span>
+                        <p className="text-xs text-xp-ink leading-snug">
+                          {log.message}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

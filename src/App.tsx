@@ -1,14 +1,33 @@
-import { useState } from "react";
-import { Briefcase, Compass, LayoutList, Scale, Plus } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Briefcase, Compass, LayoutList, Plus, Scale } from "lucide-react";
 import {
+  ApplicationDetailModal,
   ApplicationFormModal,
+  ConflictBanner,
   JobExplorer,
   SkillProfile,
+  UndoToast,
+  WarRoomPipeline,
 } from "./components";
 import type { ManualApplicationInput } from "./components";
-import { useLocalStorage } from "./hooks";
-import type { Application, JobDataSource, JobListing, WorkMode } from "./types";
-import { hasDuplicateSkill, isDuplicateApplication } from "./utils";
+import { useLocalStorage, useUndoDelete } from "./hooks";
+import type {
+  ActivityLog,
+  Application,
+  ApplicationStatus,
+  ChecklistItem,
+  JobDataSource,
+  JobListing,
+  StatusTransitionPayload,
+  WorkMode,
+} from "./types";
+import {
+  STATUS_LABELS,
+  findInterviewConflicts,
+  getConflictingApplicationIds,
+  hasDuplicateSkill,
+  isDuplicateApplication,
+} from "./utils";
 
 type ActiveTab = "explorer" | "pipeline" | "comparator";
 
@@ -24,6 +43,8 @@ const DEFAULT_KAPTEN_SKILLS: string[] = [
   "Git",
   "REST API",
 ];
+
+const FIFTEEN_DAYS_MS = 15 * 24 * 60 * 60 * 1000;
 
 function inferWorkMode(location: string): WorkMode {
   const normalized = location.toLowerCase();
@@ -41,6 +62,37 @@ function createId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
+function createLog(
+  message: string,
+  timestamp = new Date().toISOString(),
+): ActivityLog {
+  return {
+    id: createId(),
+    timestamp,
+    message,
+  };
+}
+
+function buildTransitionLogMessage(
+  from: ApplicationStatus,
+  to: ApplicationStatus,
+  payload: StatusTransitionPayload,
+): string {
+  const base = `Status pindah dari ${STATUS_LABELS[from]} ke ${STATUS_LABELS[to]}`;
+
+  if (to === "APPLIED" && payload.cvVersion) {
+    return `${base} (CV: ${payload.cvVersion}, Tanggal: ${payload.appliedDate ?? "-"})`;
+  }
+  if (to === "INTERVIEW" && payload.interviewDateTime) {
+    return `${base} (Jadwal: ${payload.interviewDateTime})`;
+  }
+  if (to === "OFFER" && payload.salaryOffer) {
+    const formatted = new Intl.NumberFormat("id-ID").format(payload.salaryOffer);
+    return `${base} (Offer: Rp ${formatted}, Mode: ${payload.workMode ?? "-"})`;
+  }
+  return base;
+}
+
 export function App() {
   const [applications, setApplications] = useLocalStorage<Application[]>(
     STORAGE_KEYS.APPLICATIONS,
@@ -53,8 +105,34 @@ export function App() {
   const [dataSource, setDataSource] = useState<JobDataSource>("live");
   const [activeTab, setActiveTab] = useState<ActiveTab>("explorer");
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [selectedApplicationId, setSelectedApplicationId] = useState<
+    string | null
+  >(null);
+
+  const {
+    pendingDeleted,
+    secondsRemaining,
+    scheduleUndo,
+    triggerUndo,
+    dismissUndo,
+  } = useUndoDelete(5000);
 
   const offerCount = applications.filter((app) => app.status === "OFFER").length;
+
+  const conflicts = useMemo(
+    () => findInterviewConflicts(applications),
+    [applications],
+  );
+
+  const conflictingIds = useMemo(
+    () => getConflictingApplicationIds(applications),
+    [applications],
+  );
+
+  const selectedApplication = useMemo(
+    () => applications.find((app) => app.id === selectedApplicationId) ?? null,
+    [applications, selectedApplicationId],
+  );
 
   const handleAddSkill = (skill: string) => {
     setKaptenSkills((prev) => {
@@ -88,11 +166,7 @@ export function App() {
         lastUpdatedAt: now,
         checklist: [],
         activityLogs: [
-          {
-            id: createId(),
-            timestamp: now,
-            message: "Disimpan ke Wishlist dari Eksplorasi Lowongan.",
-          },
+          createLog("Disimpan ke Wishlist dari Eksplorasi Lowongan.", now),
         ],
       };
 
@@ -124,17 +198,155 @@ export function App() {
           : {}),
         lastUpdatedAt: now,
         checklist: [],
-        activityLogs: [
-          {
-            id: createId(),
-            timestamp: now,
-            message: logMessage,
-          },
-        ],
+        activityLogs: [createLog(logMessage, now)],
       };
 
       return [newApplication, ...prev];
     });
+  };
+
+  // Fitur 4: Transisi status ketat + catat otomatis ke activityLogs[] (immutable)
+  const handleTransitionStatus = (
+    applicationId: string,
+    nextStatus: ApplicationStatus,
+    payload: StatusTransitionPayload,
+  ) => {
+    const nowIso = new Date().toISOString();
+
+    setApplications((prev) =>
+      prev.map((app) => {
+        if (app.id !== applicationId) return app;
+
+        const nextLog = createLog(
+          buildTransitionLogMessage(app.status, nextStatus, payload),
+          nowIso,
+        );
+
+        return {
+          ...app,
+          status: nextStatus,
+          cvVersion: payload.cvVersion ?? app.cvVersion,
+          appliedDate: payload.appliedDate ?? app.appliedDate,
+          interviewDateTime: payload.interviewDateTime ?? app.interviewDateTime,
+          salaryOffer: payload.salaryOffer ?? app.salaryOffer,
+          workMode: payload.workMode ?? app.workMode,
+          lastUpdatedAt: nowIso,
+          activityLogs: [nextLog, ...app.activityLogs],
+        };
+      }),
+    );
+  };
+
+  // Fitur 4: Nested Checklist (tambah, toggle, hapus — wajib immutable)
+  const handleAddChecklistItem = (applicationId: string, text: string) => {
+    const newItem: ChecklistItem = {
+      id: createId(),
+      text,
+      done: false,
+    };
+
+    setApplications((prev) =>
+      prev.map((app) =>
+        app.id === applicationId
+          ? { ...app, checklist: [...app.checklist, newItem] }
+          : app,
+      ),
+    );
+  };
+
+  const handleToggleChecklistItem = (applicationId: string, itemId: string) => {
+    setApplications((prev) =>
+      prev.map((app) =>
+        app.id === applicationId
+          ? {
+              ...app,
+              checklist: app.checklist.map((item) =>
+                item.id === itemId ? { ...item, done: !item.done } : item,
+              ),
+            }
+          : app,
+      ),
+    );
+  };
+
+  const handleDeleteChecklistItem = (applicationId: string, itemId: string) => {
+    setApplications((prev) =>
+      prev.map((app) =>
+        app.id === applicationId
+          ? {
+              ...app,
+              checklist: app.checklist.filter((item) => item.id !== itemId),
+            }
+          : app,
+      ),
+    );
+  };
+
+  // Fitur 4: Catatan manual Kapten ke activityLogs[] (immutable)
+  const handleAddActivityNote = (applicationId: string, message: string) => {
+    const noteLog = createLog(`Catatan Kapten: ${message}`);
+
+    setApplications((prev) =>
+      prev.map((app) =>
+        app.id === applicationId
+          ? { ...app, activityLogs: [noteLog, ...app.activityLogs] }
+          : app,
+      ),
+    );
+  };
+
+  // Fitur 3: Simulasi +15 Hari untuk uji badge Rawan Ghosting
+  const handleSimulateGhosting = (applicationId: string) => {
+    setApplications((prev) =>
+      prev.map((app) => {
+        if (app.id !== applicationId) return app;
+        if (app.status !== "APPLIED" && app.status !== "SCREENING") return app;
+
+        const baseMs = Date.parse(app.lastUpdatedAt) || Date.now();
+        const shiftedIso = new Date(baseMs - FIFTEEN_DAYS_MS).toISOString();
+        const simLog = createLog(
+          "Simulasi +15 Hari dijalankan (lastUpdatedAt dimundurkan 15 hari).",
+        );
+
+        return {
+          ...app,
+          lastUpdatedAt: shiftedIso,
+          activityLogs: [simLog, ...app.activityLogs],
+        };
+      }),
+    );
+  };
+
+  // Fitur 6: Hapus lamaran + Toast Undo 5 detik (useRef cleanup di useUndoDelete)
+  const handleDeleteApplication = (applicationId: string) => {
+    const target = applications.find((app) => app.id === applicationId);
+    if (!target) return;
+
+    setApplications((prev) => prev.filter((app) => app.id !== applicationId));
+    if (selectedApplicationId === applicationId) {
+      setSelectedApplicationId(null);
+    }
+    scheduleUndo(target);
+  };
+
+  const handleUndoDelete = () => {
+    const restored = triggerUndo();
+    if (!restored) return;
+
+    setApplications((prev) => {
+      if (
+        prev.some((app) => app.id === restored.id) ||
+        isDuplicateApplication(prev, restored.company, restored.role)
+      ) {
+        return prev;
+      }
+      return [restored, ...prev];
+    });
+  };
+
+  const handleSelectConflictApplication = (applicationId: string) => {
+    setActiveTab("pipeline");
+    setSelectedApplicationId(applicationId);
   };
 
   return (
@@ -217,6 +429,12 @@ export function App() {
 
         {/* Main Workspace */}
         <main className="p-4 sm:p-6 space-y-5">
+          {/* Banner Bentrok Global: selalu tampil dari seluruh data meski tab/filter lain aktif */}
+          <ConflictBanner
+            conflicts={conflicts}
+            onSelectApplication={handleSelectConflictApplication}
+          />
+
           {activeTab === "explorer" && (
             <div className="grid grid-cols-1 lg:grid-cols-[290px_1fr] gap-5 items-start">
               <SkillProfile
@@ -237,18 +455,15 @@ export function App() {
           )}
 
           {activeTab === "pipeline" && (
-            <section className="xp-paper p-6 text-center space-y-2">
-              <h2 className="font-display text-xl font-bold text-xp-deep">
-                War Room Pipeline ({applications.length} lamaran tersimpan)
-              </h2>
-              <p className="text-xs text-slate-600">
-                Slot tab ini akan diisi komponen Pipeline dari branch{" "}
-                <code className="font-mono bg-xp-cream px-1.5 py-0.5 border border-xp-border">
-                  feat/warroom-detail-undo
-                </code>
-                .
-              </p>
-            </section>
+            <WarRoomPipeline
+              applications={applications}
+              userSkills={kaptenSkills}
+              onSelectApplication={setSelectedApplicationId}
+              onSimulateGhosting={handleSimulateGhosting}
+              onDeleteApplication={handleDeleteApplication}
+              onOpenCreateModal={() => setIsFormModalOpen(true)}
+              showConflictBanner={false}
+            />
           )}
 
           {activeTab === "comparator" && (
@@ -270,6 +485,32 @@ export function App() {
         applications={applications}
         onClose={() => setIsFormModalOpen(false)}
         onSubmit={handleAddManualApplication}
+      />
+
+      {/* Modal Fitur 4 & 5: Detail Lamaran & Interview Prep Timer */}
+      {selectedApplication && (
+        <ApplicationDetailModal
+          key={selectedApplication.id}
+          application={selectedApplication}
+          userSkills={kaptenSkills}
+          hasConflict={conflictingIds.has(selectedApplication.id)}
+          onClose={() => setSelectedApplicationId(null)}
+          onTransitionStatus={handleTransitionStatus}
+          onAddChecklistItem={handleAddChecklistItem}
+          onToggleChecklistItem={handleToggleChecklistItem}
+          onDeleteChecklistItem={handleDeleteChecklistItem}
+          onAddActivityNote={handleAddActivityNote}
+          onSimulateGhosting={handleSimulateGhosting}
+          onDeleteApplication={handleDeleteApplication}
+        />
+      )}
+
+      {/* Toast Fitur 6: Undo Delete 5 Detik */}
+      <UndoToast
+        deletedApplication={pendingDeleted}
+        secondsRemaining={secondsRemaining}
+        onUndo={handleUndoDelete}
+        onDismiss={dismissUndo}
       />
 
       {/* Windows XP Bottom Taskbar */}
@@ -298,7 +539,8 @@ export function App() {
             className={`xp-task ${activeTab === "pipeline" ? "xp-task-active" : ""}`}
           >
             <LayoutList className="w-3.5 h-3.5" aria-hidden="true" />
-            <span className="hidden sm:inline">Pipeline</span> ({applications.length})
+            <span className="hidden sm:inline">Pipeline</span> (
+            {applications.length})
           </button>
           <button
             type="button"

@@ -512,7 +512,7 @@ export function JobExplorer({
                     {match.missingSkills.map((skill) => (
                       <span
                         key={`missing-${skill}`}
-                        title="Missing skill — belum ada di profil Kapten"
+                        title="Missing skill - belum ada di profil Kapten"
                         className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] bg-red-50/90 text-red-900 border border-dashed border-red-400"
                       >
                         <img

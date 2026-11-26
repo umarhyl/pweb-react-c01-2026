@@ -447,7 +447,7 @@ export function App() {
                 height={16}
                 className="xp-pixel shrink-0"
               />
-              <span className="truncate">Aku Mw Magang — Kapten&apos;s War Room</span>
+              <span className="truncate">Aku Mw Magang - Kapten&apos;s War Room</span>
             </div>
             <div className="flex items-center gap-1 shrink-0" aria-hidden="true">
               <span className="xp-win-ctrl">_</span>

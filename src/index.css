@@ -88,7 +88,7 @@
       0 2px 6px rgb(0 0 0 / 0.18);
   }
 
-  /* Dialog Window (used ONLY for Modals & Toasts — not nested inside page cards) */
+  /* Dialog Window (used ONLY for Modals & Toasts - not nested inside page cards) */
   .xp-window {
     background: var(--color-xp-cream);
     border: 2px solid var(--color-xp-deep);

@@ -228,7 +228,7 @@ export function ApplicationDetailModal({
               height={15}
               className="xp-pixel shrink-0"
             />
-            Detail Lamaran — {application.role} ({application.company})
+            Detail Lamaran - {application.role} ({application.company})
           </span>
           <button
             type="button"
@@ -247,7 +247,7 @@ export function ApplicationDetailModal({
             <div className="space-y-1.5">
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="font-display text-lg sm:text-xl font-bold text-xp-deep">
-                  {application.role} — {application.company}
+                  {application.role} - {application.company}
                 </h2>
                 <span className="px-2 py-0.5 text-[11px] font-bold bg-xp-soft text-xp-deep border border-xp-ink">
                   {STATUS_LABELS[application.status]}
@@ -409,8 +409,8 @@ export function ApplicationDetailModal({
                     Status saat ini:{" "}
                     <strong>{STATUS_LABELS[application.status]}</strong>
                     {application.status === "GHOSTED"
-                      ? " — Khusus GHOSTED masih boleh kembali ke SCREENING jika HRD menghubungi lagi."
-                      : " — Status ini bersifat final."}
+                      ? " - Khusus GHOSTED masih boleh kembali ke SCREENING jika HRD menghubungi lagi."
+                      : " - Status ini bersifat final."}
                   </p>
                 )}
 

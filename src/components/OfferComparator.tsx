@@ -285,7 +285,7 @@ export function OfferComparator({
             >
               {offerApplications.map((app) => (
                 <option key={app.id} value={app.id}>
-                  {app.company} — {app.role}
+                  {app.company} - {app.role}
                 </option>
               ))}
             </select>
@@ -310,7 +310,7 @@ export function OfferComparator({
             >
               {offerApplications.map((app) => (
                 <option key={app.id} value={app.id}>
-                  {app.company} — {app.role}
+                  {app.company} - {app.role}
                 </option>
               ))}
             </select>

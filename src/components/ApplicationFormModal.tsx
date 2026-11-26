@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { AlertCircle, Briefcase, FilePlus2, X } from "lucide-react";
+import { RETRO_ICONS } from "../assets/retro";
 import type {
   Application,
   InitialApplicationStatus,
@@ -225,9 +226,15 @@ export function ApplicationFormModal({
         <div className="xp-titlebar">
           <span
             id="manual-application-modal-title"
-            className="inline-flex items-center gap-1.5"
+            className="inline-flex items-center gap-2"
           >
-            <FilePlus2 className="w-4 h-4" aria-hidden="true" />
+            <img
+              src={RETRO_ICONS.plus}
+              alt=""
+              width={14}
+              height={14}
+              className="xp-pixel brightness-200"
+            />
             Catat Lamaran Manual
           </span>
           <button

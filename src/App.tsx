@@ -214,7 +214,11 @@ export function App() {
         status: input.status,
         requiredSkills: input.requiredSkills,
         ...(input.status === "APPLIED"
-          ? { cvVersion: input.cvVersion, appliedDate: input.appliedDate }
+          ? {
+              cvVersion: input.cvVersion,
+              cvAttachment: input.cvAttachment,
+              appliedDate: input.appliedDate,
+            }
           : {}),
         lastUpdatedAt: now,
         checklist: [],
@@ -245,6 +249,7 @@ export function App() {
           ...app,
           status: nextStatus,
           cvVersion: payload.cvVersion ?? app.cvVersion,
+          cvAttachment: payload.cvAttachment ?? app.cvAttachment,
           appliedDate: payload.appliedDate ?? app.appliedDate,
           interviewDateTime: payload.interviewDateTime ?? app.interviewDateTime,
           salaryOffer: payload.salaryOffer ?? app.salaryOffer,

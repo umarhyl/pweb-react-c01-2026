@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { FormEvent } from "react";
-import { AlertCircle, Briefcase, FilePlus2, X } from "lucide-react";
+import type { ChangeEvent, FormEvent } from "react";
+import { AlertCircle, Briefcase, FilePlus2, Paperclip, Upload, X } from "lucide-react";
 import { RETRO_ICONS } from "../assets/retro";
 import type {
   Application,
+  CvAttachment,
   InitialApplicationStatus,
   WorkMode,
 } from "../types";
-import { isDuplicateApplication } from "../utils";
+import { formatFileSize, isDuplicateApplication, readCvFile } from "../utils";
 
 export interface ManualApplicationInput {
   company: string;
@@ -16,6 +17,7 @@ export interface ManualApplicationInput {
   status: InitialApplicationStatus;
   requiredSkills: string[];
   cvVersion?: string;
+  cvAttachment?: CvAttachment;
   appliedDate?: string;
 }
 
@@ -65,6 +67,10 @@ export function ApplicationFormModal({
   const [status, setStatus] = useState<InitialApplicationStatus>("WISHLIST");
   const [skillsInput, setSkillsInput] = useState("");
   const [cvVersion, setCvVersion] = useState("");
+  const [cvAttachment, setCvAttachment] = useState<CvAttachment | undefined>(
+    undefined,
+  );
+  const [cvUploadError, setCvUploadError] = useState<string | null>(null);
   const [appliedDate, setAppliedDate] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
 
@@ -73,6 +79,7 @@ export function ApplicationFormModal({
   const skillsRef = useRef<HTMLInputElement | null>(null);
   const cvVersionRef = useRef<HTMLInputElement | null>(null);
   const appliedDateRef = useRef<HTMLInputElement | null>(null);
+  const cvFileInputRef = useRef<HTMLInputElement | null>(null);
 
   const parsedSkills = useMemo(() => parseSkillsInput(skillsInput), [skillsInput]);
 
@@ -114,8 +121,27 @@ export function ApplicationFormModal({
     setStatus("WISHLIST");
     setSkillsInput("");
     setCvVersion("");
+    setCvAttachment(undefined);
+    setCvUploadError(null);
     setAppliedDate("");
     setErrors({});
+  };
+
+  const handleCvFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    const result = await readCvFile(file);
+    if (!result.ok) {
+      setCvUploadError(result.error);
+      return;
+    }
+
+    setCvUploadError(null);
+    setCvAttachment(result.attachment);
+    setCvVersion(result.attachment.fileName);
+    clearError("cvVersion");
   };
 
   const handleClose = () => {
@@ -204,7 +230,11 @@ export function ApplicationFormModal({
       status,
       requiredSkills: parsedSkills,
       ...(status === "APPLIED"
-        ? { cvVersion: trimmedCv, appliedDate: trimmedDate }
+        ? {
+            cvVersion: trimmedCv,
+            cvAttachment,
+            appliedDate: trimmedDate,
+          }
         : {}),
     });
 
@@ -477,12 +507,64 @@ export function ApplicationFormModal({
                       errors.appliedDate ? "border-xp-danger bg-red-50/40" : ""
                     }`}
                   />
-                  {errors.appliedDate && (
+                    {errors.appliedDate && (
                     <p role="alert" className="text-[11px] font-bold text-red-700">
                       {errors.appliedDate}
                     </p>
                   )}
                 </div>
+              </div>
+
+              <div className="pt-2 border-t border-xp-cream-border space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-[11px] text-slate-700">
+                    Lampirkan file CV lokal (opsional, PDF/DOC/DOCX maks. 500 KB)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => cvFileInputRef.current?.click()}
+                    className="xp-btn py-1 px-2.5 text-[11px]"
+                  >
+                    <Upload className="w-3 h-3" aria-hidden="true" />
+                    Upload File CV
+                  </button>
+                  <input
+                    ref={cvFileInputRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx,application/pdf"
+                    onChange={(e) => {
+                      void handleCvFileChange(e);
+                    }}
+                    className="hidden"
+                    aria-label="Upload file CV lokal"
+                  />
+                </div>
+
+                {cvAttachment && (
+                  <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 bg-xp-paper border border-xp-border text-[11px]">
+                    <span className="inline-flex items-center gap-1.5 min-w-0 truncate">
+                      <Paperclip className="w-3 h-3 text-xp-deep shrink-0" aria-hidden="true" />
+                      <strong className="truncate">{cvAttachment.fileName}</strong>
+                      <span className="font-mono text-slate-500 shrink-0">
+                        ({formatFileSize(cvAttachment.sizeBytes)})
+                      </span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setCvAttachment(undefined)}
+                      aria-label="Hapus lampiran file CV"
+                      className="text-slate-500 hover:text-xp-danger cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" aria-hidden="true" />
+                    </button>
+                  </div>
+                )}
+
+                {cvUploadError && (
+                  <p role="alert" className="text-[11px] font-bold text-red-700">
+                    {cvUploadError}
+                  </p>
+                )}
               </div>
             </div>
           )}

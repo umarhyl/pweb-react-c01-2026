@@ -1,28 +1,36 @@
-import { useEffect, useState } from "react";
-import type { FormEvent } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import {
   ArrowRight,
   CalendarClock,
   CheckCircle2,
+  Download,
+  ExternalLink,
+  Paperclip,
   Plus,
   Send,
   Trash2,
+  Upload,
   X,
 } from "lucide-react";
 import { RETRO_ICONS } from "../assets/retro";
 import type {
   Application,
   ApplicationStatus,
+  CvAttachment,
   StatusTransitionPayload,
   WorkMode,
 } from "../types";
 import {
   STATUS_LABELS,
   calculateSkillMatch,
+  formatFileSize,
   getAllowedNextStatuses,
   getDaysSinceUpdate,
   isFinalStatus,
   isGhostingRisk,
+  openCvPreview,
+  readCvFile,
   validateStatusTransition,
 } from "../utils";
 import { InterviewPrepTimer } from "./InterviewPrepTimer";
@@ -111,6 +119,11 @@ export function ApplicationDetailModal({
       : (allowedNextStatuses[0] ?? null);
 
   const [cvVersion, setCvVersion] = useState(application.cvVersion ?? "");
+  const [cvAttachment, setCvAttachment] = useState<CvAttachment | undefined>(
+    application.cvAttachment,
+  );
+  const [cvUploadError, setCvUploadError] = useState<string | null>(null);
+  const cvFileInputRef = useRef<HTMLInputElement | null>(null);
   const [appliedDate, setAppliedDate] = useState(
     application.appliedDate ?? getTodayDateString(),
   );
@@ -141,6 +154,22 @@ export function ApplicationDetailModal({
     };
   }, [onClose]);
 
+  const handleCvFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    const result = await readCvFile(file);
+    if (!result.ok) {
+      setCvUploadError(result.error);
+      return;
+    }
+
+    setCvUploadError(null);
+    setCvAttachment(result.attachment);
+    setCvVersion(result.attachment.fileName);
+  };
+
   const handleConfirmTransition = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedNextStatus) return;
@@ -148,6 +177,7 @@ export function ApplicationDetailModal({
     const payload: StatusTransitionPayload = {};
     if (selectedNextStatus === "APPLIED") {
       payload.cvVersion = cvVersion.trim();
+      payload.cvAttachment = cvAttachment;
       payload.appliedDate = appliedDate.trim();
     } else if (selectedNextStatus === "INTERVIEW") {
       payload.interviewDateTime = interviewDateTime.trim();
@@ -262,8 +292,34 @@ export function ApplicationDetailModal({
                   Mode: <strong>{application.workMode}</strong>
                 </span>
                 {application.cvVersion && (
-                  <span>
-                    CV: <strong>{application.cvVersion}</strong>
+                  <span className="inline-flex items-center gap-1.5 flex-wrap">
+                    <span>
+                      CV: <strong>{application.cvVersion}</strong>
+                    </span>
+                    {application.cvAttachment && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (application.cvAttachment) {
+                              openCvPreview(application.cvAttachment);
+                            }
+                          }}
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[11px] font-bold bg-xp-soft text-xp-deep border border-xp-border hover:bg-xp-cream cursor-pointer"
+                        >
+                          <ExternalLink className="w-3 h-3" aria-hidden="true" />
+                          Preview
+                        </button>
+                        <a
+                          href={application.cvAttachment.dataUrl}
+                          download={application.cvAttachment.fileName}
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[11px] font-bold bg-xp-cream text-xp-ink border border-xp-border hover:bg-xp-soft"
+                        >
+                          <Download className="w-3 h-3" aria-hidden="true" />
+                          Unduh ({formatFileSize(application.cvAttachment.sizeBytes)})
+                        </a>
+                      </>
+                    )}
                   </span>
                 )}
                 {application.appliedDate && (
@@ -467,37 +523,91 @@ export function ApplicationDetailModal({
 
                     {/* Input Kondisional: APPLIED */}
                     {selectedNextStatus === "APPLIED" && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                          <label
-                            htmlFor="transition-cv-version"
-                            className="block text-[11px] font-bold mb-1"
-                          >
-                            Versi CV *
-                          </label>
-                          <input
-                            id="transition-cv-version"
-                            type="text"
-                            value={cvVersion}
-                            onChange={(e) => setCvVersion(e.target.value)}
-                            placeholder="mis. Kapten-CV-v2.pdf"
-                            className="xp-input text-xs"
-                          />
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label
+                              htmlFor="transition-cv-version"
+                              className="block text-[11px] font-bold mb-1"
+                            >
+                              Versi CV *
+                            </label>
+                            <input
+                              id="transition-cv-version"
+                              type="text"
+                              value={cvVersion}
+                              onChange={(e) => setCvVersion(e.target.value)}
+                              placeholder="mis. Kapten-CV-v2.pdf"
+                              className="xp-input text-xs"
+                            />
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="transition-applied-date"
+                              className="block text-[11px] font-bold mb-1"
+                            >
+                              Tanggal Melamar *
+                            </label>
+                            <input
+                              id="transition-applied-date"
+                              type="date"
+                              value={appliedDate}
+                              onChange={(e) => setAppliedDate(e.target.value)}
+                              className="xp-input text-xs"
+                            />
+                          </div>
                         </div>
-                        <div>
-                          <label
-                            htmlFor="transition-applied-date"
-                            className="block text-[11px] font-bold mb-1"
-                          >
-                            Tanggal Melamar *
-                          </label>
-                          <input
-                            id="transition-applied-date"
-                            type="date"
-                            value={appliedDate}
-                            onChange={(e) => setAppliedDate(e.target.value)}
-                            className="xp-input text-xs"
-                          />
+
+                        <div className="space-y-1.5">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <span className="text-[11px] text-slate-700">
+                              Upload file CV lokal (opsional, PDF/DOC/DOCX maks. 500 KB)
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => cvFileInputRef.current?.click()}
+                              className="xp-btn py-1 px-2.5 text-[11px]"
+                            >
+                              <Upload className="w-3 h-3" aria-hidden="true" />
+                              Upload File CV
+                            </button>
+                            <input
+                              ref={cvFileInputRef}
+                              type="file"
+                              accept=".pdf,.doc,.docx,application/pdf"
+                              onChange={(e) => {
+                                void handleCvFileChange(e);
+                              }}
+                              className="hidden"
+                              aria-label="Upload file CV untuk status APPLIED"
+                            />
+                          </div>
+
+                          {cvAttachment && (
+                            <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 bg-xp-paper border border-xp-border text-[11px]">
+                              <span className="inline-flex items-center gap-1.5 min-w-0 truncate">
+                                <Paperclip className="w-3 h-3 text-xp-deep shrink-0" aria-hidden="true" />
+                                <strong className="truncate">{cvAttachment.fileName}</strong>
+                                <span className="font-mono text-slate-500 shrink-0">
+                                  ({formatFileSize(cvAttachment.sizeBytes)})
+                                </span>
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => setCvAttachment(undefined)}
+                                aria-label="Hapus lampiran file CV"
+                                className="text-slate-500 hover:text-xp-danger cursor-pointer"
+                              >
+                                <X className="w-3.5 h-3.5" aria-hidden="true" />
+                              </button>
+                            </div>
+                          )}
+
+                          {cvUploadError && (
+                            <p role="alert" className="text-[11px] font-bold text-red-700">
+                              {cvUploadError}
+                            </p>
+                          )}
                         </div>
                       </div>
                     )}

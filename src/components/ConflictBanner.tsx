@@ -31,22 +31,24 @@ export function ConflictBanner({
     <section
       role="alert"
       aria-live="assertive"
-      className="bg-[#fff7cc] border-2 border-xp-ink p-4 text-xp-ink shadow-[4px_4px_0_#c93b1a]"
+      className="rounded-2xl bg-warn-soft border border-amber-300 px-5 py-4 text-ink shadow-xs"
     >
       <div className="flex items-start gap-3">
-        <img
-          src={RETRO_ICONS.conflict}
-          alt=""
-          width={20}
-          height={20}
-          className="xp-pixel shrink-0 mt-0.5"
-        />
+        <span className="w-8 h-8 rounded-xl bg-white border border-amber-300 flex items-center justify-center shrink-0 mt-0.5">
+          <img
+            src={RETRO_ICONS.conflict}
+            alt=""
+            width={18}
+            height={18}
+            className="pixel-art"
+          />
+        </span>
         <div className="space-y-1.5 flex-1">
-          <p className="text-xs font-bold text-red-900">
+          <p className="font-pixel text-sm font-bold text-amber-950">
             Jadwal Interview Bentrok ({conflicts.length} konflik terdeteksi di
             seluruh pipeline)
           </p>
-          <ul className="space-y-1 text-xs leading-relaxed">
+          <ul className="space-y-1 text-xs leading-relaxed text-amber-950/90">
             {conflicts.map((conflict) => (
               <li
                 key={`${conflict.first.id}-${conflict.second.id}`}
@@ -55,22 +57,22 @@ export function ConflictBanner({
                 <button
                   type="button"
                   onClick={() => onSelectApplication?.(conflict.first.id)}
-                  className="font-bold underline text-xp-deep hover:text-xp-bar cursor-pointer"
+                  className="font-semibold underline text-danger hover:text-ink cursor-pointer"
                 >
                   {conflict.first.company}
                 </button>
-                <span className="font-mono text-[11px] text-slate-700">
+                <span className="font-mono text-[11px] text-amber-900">
                   ({formatShortDateTime(conflict.first.interviewDateTime)})
                 </span>
                 <span>dan</span>
                 <button
                   type="button"
                   onClick={() => onSelectApplication?.(conflict.second.id)}
-                  className="font-bold underline text-xp-deep hover:text-xp-bar cursor-pointer"
+                  className="font-semibold underline text-danger hover:text-ink cursor-pointer"
                 >
                   {conflict.second.company}
                 </button>
-                <span className="font-mono text-[11px] text-slate-700">
+                <span className="font-mono text-[11px] text-amber-900">
                   ({formatShortDateTime(conflict.second.interviewDateTime)})
                 </span>
                 <span>

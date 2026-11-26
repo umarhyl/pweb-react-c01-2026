@@ -1,10 +1,11 @@
 import { useMemo, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
-import { Download, RotateCcw, Upload, X } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Database, X } from "lucide-react";
 import { RETRO_ICONS } from "./assets/retro";
 import {
   ApplicationDetailModal,
   ApplicationFormModal,
+  BackupDataModal,
   ConflictBanner,
   JobExplorer,
   OfferComparator,
@@ -120,6 +121,10 @@ export function App() {
   const [dataSource, setDataSource] = useState<JobDataSource>("live");
   const [activeTab, setActiveTab] = useState<ActiveTab>("explorer");
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
+  const [formPrefill, setFormPrefill] =
+    useState<Partial<ManualApplicationInput> | null>(null);
+  const [formModalKey, setFormModalKey] = useState(0);
   const [selectedApplicationId, setSelectedApplicationId] = useState<
     string | null
   >(null);
@@ -183,6 +188,7 @@ export function App() {
         workMode: inferWorkMode(job.candidate_required_location),
         status: "WISHLIST",
         requiredSkills: job.tags,
+        ...(job.url ? { jobUrl: job.url } : {}),
         lastUpdatedAt: now,
         checklist: [],
         activityLogs: [
@@ -213,6 +219,7 @@ export function App() {
         workMode: input.workMode,
         status: input.status,
         requiredSkills: input.requiredSkills,
+        ...(input.jobUrl ? { jobUrl: input.jobUrl } : {}),
         ...(input.status === "APPLIED"
           ? {
               cvVersion: input.cvVersion,
@@ -369,6 +376,25 @@ export function App() {
     setSelectedApplicationId(applicationId);
   };
 
+  const handleOpenManualForm = () => {
+    setFormPrefill(null);
+    setFormModalKey((prev) => prev + 1);
+    setIsFormModalOpen(true);
+  };
+
+  const handleQuickApplyFromJob = (job: JobListing) => {
+    setFormPrefill({
+      company: job.company_name.trim(),
+      role: job.title.trim(),
+      workMode: inferWorkMode(job.candidate_required_location),
+      status: "APPLIED",
+      requiredSkills: job.tags,
+      jobUrl: job.url,
+    });
+    setFormModalKey((prev) => prev + 1);
+    setIsFormModalOpen(true);
+  };
+
   // Bonus: Export backup JSON
   const handleExportBackup = () => {
     const json = createBackupJson(applications, kaptenSkills);
@@ -439,41 +465,65 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen px-2 sm:px-6 pt-4 sm:pt-7 pb-20">
-      <div className="xp-desktop max-w-[1140px] mx-auto overflow-hidden">
-        {/* Sticky XP Window Titlebar + Classic Menu Bar */}
-        <header className="sticky top-0 z-30">
-          <div className="xp-titlebar">
+    <div className="h-screen overflow-hidden px-3 sm:px-6 lg:px-8 py-3 sm:py-5 flex flex-col">
+      <div className="craft-sheet w-full max-w-[1160px] mx-auto flex-1 min-h-0 flex flex-col">
+        {/* Pinned Combined Header: Retro '98 Mini-Strip + Main Navbar (Always On Top & Rounded) */}
+        <header className="shrink-0 z-30 shadow-[0_6px_18px_rgb(15_44_95/0.08)]">
+          <div className="craft-topbar-98">
             <div className="flex items-center gap-2 min-w-0">
               <img
                 src={RETRO_ICONS.briefcase}
                 alt=""
-                width={16}
-                height={16}
-                className="xp-pixel shrink-0"
+                width={14}
+                height={14}
+                className="pixel-art shrink-0"
               />
-              <span className="truncate">Aku Mw Magang - Kapten&apos;s War Room</span>
+              <span className="truncate">
+                AkuMwMagang.exe - Kapten&apos;s War Room
+              </span>
             </div>
             <div className="flex items-center gap-1 shrink-0" aria-hidden="true">
-              <span className="xp-win-ctrl">_</span>
-              <span className="xp-win-ctrl">□</span>
-              <span className="xp-win-ctrl xp-win-ctrl-close">X</span>
+              <span className="craft-win-dot">_</span>
+              <span className="craft-win-dot">□</span>
+              <span className="craft-win-dot">×</span>
             </div>
           </div>
 
-          <nav
-            aria-label="Navigasi utama"
-            className="flex flex-wrap items-center justify-between gap-2 px-4 py-1.5 bg-xp-cream border-b border-xp-cream-border"
-          >
-            <div className="flex flex-wrap items-center gap-1">
+          <div className="bg-paper/95 backdrop-blur-md border-b border-line px-5 sm:px-8 py-3">
+            <nav
+              aria-label="Navigasi utama"
+              className="flex flex-wrap items-center justify-between gap-3"
+            >
+            {/* Brand */}
+            <button
+              type="button"
+              onClick={() => setActiveTab("explorer")}
+              className="inline-flex items-center gap-2.5 cursor-pointer group"
+            >
+              <span className="w-9 h-9 rounded-2xl bg-gradient-to-br from-leaf-soft to-cream border border-line-strong flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
+                <img
+                  src={RETRO_ICONS.home}
+                  alt=""
+                  width={18}
+                  height={18}
+                  className="pixel-art"
+                />
+              </span>
+              <span className="font-pixel text-lg font-bold text-ink tracking-tight">
+                Aku Mw <span className="text-leaf-deep">Magang</span>
+              </span>
+            </button>
+
+            {/* Center Segmented Pill Tabs */}
+            <div className="inline-flex flex-wrap items-center gap-1 p-1 rounded-full bg-cream-soft border border-line">
               <button
                 type="button"
                 onClick={() => setActiveTab("explorer")}
                 aria-current={activeTab === "explorer" ? "page" : undefined}
-                className={`px-3 py-1.5 text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer transition-colors ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-all ${
                   activeTab === "explorer"
-                    ? "bg-xp-select text-white"
-                    : "text-xp-ink hover:bg-xp-soft"
+                    ? "bg-white text-leaf-deep shadow-xs border border-line"
+                    : "text-muted hover:text-ink"
                 }`}
               >
                 <img
@@ -481,19 +531,19 @@ export function App() {
                   alt=""
                   width={14}
                   height={14}
-                  className="xp-pixel"
+                  className="pixel-art"
                 />
-                Eksplorasi Lowongan
+                Eksplorasi
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab("pipeline")}
                 aria-current={activeTab === "pipeline" ? "page" : undefined}
-                className={`px-3 py-1.5 text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer transition-colors ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-all ${
                   activeTab === "pipeline"
-                    ? "bg-xp-select text-white"
-                    : "text-xp-ink hover:bg-xp-soft"
+                    ? "bg-white text-leaf-deep shadow-xs border border-line"
+                    : "text-muted hover:text-ink"
                 }`}
               >
                 <img
@@ -501,19 +551,19 @@ export function App() {
                   alt=""
                   width={14}
                   height={14}
-                  className="xp-pixel"
+                  className="pixel-art"
                 />
-                Pipeline Lamaran ({applications.length})
+                War Room ({applications.length})
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab("comparator")}
                 aria-current={activeTab === "comparator" ? "page" : undefined}
-                className={`px-3 py-1.5 text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer transition-colors ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-all ${
                   activeTab === "comparator"
-                    ? "bg-xp-select text-white"
-                    : "text-xp-ink hover:bg-xp-soft"
+                    ? "bg-white text-leaf-deep shadow-xs border border-line"
+                    : "text-muted hover:text-ink"
                 }`}
               >
                 <img
@@ -521,41 +571,22 @@ export function App() {
                   alt=""
                   width={14}
                   height={14}
-                  className="xp-pixel"
+                  className="pixel-art"
                 />
-                Bandingkan Offer ({offerCount})
+                Offer ({offerCount})
               </button>
             </div>
 
-            <div className="flex flex-wrap items-center gap-1.5">
+            {/* Right Utilities + Primary Pill CTA */}
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                onClick={handleExportBackup}
-                title="Export backup lamaran dan skill ke file JSON"
-                className="xp-btn py-1 px-2.5 text-[11px]"
+                onClick={() => setIsBackupModalOpen(true)}
+                title="Simpan cadangan, pulihkan, atau reset data lamaran & skill"
+                className="craft-btn py-1.5 px-3 text-xs"
               >
-                <Download className="w-3 h-3" aria-hidden="true" />
-                Export JSON
-              </button>
-
-              <button
-                type="button"
-                onClick={() => importInputRef.current?.click()}
-                title="Import backup dari file JSON"
-                className="xp-btn py-1 px-2.5 text-[11px]"
-              >
-                <Upload className="w-3 h-3" aria-hidden="true" />
-                Import JSON
-              </button>
-
-              <button
-                type="button"
-                onClick={handleResetAllData}
-                title="Reset seluruh lamaran & skill ke kondisi awal"
-                className="xp-btn py-1 px-2.5 text-[11px]"
-              >
-                <RotateCcw className="w-3 h-3" aria-hidden="true" />
-                Reset
+                <Database className="w-3.5 h-3.5 text-leaf" aria-hidden="true" />
+                Backup Data
               </button>
 
               <input
@@ -569,65 +600,117 @@ export function App() {
 
               <button
                 type="button"
-                onClick={() => setIsFormModalOpen(true)}
-                className="xp-btn xp-btn-green py-1.5 px-3.5"
+                onClick={handleOpenManualForm}
+                className="craft-btn craft-btn-primary py-1.5 px-4 text-xs"
               >
-                <img
-                  src={RETRO_ICONS.plus}
-                  alt=""
-                  width={13}
-                  height={13}
-                  className="xp-pixel brightness-200"
-                />
                 Catat Lamaran
+                <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
             </div>
-          </nav>
+            </nav>
+          </div>
         </header>
 
-        {/* Retro98 / Modul-1 Blueprint Grid Hero Header */}
-        <section className="xp-grid-bg border-b border-xp-ink px-5 sm:px-8 py-6 sm:py-7">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <div className="space-y-2 max-w-2xl">
-              <p className="xp-eyebrow text-xp-deep/80">
-                WELCOME TO KAPTEN&apos;S WAR ROOM &middot; INTERNSHIP TRACKER 2026
+        {/* Scrollable Inner Window Viewport */}
+        <div className="flex-1 min-h-0 overflow-y-auto craft-scroll">
+        {/* Blockfolio-style Scenic Voxel Hero with Image-Tinted Shadow & Curved Wave */}
+        <section className="relative overflow-hidden">
+          <div className="craft-hero px-6 sm:px-10 pt-8 sm:pt-10 pb-14 sm:pb-16 flex items-center">
+            <div className="relative z-10 max-w-lg space-y-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
+                Kapten&apos;s Internship Tracker &middot; Modul 5
               </p>
-              <h1 className="font-display text-3xl sm:text-4xl font-bold text-xp-deep tracking-tight leading-tight">
-                Aku Mw <mark className="xp-highlight">Magang!</mark>
+
+              <h1 className="font-pixel text-4xl sm:text-[46px] font-bold tracking-tight leading-[1.03] text-ink">
+                <span className="block">Lamar,</span>
+                <span className="block">Pantau,</span>
+                <span className="inline-flex items-center gap-2 text-leaf">
+                  Dapat Magang!
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 16 16"
+                    width="22"
+                    height="22"
+                    shapeRendering="crispEdges"
+                    className="shrink-0 -mt-3 text-leaf"
+                  >
+                    <rect x="7" y="1" width="2" height="4" fill="currentColor" />
+                    <rect x="7" y="11" width="2" height="4" fill="currentColor" />
+                    <rect x="1" y="7" width="4" height="2" fill="currentColor" />
+                    <rect x="11" y="7" width="4" height="2" fill="currentColor" />
+                    <rect x="6" y="6" width="4" height="4" fill="#59acff" />
+                  </svg>
+                </span>
               </h1>
-              <p className="text-xs sm:text-sm text-slate-800 leading-relaxed">
+
+              <p className="text-xs sm:text-[13.5px] text-ink/80 leading-relaxed max-w-md">
                 {TAB_SUBTITLE[activeTab]}
               </p>
+
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                {activeTab === "explorer" ? (
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("pipeline")}
+                    className="craft-btn craft-btn-primary py-2 px-5 text-xs"
+                  >
+                    Buka War Room
+                    <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("explorer")}
+                    className="craft-btn craft-btn-primary py-2 px-5 text-xs"
+                  >
+                    Jelajahi Lowongan
+                    <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                  </button>
+                )}
+
+                <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/85 backdrop-blur-xs border border-line text-xs text-ink shadow-xs">
+                  <img
+                    src={RETRO_ICONS.sleepingCat}
+                    alt=""
+                    width={22}
+                    height={15}
+                    className="pixel-art"
+                  />
+                  <span>
+                    Tekan{" "}
+                    <kbd className="px-1.5 py-0.5 rounded bg-cream-soft border border-line-strong font-mono text-[10px] font-semibold">
+                      /
+                    </kbd>{" "}
+                    cari cepat
+                  </span>
+                </span>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => setIsFormModalOpen(true)}
-                className="xp-btn xp-btn-green px-4 py-2 text-xs"
-              >
-                <img
-                  src={RETRO_ICONS.plus}
-                  alt=""
-                  width={14}
-                  height={14}
-                  className="xp-pixel brightness-200"
-                />
-                + Catat Lamaran Manual
-              </button>
-            </div>
+            {/* Smooth Curved Wave Slicing into Paper Workspace */}
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 1200 54"
+              preserveAspectRatio="none"
+              className="absolute bottom-0 left-0 w-full h-9 sm:h-11 text-paper fill-current pointer-events-none z-10"
+            >
+              <path d="M0,34 C340,62 840,-10 1200,28 L1200,54 L0,54 Z" />
+            </svg>
           </div>
+
+          {/* Ambient Image-Backed Shadow Layer */}
+          <div className="craft-hero-img-shadow" aria-hidden="true" />
         </section>
 
-        {/* Airy Editorial Paper Workspace */}
-        <main className="px-5 sm:px-8 py-6 sm:py-8 space-y-7 bg-xp-paper">
+        {/* Main Workspace (relative z-10 & transparent so bottom voxel horizon peeks softly behind last cards) */}
+        <main className="relative z-10 px-5 sm:px-8 pt-3 pb-10 space-y-6">
           {backupNotice && (
             <div
               role="status"
-              className={`p-3 border text-xs font-bold flex items-center justify-between gap-3 ${
+              className={`p-3.5 rounded-2xl border text-xs font-semibold flex items-center justify-between gap-3 ${
                 backupNotice.type === "success"
-                  ? "bg-emerald-50 border-xp-green text-emerald-950"
-                  : "bg-red-50 border-xp-danger text-red-900"
+                  ? "bg-leaf-soft border-leaf/45 text-leaf-deep"
+                  : "bg-danger-soft border-danger/45 text-danger"
               }`}
             >
               <span>{backupNotice.text}</span>
@@ -666,6 +749,8 @@ export function App() {
                 dataSource={dataSource}
                 onChangeDataSource={setDataSource}
                 onSaveToWishlist={handleSaveToWishlist}
+                onQuickApply={handleQuickApplyFromJob}
+                onOpenInWarRoom={handleSelectConflictApplication}
               />
             </div>
           )}
@@ -677,7 +762,7 @@ export function App() {
               onSelectApplication={setSelectedApplicationId}
               onSimulateGhosting={handleSimulateGhosting}
               onDeleteApplication={handleDeleteApplication}
-              onOpenCreateModal={() => setIsFormModalOpen(true)}
+              onOpenCreateModal={handleOpenManualForm}
               showConflictBanner={false}
             />
           )}
@@ -690,13 +775,71 @@ export function App() {
             />
           )}
         </main>
+
+        {/* Panoramic Voxel Mountains & Tech Campus Footer Banner */}
+        <section
+          aria-label="Semangat Magang Kapten"
+          className="craft-footer-horizon px-6 sm:px-10 pb-8 flex items-end"
+        >
+          <div className="max-w-xs sm:max-w-sm space-y-1.5">
+            <span
+              aria-hidden="true"
+              className="block font-pixel text-4xl leading-none text-leaf"
+            >
+              &ldquo;
+            </span>
+            <p className="font-pixel text-lg sm:text-xl font-bold text-ink leading-snug">
+              Satu lamaran rapi hari ini, satu langkah menuju offer pertamamu.
+            </p>
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-muted pt-0.5">
+              Kapten&apos;s Career Horizon
+            </p>
+          </div>
+        </section>
+
+        {/* Subtle Retro '98 Status Footer Strip (Inside the sheet, no clutter) */}
+        <footer className="px-5 sm:px-8 py-3 bg-cream-soft/90 border-t border-line flex flex-wrap items-center justify-between gap-2 text-[11.5px] text-muted">
+          <div className="inline-flex items-center gap-2 font-os">
+            <img
+              src={RETRO_ICONS.sleepingCat}
+              alt=""
+              width={22}
+              height={15}
+              className="pixel-art"
+            />
+            <span>
+              {applications.length} lamaran tersimpan &middot;{" "}
+              {kaptenSkills.length} skill aktif
+            </span>
+          </div>
+          <span className="font-os">
+            Aku Mw Magang &middot; Praktikum Pemweb 2026
+          </span>
+        </footer>
+        </div>
       </div>
+
+      {/* Modal Fitur Bonus: Backup & Kelola Data Lokal */}
+      <BackupDataModal
+        isOpen={isBackupModalOpen}
+        applicationsCount={applications.length}
+        skillsCount={kaptenSkills.length}
+        onClose={() => setIsBackupModalOpen(false)}
+        onExportBackup={handleExportBackup}
+        onTriggerImport={() => importInputRef.current?.click()}
+        onResetAllData={handleResetAllData}
+      />
 
       {/* Modal Fitur 2: Form Tambah Lamaran Manual */}
       <ApplicationFormModal
+        key={formModalKey}
         isOpen={isFormModalOpen}
         applications={applications}
-        onClose={() => setIsFormModalOpen(false)}
+        initialData={formPrefill}
+        onClose={() => {
+          setIsFormModalOpen(false);
+          setFormPrefill(null);
+        }}
         onSubmit={handleAddManualApplication}
       />
 
@@ -725,88 +868,6 @@ export function App() {
         onUndo={handleUndoDelete}
         onDismiss={dismissUndo}
       />
-
-      {/* Windows XP Bottom Taskbar */}
-      <footer className="xp-taskbar fixed bottom-0 left-0 right-0 z-40">
-        <button
-          type="button"
-          onClick={() => setActiveTab("explorer")}
-          className="xp-start"
-        >
-          <img
-            src={RETRO_ICONS.startLogo}
-            alt=""
-            width={20}
-            height={20}
-            className="rounded-xs object-contain"
-          />
-          <span>start</span>
-        </button>
-
-        <div className="flex items-center gap-1.5 px-2.5 overflow-x-auto">
-          <button
-            type="button"
-            onClick={() => setActiveTab("explorer")}
-            className={`xp-task ${activeTab === "explorer" ? "xp-task-active" : ""}`}
-          >
-            <img
-              src={RETRO_ICONS.briefcase}
-              alt=""
-              width={15}
-              height={15}
-              className="xp-pixel"
-            />
-            <span className="hidden sm:inline">Eksplorasi</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("pipeline")}
-            className={`xp-task ${activeTab === "pipeline" ? "xp-task-active" : ""}`}
-          >
-            <img
-              src={RETRO_ICONS.pipeline}
-              alt=""
-              width={15}
-              height={15}
-              className="xp-pixel"
-            />
-            <span className="hidden sm:inline">Pipeline</span> (
-            {applications.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("comparator")}
-            className={`xp-task ${activeTab === "comparator" ? "xp-task-active" : ""}`}
-          >
-            <img
-              src={RETRO_ICONS.comparator}
-              alt=""
-              width={15}
-              height={15}
-              className="xp-pixel"
-            />
-            <span className="hidden sm:inline">Offer</span> ({offerCount})
-          </button>
-        </div>
-
-        <div className="xp-tray hidden sm:flex">
-          <img
-            src={RETRO_ICONS.sleepingCat}
-            alt=""
-            width={22}
-            height={16}
-            className="xp-pixel"
-          />
-          <img
-            src={RETRO_ICONS.speaker}
-            alt=""
-            width={14}
-            height={14}
-            className="xp-pixel"
-          />
-          <span>Praktikum Pemrograman Website - 2026</span>
-        </div>
-      </footer>
     </div>
   );
 }

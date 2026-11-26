@@ -16,6 +16,7 @@ export interface ManualApplicationInput {
   workMode: WorkMode;
   status: InitialApplicationStatus;
   requiredSkills: string[];
+  jobUrl?: string;
   cvVersion?: string;
   cvAttachment?: CvAttachment;
   appliedDate?: string;
@@ -24,6 +25,7 @@ export interface ManualApplicationInput {
 interface ApplicationFormModalProps {
   isOpen: boolean;
   applications: readonly Application[];
+  initialData?: Partial<ManualApplicationInput> | null;
   onClose: () => void;
   onSubmit: (data: ManualApplicationInput) => void;
 }
@@ -55,23 +57,42 @@ function parseSkillsInput(raw: string): string[] {
   return result;
 }
 
+function getTodayIsoDate(): string {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 export function ApplicationFormModal({
   isOpen,
   applications,
+  initialData = null,
   onClose,
   onSubmit,
 }: ApplicationFormModalProps) {
-  const [company, setCompany] = useState("");
-  const [role, setRole] = useState("");
-  const [workMode, setWorkMode] = useState<WorkMode>("Remote");
-  const [status, setStatus] = useState<InitialApplicationStatus>("WISHLIST");
-  const [skillsInput, setSkillsInput] = useState("");
-  const [cvVersion, setCvVersion] = useState("");
+  const [company, setCompany] = useState(initialData?.company ?? "");
+  const [role, setRole] = useState(initialData?.role ?? "");
+  const [workMode, setWorkMode] = useState<WorkMode>(
+    initialData?.workMode ?? "Remote",
+  );
+  const [status, setStatus] = useState<InitialApplicationStatus>(
+    initialData?.status ?? "WISHLIST",
+  );
+  const [skillsInput, setSkillsInput] = useState(
+    initialData?.requiredSkills ? initialData.requiredSkills.join(", ") : "",
+  );
+  const [jobUrl, setJobUrl] = useState(initialData?.jobUrl ?? "");
+  const [cvVersion, setCvVersion] = useState(initialData?.cvVersion ?? "");
   const [cvAttachment, setCvAttachment] = useState<CvAttachment | undefined>(
     undefined,
   );
   const [cvUploadError, setCvUploadError] = useState<string | null>(null);
-  const [appliedDate, setAppliedDate] = useState("");
+  const [appliedDate, setAppliedDate] = useState(
+    initialData?.appliedDate ??
+      (initialData?.status === "APPLIED" ? getTodayIsoDate() : ""),
+  );
   const [errors, setErrors] = useState<FormErrors>({});
 
   const companyRef = useRef<HTMLInputElement | null>(null);
@@ -120,6 +141,7 @@ export function ApplicationFormModal({
     setWorkMode("Remote");
     setStatus("WISHLIST");
     setSkillsInput("");
+    setJobUrl("");
     setCvVersion("");
     setCvAttachment(undefined);
     setCvUploadError(null);
@@ -229,6 +251,7 @@ export function ApplicationFormModal({
       workMode,
       status,
       requiredSkills: parsedSkills,
+      ...(jobUrl.trim().length > 0 ? { jobUrl: jobUrl.trim() } : {}),
       ...(status === "APPLIED"
         ? {
             cvVersion: trimmedCv,
@@ -250,20 +273,20 @@ export function ApplicationFormModal({
       onClick={(e) => {
         if (e.target === e.currentTarget) handleClose();
       }}
-      className="fixed inset-0 z-50 bg-xp-ink/55 backdrop-blur-[1px] flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
+      className="fixed inset-0 z-50 bg-ink/45 backdrop-blur-[2px] flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
     >
-      <div className="xp-window w-full max-w-lg shadow-2xl my-auto">
-        <div className="xp-titlebar">
+      <div className="craft-modal w-full max-w-lg my-auto">
+        <div className="craft-modal-header">
           <span
             id="manual-application-modal-title"
-            className="inline-flex items-center gap-2"
+            className="inline-flex items-center gap-2 font-pixel font-bold text-base text-white"
           >
             <img
               src={RETRO_ICONS.plus}
               alt=""
-              width={14}
-              height={14}
-              className="xp-pixel brightness-200"
+              width={16}
+              height={16}
+              className="pixel-art brightness-200"
             />
             Catat Lamaran Manual
           </span>
@@ -271,36 +294,36 @@ export function ApplicationFormModal({
             type="button"
             onClick={handleClose}
             aria-label="Tutup form tambah lamaran"
-            className="xp-win-ctrl xp-win-ctrl-close"
+            className="craft-win-dot cursor-pointer hover:bg-danger hover:border-danger hover:text-white"
           >
             <X className="w-3 h-3" aria-hidden="true" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} noValidate className="p-4 sm:p-5 space-y-4">
+        <form onSubmit={handleSubmit} noValidate className="p-5 sm:p-6 space-y-4">
           {errors.duplicate && (
             <div
               role="alert"
-              className="p-3 bg-red-50 border border-xp-danger text-red-900 text-xs flex items-start gap-2"
+              className="p-3.5 rounded-2xl bg-danger-soft border border-danger/40 text-danger text-xs flex items-start gap-2"
             >
               <AlertCircle
-                className="w-4 h-4 shrink-0 text-xp-danger mt-0.5"
+                className="w-4 h-4 shrink-0 text-danger mt-0.5"
                 aria-hidden="true"
               />
               <div>
-                <p className="font-bold">Lamaran Duplikat Ditolak</p>
+                <p className="font-semibold">Lamaran Duplikat Ditolak</p>
                 <p className="mt-0.5">{errors.duplicate}</p>
               </div>
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div className="space-y-1">
               <label
                 htmlFor="manual-company"
-                className="block text-xs font-bold text-xp-ink"
+                className="block text-xs font-semibold text-ink"
               >
-                Perusahaan <span className="text-red-700">*</span>
+                Perusahaan <span className="text-danger">*</span>
               </label>
               <input
                 ref={companyRef}
@@ -313,12 +336,14 @@ export function ApplicationFormModal({
                 }}
                 placeholder="mis. Nusantara Cloud Tech"
                 aria-invalid={Boolean(errors.company || errors.duplicate)}
-                className={`xp-input ${
-                  errors.company || errors.duplicate ? "border-xp-danger bg-red-50/40" : ""
+                className={`craft-input ${
+                  errors.company || errors.duplicate
+                    ? "border-danger bg-danger-soft/30"
+                    : ""
                 }`}
               />
               {errors.company && (
-                <p role="alert" className="text-[11px] font-bold text-red-700">
+                <p role="alert" className="text-[11px] font-medium text-danger">
                   {errors.company}
                 </p>
               )}
@@ -327,9 +352,9 @@ export function ApplicationFormModal({
             <div className="space-y-1">
               <label
                 htmlFor="manual-role"
-                className="block text-xs font-bold text-xp-ink"
+                className="block text-xs font-semibold text-ink"
               >
-                Posisi / Role <span className="text-red-700">*</span>
+                Posisi / Role <span className="text-danger">*</span>
               </label>
               <input
                 ref={roleRef}
@@ -342,31 +367,33 @@ export function ApplicationFormModal({
                 }}
                 placeholder="mis. Frontend Engineer Intern"
                 aria-invalid={Boolean(errors.role || errors.duplicate)}
-                className={`xp-input ${
-                  errors.role || errors.duplicate ? "border-xp-danger bg-red-50/40" : ""
+                className={`craft-input ${
+                  errors.role || errors.duplicate
+                    ? "border-danger bg-danger-soft/30"
+                    : ""
                 }`}
               />
               {errors.role && (
-                <p role="alert" className="text-[11px] font-bold text-red-700">
+                <p role="alert" className="text-[11px] font-medium text-danger">
                   {errors.role}
                 </p>
               )}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div className="space-y-1">
               <label
                 htmlFor="manual-work-mode"
-                className="block text-xs font-bold text-xp-ink"
+                className="block text-xs font-semibold text-ink"
               >
-                Mode Kerja <span className="text-red-700">*</span>
+                Mode Kerja <span className="text-danger">*</span>
               </label>
               <select
                 id="manual-work-mode"
                 value={workMode}
                 onChange={(e) => setWorkMode(e.target.value as WorkMode)}
-                className="xp-input"
+                className="craft-input"
               >
                 {WORK_MODES.map((mode) => (
                   <option key={mode} value={mode}>
@@ -379,9 +406,9 @@ export function ApplicationFormModal({
             <div className="space-y-1">
               <label
                 htmlFor="manual-initial-status"
-                className="block text-xs font-bold text-xp-ink"
+                className="block text-xs font-semibold text-ink"
               >
-                Status Awal <span className="text-red-700">*</span>
+                Status Awal <span className="text-danger">*</span>
               </label>
               <select
                 id="manual-initial-status"
@@ -398,7 +425,7 @@ export function ApplicationFormModal({
                     });
                   }
                 }}
-                className="xp-input"
+                className="craft-input"
               >
                 <option value="WISHLIST">WISHLIST (Simpan dulu)</option>
                 <option value="APPLIED">APPLIED (Sudah kirim lamaran)</option>
@@ -409,10 +436,10 @@ export function ApplicationFormModal({
           <div className="space-y-1.5">
             <label
               htmlFor="manual-skills"
-              className="block text-xs font-bold text-xp-ink"
+              className="block text-xs font-semibold text-ink"
             >
               Required Skills (pisahkan dengan koma){" "}
-              <span className="text-red-700">*</span>
+              <span className="text-danger">*</span>
             </label>
             <input
               ref={skillsRef}
@@ -425,21 +452,21 @@ export function ApplicationFormModal({
               }}
               placeholder="React, TypeScript, Tailwind CSS, Docker"
               aria-invalid={Boolean(errors.requiredSkills)}
-              className={`xp-input ${
-                errors.requiredSkills ? "border-xp-danger bg-red-50/40" : ""
+              className={`craft-input ${
+                errors.requiredSkills ? "border-danger bg-danger-soft/30" : ""
               }`}
             />
             {errors.requiredSkills && (
-              <p role="alert" className="text-[11px] font-bold text-red-700">
+              <p role="alert" className="text-[11px] font-medium text-danger">
                 {errors.requiredSkills}
               </p>
             )}
             {parsedSkills.length > 0 && (
-              <div className="flex flex-wrap gap-1 pt-0.5">
+              <div className="flex flex-wrap gap-1.5 pt-0.5">
                 {parsedSkills.map((skill) => (
                   <span
                     key={skill}
-                    className="px-1.5 py-0.5 text-[11px] font-mono bg-xp-paper border border-xp-border text-xp-deep"
+                    className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-cream-soft border border-line text-ink"
                   >
                     {skill}
                   </span>
@@ -450,8 +477,8 @@ export function ApplicationFormModal({
 
           {/* Conditional inputs when initial status === APPLIED */}
           {status === "APPLIED" && (
-            <div className="xp-paper p-3.5 space-y-3 bg-xp-soft/30">
-              <p className="text-xs font-bold text-xp-deep flex items-center gap-1.5">
+            <div className="craft-card-warm p-4 space-y-3">
+              <p className="text-xs font-semibold text-leaf-deep flex items-center gap-1.5">
                 <Briefcase className="w-3.5 h-3.5" aria-hidden="true" />
                 Detail Pengiriman Lamaran (Wajib untuk APPLIED)
               </p>
@@ -460,9 +487,9 @@ export function ApplicationFormModal({
                 <div className="space-y-1">
                   <label
                     htmlFor="manual-cv-version"
-                    className="block text-xs font-bold text-xp-ink"
+                    className="block text-xs font-semibold text-ink"
                   >
-                    Versi CV <span className="text-red-700">*</span>
+                    Versi CV <span className="text-danger">*</span>
                   </label>
                   <input
                     ref={cvVersionRef}
@@ -475,12 +502,12 @@ export function ApplicationFormModal({
                     }}
                     placeholder="mis. Kapten-CV-v2.pdf"
                     aria-invalid={Boolean(errors.cvVersion)}
-                    className={`xp-input ${
-                      errors.cvVersion ? "border-xp-danger bg-red-50/40" : ""
+                    className={`craft-input ${
+                      errors.cvVersion ? "border-danger bg-danger-soft/30" : ""
                     }`}
                   />
                   {errors.cvVersion && (
-                    <p role="alert" className="text-[11px] font-bold text-red-700">
+                    <p role="alert" className="text-[11px] font-medium text-danger">
                       {errors.cvVersion}
                     </p>
                   )}
@@ -489,9 +516,9 @@ export function ApplicationFormModal({
                 <div className="space-y-1">
                   <label
                     htmlFor="manual-applied-date"
-                    className="block text-xs font-bold text-xp-ink"
+                    className="block text-xs font-semibold text-ink"
                   >
-                    Tanggal Melamar <span className="text-red-700">*</span>
+                    Tanggal Melamar <span className="text-danger">*</span>
                   </label>
                   <input
                     ref={appliedDateRef}
@@ -503,27 +530,27 @@ export function ApplicationFormModal({
                       clearError("appliedDate");
                     }}
                     aria-invalid={Boolean(errors.appliedDate)}
-                    className={`xp-input ${
-                      errors.appliedDate ? "border-xp-danger bg-red-50/40" : ""
+                    className={`craft-input ${
+                      errors.appliedDate ? "border-danger bg-danger-soft/30" : ""
                     }`}
                   />
-                    {errors.appliedDate && (
-                    <p role="alert" className="text-[11px] font-bold text-red-700">
+                  {errors.appliedDate && (
+                    <p role="alert" className="text-[11px] font-medium text-danger">
                       {errors.appliedDate}
                     </p>
                   )}
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-xp-cream-border space-y-2">
+              <div className="pt-2 border-t border-line space-y-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-[11px] text-slate-700">
+                  <span className="text-[11px] text-muted">
                     Lampirkan file CV lokal (opsional, PDF/DOC/DOCX maks. 500 KB)
                   </span>
                   <button
                     type="button"
                     onClick={() => cvFileInputRef.current?.click()}
-                    className="xp-btn py-1 px-2.5 text-[11px]"
+                    className="craft-btn py-1 px-3 text-[11px]"
                   >
                     <Upload className="w-3 h-3" aria-hidden="true" />
                     Upload File CV
@@ -541,11 +568,16 @@ export function ApplicationFormModal({
                 </div>
 
                 {cvAttachment && (
-                  <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 bg-xp-paper border border-xp-border text-[11px]">
+                  <div className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-white border border-line text-[11px]">
                     <span className="inline-flex items-center gap-1.5 min-w-0 truncate">
-                      <Paperclip className="w-3 h-3 text-xp-deep shrink-0" aria-hidden="true" />
-                      <strong className="truncate">{cvAttachment.fileName}</strong>
-                      <span className="font-mono text-slate-500 shrink-0">
+                      <Paperclip
+                        className="w-3 h-3 text-leaf-deep shrink-0"
+                        aria-hidden="true"
+                      />
+                      <strong className="truncate text-ink">
+                        {cvAttachment.fileName}
+                      </strong>
+                      <span className="font-mono text-muted shrink-0">
                         ({formatFileSize(cvAttachment.sizeBytes)})
                       </span>
                     </span>
@@ -553,7 +585,7 @@ export function ApplicationFormModal({
                       type="button"
                       onClick={() => setCvAttachment(undefined)}
                       aria-label="Hapus lampiran file CV"
-                      className="text-slate-500 hover:text-xp-danger cursor-pointer"
+                      className="text-muted hover:text-danger cursor-pointer"
                     >
                       <X className="w-3.5 h-3.5" aria-hidden="true" />
                     </button>
@@ -561,7 +593,7 @@ export function ApplicationFormModal({
                 )}
 
                 {cvUploadError && (
-                  <p role="alert" className="text-[11px] font-bold text-red-700">
+                  <p role="alert" className="text-[11px] font-medium text-danger">
                     {cvUploadError}
                   </p>
                 )}
@@ -569,11 +601,11 @@ export function ApplicationFormModal({
             </div>
           )}
 
-          <div className="pt-2 border-t border-xp-cream-border flex items-center justify-end gap-2">
-            <button type="button" onClick={handleClose} className="xp-btn">
+          <div className="pt-3 border-t border-line flex items-center justify-end gap-2">
+            <button type="button" onClick={handleClose} className="craft-btn">
               Batal
             </button>
-            <button type="submit" className="xp-btn xp-btn-green">
+            <button type="submit" className="craft-btn craft-btn-primary">
               <FilePlus2 className="w-3.5 h-3.5" aria-hidden="true" />
               Simpan Lamaran
             </button>

@@ -23,16 +23,16 @@ export function UndoToast({
     <div
       role="status"
       aria-live="polite"
-      className="fixed bottom-16 right-5 z-50 max-w-md xp-window"
+      className="fixed bottom-5 right-5 z-50 max-w-md craft-modal"
     >
-      <div className="xp-titlebar">
-        <span className="inline-flex items-center gap-2 text-xs">
+      <div className="craft-modal-header py-2 px-3.5">
+        <span className="inline-flex items-center gap-2 font-os text-xs text-white">
           <img
             src={RETRO_ICONS.undo}
             alt=""
             width={14}
             height={14}
-            className="xp-pixel"
+            className="pixel-art brightness-200"
           />
           Lamaran Dihapus
         </span>
@@ -40,14 +40,14 @@ export function UndoToast({
           type="button"
           onClick={onDismiss}
           aria-label="Tutup notifikasi undo"
-          className="xp-win-ctrl xp-win-ctrl-close"
+          className="craft-win-dot cursor-pointer hover:bg-danger hover:border-danger hover:text-white"
         >
           <X className="w-3 h-3" aria-hidden="true" />
         </button>
       </div>
 
-      <div className="p-3.5 bg-xp-paper flex items-center justify-between gap-4">
-        <p className="text-xs text-xp-ink leading-snug">
+      <div className="p-3.5 bg-paper flex items-center justify-between gap-4">
+        <p className="text-xs text-ink leading-snug">
           Lamaran <strong>{deletedApplication.company}</strong> (
           {deletedApplication.role}) telah dihapus.
         </p>
@@ -55,14 +55,14 @@ export function UndoToast({
         <button
           type="button"
           onClick={onUndo}
-          className="xp-btn xp-btn-green shrink-0"
+          className="craft-btn craft-btn-primary shrink-0 py-1.5 px-3.5"
         >
           <img
             src={RETRO_ICONS.undo}
             alt=""
-            width={14}
-            height={14}
-            className="xp-pixel"
+            width={13}
+            height={13}
+            className="pixel-art brightness-200"
           />
           Undo ({secondsRemaining}d)
         </button>

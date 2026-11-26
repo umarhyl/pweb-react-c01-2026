@@ -45,6 +45,7 @@ export interface Application {
   workMode: WorkMode;
   status: ApplicationStatus;
   requiredSkills: string[];
+  jobUrl?: string;
   cvVersion?: string;
   cvAttachment?: CvAttachment;
   appliedDate?: string;

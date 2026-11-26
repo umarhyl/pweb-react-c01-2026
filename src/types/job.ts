@@ -7,6 +7,7 @@ export interface JobListing {
   salary: string;
   tags: string[];
   url?: string;
+  description?: string;
   publication_date?: string;
 }
 

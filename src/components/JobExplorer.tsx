@@ -1,19 +1,24 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  ArrowRight,
   BookmarkCheck,
   BookmarkPlus,
   ExternalLink,
+  Eye,
   Loader2,
   MapPin,
   RefreshCw,
+  Search,
+  Send,
   X,
 } from "lucide-react";
 import { RETRO_ICONS } from "../assets/retro";
 import { useDebounce } from "../hooks";
 import { fetchJobs, isAbortError } from "../services";
 import type { Application, JobDataSource, JobListing } from "../types";
-import { calculateSkillMatch, isDuplicateApplication } from "../utils";
+import { STATUS_LABELS, calculateSkillMatch } from "../utils";
 import type { MatchLevel } from "../utils";
+import { JobDetailModal } from "./JobDetailModal";
 
 type JobSortOption = "matchDesc" | "matchAsc" | "default";
 
@@ -23,19 +28,40 @@ interface JobExplorerProps {
   dataSource: JobDataSource;
   onChangeDataSource: (source: JobDataSource) => void;
   onSaveToWishlist: (job: JobListing) => void;
+  onQuickApply: (job: JobListing) => void;
+  onOpenInWarRoom: (applicationId: string) => void;
 }
 
 const MATCH_BADGE_STYLES: Readonly<Record<MatchLevel, string>> = {
-  high: "bg-emerald-100 text-emerald-900 border-emerald-700",
-  medium: "bg-amber-100 text-amber-950 border-amber-600",
-  low: "bg-red-100 text-red-900 border-red-700",
+  high: "bg-emerald-50 text-emerald-800 border-emerald-300",
+  medium: "bg-warn-soft text-amber-900 border-amber-300",
+  low: "bg-danger-soft text-danger border-danger/35",
 };
 
 function getCompanyInitials(companyName: string): string {
-  const words = companyName.trim().split(/\s+/).filter(Boolean);
+  const cleaned = companyName
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/[^a-zA-Z0-9\s]/g, " ");
+  const words = cleaned.trim().split(/\s+/).filter(Boolean);
   if (words.length === 0) return "??";
   if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
   return `${words[0][0]}${words[1][0]}`.toUpperCase();
+}
+
+function findMatchingApplication(
+  applications: readonly Application[],
+  company: string,
+  role: string,
+): Application | null {
+  const normCompany = company.trim().toLowerCase();
+  const normRole = role.trim().toLowerCase();
+  return (
+    applications.find(
+      (app) =>
+        app.company.trim().toLowerCase() === normCompany &&
+        app.role.trim().toLowerCase() === normRole,
+    ) ?? null
+  );
 }
 
 export function JobExplorer({
@@ -44,6 +70,8 @@ export function JobExplorer({
   dataSource,
   onChangeDataSource,
   onSaveToWishlist,
+  onQuickApply,
+  onOpenInWarRoom,
 }: JobExplorerProps) {
   const [jobs, setJobs] = useState<JobListing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,6 +81,7 @@ export function JobExplorer({
   const [keyword, setKeyword] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [sortBy, setSortBy] = useState<JobSortOption>("matchDesc");
+  const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
 
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const debouncedKeyword = useDebounce(keyword, 400);
@@ -102,15 +131,16 @@ export function JobExplorer({
         target instanceof HTMLSelectElement ||
         target?.isContentEditable === true;
 
-      if (isEditable) return;
+      if (isEditable || document.querySelector('[role="dialog"]')) return;
 
       event.preventDefault();
+      event.stopPropagation();
       searchInputRef.current?.focus();
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown, true);
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown, true);
     };
   }, []);
 
@@ -152,15 +182,19 @@ export function JobExplorer({
 
         return searchable.includes(normalizedQuery);
       })
-      .map((job) => ({
-        job,
-        match: calculateSkillMatch(kaptenSkills, job.tags),
-        alreadyApplied: isDuplicateApplication(
+      .map((job) => {
+        const existingApplication = findMatchingApplication(
           applications,
           job.company_name,
           job.title,
-        ),
-      }));
+        );
+        return {
+          job,
+          match: calculateSkillMatch(kaptenSkills, job.tags),
+          existingApplication,
+          alreadyApplied: existingApplication !== null,
+        };
+      });
 
     if (sortBy === "matchDesc") {
       return [...matchedList].sort((a, b) => b.match.score - a.match.score);
@@ -173,6 +207,11 @@ export function JobExplorer({
     return matchedList;
   }, [jobs, effectiveCategory, debouncedKeyword, kaptenSkills, applications, sortBy]);
 
+  const selectedEntry = useMemo(
+    () => enrichedJobs.find((entry) => entry.job.id === selectedJobId) ?? null,
+    [enrichedJobs, selectedJobId],
+  );
+
   const isDebouncing = keyword !== debouncedKeyword;
   const hasActiveFilters =
     keyword.trim().length > 0 || effectiveCategory !== "ALL";
@@ -184,41 +223,43 @@ export function JobExplorer({
   };
 
   return (
-    <section className="space-y-5" aria-label="Eksplorasi Lowongan">
-      {/* Clean Editorial Toolbar */}
-      <div className="xp-paper p-4 space-y-3.5">
+    <section className="space-y-4" aria-label="Eksplorasi Lowongan">
+      {/* Filter & Search Toolbar */}
+      <div className="craft-card p-5 space-y-3.5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <span className="xp-eyebrow">LOWONGAN_FEED.EXE</span>
-            <h2 className="font-display text-xl font-bold text-xp-deep">
+            <span className="craft-eyebrow">Job Explorer</span>
+            <h2 className="font-pixel text-xl font-bold text-ink flex items-center gap-2">
+              <img
+                src={RETRO_ICONS.briefcase}
+                alt=""
+                width={18}
+                height={18}
+                className="pixel-art shrink-0"
+              />
               Daftar Lowongan Magang
             </h2>
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-slate-600">
-            <span>
-              <strong className="font-mono text-xp-deep">
-                {enrichedJobs.length}
-              </strong>{" "}
-              / {jobs.length} lowongan &middot;{" "}
+          <div className="flex items-center gap-2 text-xs text-muted">
+            <span className="px-2.5 py-1 rounded-full bg-cream-soft border border-line">
+              <strong className="text-ink">{enrichedJobs.length}</strong> /{" "}
+              {jobs.length} lowongan &middot;{" "}
               {dataSource === "live" ? "Remotive Live" : "Dataset Lokal"}
             </span>
             {isDebouncing && (
-              <span className="font-mono text-[10px] px-1.5 py-0.5 bg-xp-soft border border-xp-border text-xp-deep">
+              <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-sky-soft text-sky-deep border border-sky">
                 menyaring...
               </span>
             )}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_185px_175px] gap-2.5">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_180px_170px] gap-2.5">
           <div className="relative">
-            <img
-              src={RETRO_ICONS.search}
-              alt=""
-              width={14}
-              height={14}
-              className="xp-pixel absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+            <Search
+              className="w-3.5 h-3.5 text-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+              aria-hidden="true"
             />
             <label htmlFor="job-search-input" className="sr-only">
               Cari posisi, perusahaan, atau skill
@@ -230,14 +271,14 @@ export function JobExplorer({
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               placeholder="Cari posisi, perusahaan, atau skill... (tekan /)"
-              className="xp-input pl-8 pr-8 text-xs"
+              className="craft-input pl-9 pr-8 text-xs"
             />
             {keyword.length > 0 && (
               <button
                 type="button"
                 onClick={() => setKeyword("")}
                 aria-label="Bersihkan pencarian"
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-xp-ink cursor-pointer"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
@@ -252,7 +293,7 @@ export function JobExplorer({
               id="job-category-filter"
               value={effectiveCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="xp-input text-xs"
+              className="craft-input text-xs"
             >
               <option value="ALL">Semua Kategori</option>
               {categories.map((category) => (
@@ -271,7 +312,7 @@ export function JobExplorer({
               id="job-sort-select"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as JobSortOption)}
-              className="xp-input text-xs"
+              className="craft-input text-xs"
             >
               <option value="matchDesc">Match Tertinggi</option>
               <option value="matchAsc">Match Terendah</option>
@@ -280,25 +321,25 @@ export function JobExplorer({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px] text-slate-600">
-          <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-1">
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11.5px] text-muted">
+          <div className="flex flex-wrap items-center gap-3.5">
+            <span className="inline-flex items-center gap-1.5">
               <img
                 src={RETRO_ICONS.check}
                 alt=""
                 width={12}
                 height={12}
-                className="xp-pixel"
+                className="pixel-art"
               />
               Cocok dengan skill Kapten
             </span>
-            <span className="inline-flex items-center gap-1">
+            <span className="inline-flex items-center gap-1.5">
               <img
                 src={RETRO_ICONS.cross}
                 alt=""
-                width={12}
-                height={12}
-                className="xp-pixel"
+                width={11}
+                height={11}
+                className="pixel-art"
               />
               Missing skill
             </span>
@@ -309,7 +350,7 @@ export function JobExplorer({
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="underline text-xp-deep hover:text-xp-bar font-bold cursor-pointer"
+                className="text-xs font-semibold text-leaf-deep hover:underline cursor-pointer"
               >
                 Reset Filter
               </button>
@@ -318,7 +359,7 @@ export function JobExplorer({
               type="button"
               onClick={() => setRetryCount((prev) => prev + 1)}
               disabled={isLoading}
-              className="xp-btn px-2.5 py-1 text-[11px]"
+              className="craft-btn py-1 px-3 text-[11.5px]"
             >
               <RefreshCw
                 className={`w-3 h-3 ${isLoading ? "animate-spin" : ""}`}
@@ -335,17 +376,17 @@ export function JobExplorer({
         <div
           role="status"
           aria-live="polite"
-          className="xp-paper p-10 text-center space-y-3"
+          className="craft-card p-10 text-center space-y-3"
         >
           <Loader2
-            className="w-7 h-7 text-xp-bar animate-spin mx-auto"
+            className="w-7 h-7 text-leaf animate-spin mx-auto"
             aria-hidden="true"
           />
           <div>
-            <p className="font-display font-bold text-base text-xp-deep">
+            <p className="font-pixel font-bold text-lg text-ink">
               Mengambil data lowongan...
             </p>
-            <p className="text-xs text-slate-600 mt-1">
+            <p className="text-xs text-muted mt-1">
               Sumber:{" "}
               {dataSource === "live"
                 ? "Remotive Live API"
@@ -359,22 +400,22 @@ export function JobExplorer({
       {!isLoading && errorMessage && (
         <div
           role="alert"
-          className="xp-paper !border-2 !border-xp-danger bg-red-50/80 p-6 space-y-3.5"
+          className="craft-card border-danger/45 bg-danger-soft/75 p-6 space-y-3.5"
         >
-          <div className="flex items-center gap-2 text-red-900">
+          <div className="flex items-center gap-2.5 text-danger">
             <img
               src={RETRO_ICONS.conflict}
               alt=""
-              width={18}
-              height={18}
-              className="xp-pixel"
+              width={20}
+              height={20}
+              className="pixel-art"
             />
-            <h3 className="font-display font-bold text-base">
+            <h3 className="font-pixel font-bold text-lg">
               Gagal Memuat Lowongan
             </h3>
           </div>
-          <p className="text-xs font-bold text-red-950">{errorMessage}</p>
-          <p className="text-xs text-red-900 leading-relaxed">
+          <p className="text-xs font-semibold text-ink">{errorMessage}</p>
+          <p className="text-xs text-muted leading-relaxed">
             Periksa koneksi internet Anda, klik <strong>Coba Lagi</strong>, atau
             beralih ke <strong>Dataset Fallback Lokal</strong> agar tetap bisa
             eksplorasi lowongan secara offline.
@@ -383,7 +424,7 @@ export function JobExplorer({
             <button
               type="button"
               onClick={() => setRetryCount((prev) => prev + 1)}
-              className="xp-btn xp-btn-green"
+              className="craft-btn craft-btn-primary"
             >
               <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
               Coba Lagi
@@ -392,14 +433,14 @@ export function JobExplorer({
               <button
                 type="button"
                 onClick={() => onChangeDataSource("fallback")}
-                className="xp-btn"
+                className="craft-btn"
               >
                 <img
                   src={RETRO_ICONS.folderOpen}
                   alt=""
                   width={14}
                   height={14}
-                  className="xp-pixel"
+                  className="pixel-art"
                 />
                 Gunakan Fallback Lokal
               </button>
@@ -410,19 +451,19 @@ export function JobExplorer({
 
       {/* State 3: Empty */}
       {!isLoading && !errorMessage && enrichedJobs.length === 0 && (
-        <div className="xp-paper p-10 text-center space-y-3">
+        <div className="craft-card p-10 text-center space-y-3">
           <img
             src={RETRO_ICONS.search}
             alt=""
-            width={28}
-            height={28}
-            className="xp-pixel mx-auto opacity-75"
+            width={32}
+            height={32}
+            className="pixel-art mx-auto opacity-85"
           />
           <div>
-            <p className="font-display font-bold text-base text-xp-deep">
+            <p className="font-pixel font-bold text-lg text-ink">
               Tidak ada lowongan yang cocok
             </p>
-            <p className="text-xs text-slate-600 mt-1">
+            <p className="text-xs text-muted mt-1">
               {hasActiveFilters
                 ? "Coba ubah kata kunci pencarian atau pilih kategori lain."
                 : "Daftar lowongan dari sumber data ini sedang kosong."}
@@ -432,7 +473,7 @@ export function JobExplorer({
             <button
               type="button"
               onClick={handleResetFilters}
-              className="xp-btn"
+              className="craft-btn"
             >
               Reset Pencarian &amp; Filter
             </button>
@@ -440,142 +481,225 @@ export function JobExplorer({
         </div>
       )}
 
-      {/* Spacious Editorial Job Cards Grid */}
+      {/* Job Cards Grid */}
       {!isLoading && !errorMessage && enrichedJobs.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {enrichedJobs.map(({ job, match, alreadyApplied }) => (
-            <article
-              key={`${dataSource}-${job.id}`}
-              className="xp-paper p-5 flex flex-col justify-between gap-4 hover:shadow-[4px_4px_0_#003399] transition-shadow"
-            >
-              <div className="space-y-3.5">
-                {/* Header: Company + Match Score Badge */}
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div
-                      aria-hidden="true"
-                      className="w-10 h-10 shrink-0 bg-xp-deep text-white font-retro text-lg flex items-center justify-center border border-xp-ink"
-                    >
-                      {getCompanyInitials(job.company_name)}
+          {enrichedJobs.map(
+            ({ job, match, existingApplication }) => (
+              <article
+                key={`${dataSource}-${job.id}`}
+                className="craft-card craft-card-hover p-5 flex flex-col justify-between gap-4"
+              >
+                <div className="space-y-3.5">
+                  {/* Header: Company + Match Score Badge */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        aria-hidden="true"
+                        className="w-10 h-10 shrink-0 rounded-2xl bg-gradient-to-br from-cream to-leaf-soft text-leaf-deep font-pixel font-bold text-base flex items-center justify-center border border-line-strong/70"
+                      >
+                        {getCompanyInitials(job.company_name)}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-ink truncate">
+                          {job.company_name}
+                        </p>
+                        <p className="text-[11.5px] text-muted flex items-center gap-1 truncate mt-0.5">
+                          <MapPin
+                            className="w-3 h-3 shrink-0"
+                            aria-hidden="true"
+                          />
+                          <span className="truncate">
+                            {job.candidate_required_location}
+                          </span>
+                        </p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-xp-ink truncate">
-                        {job.company_name}
-                      </p>
-                      <p className="text-[11px] text-slate-600 flex items-center gap-1 truncate mt-0.5">
-                        <MapPin className="w-3 h-3 shrink-0" aria-hidden="true" />
-                        <span className="truncate">
-                          {job.candidate_required_location}
+
+                    <span
+                      className={`shrink-0 inline-flex items-center px-2.5 py-0.5 text-xs font-semibold rounded-full border ${MATCH_BADGE_STYLES[match.level]}`}
+                    >
+                      {match.score}% Match
+                    </span>
+                  </div>
+
+                  {/* Role & Category (klik judul untuk buka Pop-up Detail) */}
+                  <div className="space-y-1">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedJobId(job.id)}
+                      className="text-left font-pixel font-bold text-lg text-ink hover:text-leaf transition-colors leading-snug cursor-pointer"
+                    >
+                      {job.title}
+                    </button>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="craft-eyebrow text-[10px]">{job.category}</p>
+                      {existingApplication && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            onOpenInWarRoom(existingApplication.id)
+                          }
+                          className="text-[10.5px] font-semibold px-2 py-0.5 rounded-full bg-sky-soft text-sky-deep border border-sky hover:bg-leaf hover:text-white transition-colors cursor-pointer"
+                          title="Buka lamaran ini di War Room"
+                        >
+                          Status: {STATUS_LABELS[existingApplication.status]}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Matched vs Missing Skills */}
+                  {job.tags.length === 0 ? (
+                    <p className="text-[11.5px] italic text-muted">
+                      Tidak ada tag skill spesifik dari sumber lowongan.
+                    </p>
+                  ) : (
+                    <div className="flex flex-wrap gap-1.5">
+                      {match.matchedSkills.map((skill) => (
+                        <span
+                          key={`matched-${skill}`}
+                          title="Skill cocok dengan profil Kapten"
+                          className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300"
+                        >
+                          <img
+                            src={RETRO_ICONS.check}
+                            alt=""
+                            width={10}
+                            height={10}
+                            className="pixel-art"
+                          />
+                          {skill}
                         </span>
-                      </p>
+                      ))}
+                      {match.missingSkills.map((skill) => (
+                        <span
+                          key={`missing-${skill}`}
+                          title="Missing skill - belum ada di profil Kapten"
+                          className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[11px] rounded-full bg-danger-soft/75 text-danger border border-dashed border-danger/40"
+                        >
+                          <img
+                            src={RETRO_ICONS.cross}
+                            alt=""
+                            width={9}
+                            height={9}
+                            className="pixel-art"
+                          />
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer: Salary + Detail + Web Asli + Simpan */}
+                <div className="pt-3.5 border-t border-line space-y-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-semibold text-ink">
+                      {job.salary.trim().length > 0
+                        ? job.salary
+                        : "Gaji tidak dicantumkan"}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedJobId(job.id)}
+                        className="craft-btn py-1 px-2.5 text-[11.5px]"
+                        title="Lihat detail & cara melamar"
+                      >
+                        <Eye className="w-3.5 h-3.5" aria-hidden="true" />
+                        Detail
+                      </button>
+                      {job.url && (
+                        <a
+                          href={job.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`Buka halaman lowongan ${job.title}`}
+                          className="craft-btn py-1 px-2.5 text-[11.5px]"
+                          title="Buka halaman karir resmi"
+                        >
+                          <ExternalLink
+                            className="w-3.5 h-3.5"
+                            aria-hidden="true"
+                          />
+                        </a>
+                      )}
                     </div>
                   </div>
 
-                  <span
-                    className={`shrink-0 inline-flex items-center px-2.5 py-0.5 text-xs font-mono font-bold border ${MATCH_BADGE_STYLES[match.level]}`}
-                  >
-                    {match.score}% Match
-                  </span>
-                </div>
-
-                {/* Role & Category */}
-                <div className="space-y-1">
-                  <h3 className="font-display font-bold text-lg text-xp-deep leading-snug">
-                    {job.title}
-                  </h3>
-                  <p className="xp-eyebrow text-[10px]">{job.category}</p>
-                </div>
-
-                {/* Matched vs Missing Skills */}
-                {job.tags.length === 0 ? (
-                  <p className="text-[11px] italic text-slate-500">
-                    Tidak ada tag skill spesifik dari sumber lowongan.
-                  </p>
-                ) : (
-                  <div className="flex flex-wrap gap-1.5">
-                    {match.matchedSkills.map((skill) => (
-                      <span
-                        key={`matched-${skill}`}
-                        title="Skill cocok dengan profil Kapten"
-                        className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-bold bg-emerald-50 text-emerald-900 border border-emerald-700"
+                  {existingApplication ? (
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        disabled
+                        className="craft-btn w-full py-1.5 px-2.5 text-[11.5px]"
                       >
-                        <img
-                          src={RETRO_ICONS.check}
-                          alt=""
-                          width={11}
-                          height={11}
-                          className="xp-pixel"
+                        <BookmarkCheck
+                          className="w-3.5 h-3.5 shrink-0"
+                          aria-hidden="true"
                         />
-                        {skill}
-                      </span>
-                    ))}
-                    {match.missingSkills.map((skill) => (
-                      <span
-                        key={`missing-${skill}`}
-                        title="Missing skill - belum ada di profil Kapten"
-                        className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] bg-red-50/90 text-red-900 border border-dashed border-red-400"
+                        <span className="truncate">Sudah Dilamar</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onOpenInWarRoom(existingApplication.id)}
+                        className="craft-btn craft-btn-primary w-full py-1.5 px-2.5 text-[11.5px]"
                       >
-                        <img
-                          src={RETRO_ICONS.cross}
-                          alt=""
-                          width={10}
-                          height={10}
-                          className="xp-pixel"
+                        <span className="truncate">
+                          {existingApplication.status === "WISHLIST"
+                            ? "Lamar / Kelola"
+                            : "Lihat di War Room"}
+                        </span>
+                        <ArrowRight
+                          className="w-3.5 h-3.5 shrink-0"
+                          aria-hidden="true"
                         />
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Footer: Salary + Action */}
-              <div className="pt-3.5 border-t border-xp-cream-border flex flex-wrap items-center justify-between gap-2">
-                <span className="text-xs font-mono font-bold text-xp-ink">
-                  {job.salary.trim().length > 0
-                    ? job.salary
-                    : "Gaji tidak dicantumkan"}
-                </span>
-
-                <div className="flex items-center gap-2">
-                  {job.url && (
-                    <a
-                      href={job.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`Buka halaman lowongan ${job.title}`}
-                      className="xp-btn px-2.5 py-1.5"
-                      title="Buka link lowongan"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
-                    </a>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => onSaveToWishlist(job)}
+                        className="craft-btn w-full py-1.5 px-2.5 text-[11.5px]"
+                      >
+                        <BookmarkPlus
+                          className="w-3.5 h-3.5 shrink-0"
+                          aria-hidden="true"
+                        />
+                        <span className="truncate">Simpan ke Wishlist</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onQuickApply(job)}
+                        className="craft-btn craft-btn-primary w-full py-1.5 px-2.5 text-[11.5px]"
+                      >
+                        <Send
+                          className="w-3.5 h-3.5 shrink-0"
+                          aria-hidden="true"
+                        />
+                        <span className="truncate">Catat Applied</span>
+                      </button>
+                    </div>
                   )}
-                  <button
-                    type="button"
-                    disabled={alreadyApplied}
-                    onClick={() => onSaveToWishlist(job)}
-                    className={`xp-btn ${
-                      alreadyApplied ? "bg-xp-cream text-slate-600" : "xp-btn-green"
-                    }`}
-                  >
-                    {alreadyApplied ? (
-                      <>
-                        <BookmarkCheck className="w-3.5 h-3.5" aria-hidden="true" />
-                        Sudah Dilamar
-                      </>
-                    ) : (
-                      <>
-                        <BookmarkPlus className="w-3.5 h-3.5" aria-hidden="true" />
-                        Simpan ke Wishlist
-                      </>
-                    )}
-                  </button>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            ),
+          )}
         </div>
       )}
+
+      {/* Pop-up Detail Lowongan */}
+      <JobDetailModal
+        job={selectedEntry?.job ?? null}
+        match={selectedEntry?.match ?? null}
+        existingApplication={selectedEntry?.existingApplication ?? null}
+        onClose={() => setSelectedJobId(null)}
+        onSaveToWishlist={onSaveToWishlist}
+        onQuickApply={onQuickApply}
+        onOpenInWarRoom={onOpenInWarRoom}
+      />
     </section>
   );
 }

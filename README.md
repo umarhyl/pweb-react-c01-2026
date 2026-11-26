@@ -51,14 +51,16 @@ Untuk me-reset data (misalnya sebelum demo ulang):
 
 ## Fitur Nilai Tambahan (Bonus)
 
-Tanpa melanggar aturan library (tanpa Redux, Zustand, TanStack Query, React Hook Form, maupun Formik), kelompok kami menambahkan 2 fitur bonus yang relevan untuk alur kerja Kapten dan demo praktikum:
+Tanpa melanggar aturan library (tanpa Redux, Zustand, TanStack Query, React Hook Form, maupun Formik), kelompok kami menambahkan 3 fitur bonus yang relevan untuk alur kerja Kapten dan demo praktikum:
 
 1. **Export / Import Backup JSON + Reset Data (`src/utils/backupJson.ts`)**:
-   - **Export JSON**: mengunduh seluruh state `applications` (termasuk `checklist` & `activityLogs`) dan `kaptenSkills` ke file `aku-mw-magang-backup-YYYY-MM-DD.json`.
+   - **Export JSON**: mengunduh seluruh state `applications` (termasuk `checklist`, `activityLogs`, & `cvAttachment`) dan `kaptenSkills` ke file `aku-mw-magang-backup-YYYY-MM-DD.json`.
    - **Import JSON**: membaca file `.json` memakai `FileReader`, memvalidasi seluruh field menggunakan type guard ketat (`unknown` narrowing, tanpa `any`), lalu memulihkan data ke state `useLocalStorage`.
    - **Reset Data**: tombol cepat dengan konfirmasi untuk membersihkan data uji saat demo.
 2. **Keyboard Shortcut `/` Fokus Search Bar via `useRef`**:
    - Menekan tombol **`/`** (saat kursor tidak sedang berada di dalam input/textarea/select) langsung memfokuskan kolom pencarian di tab **Eksplorasi Lowongan** (`JobExplorer.tsx`) maupun tab **Pipeline Lamaran** (`WarRoomPipeline.tsx`) menggunakan `useRef` + cleanup `removeEventListener` di `useEffect`.
+3. **Upload, Preview & Unduh File CV Lokal (`src/utils/cvFile.ts`)**:
+   - Di Form Tambah Lamaran Manual (`APPLIED`) dan transisi status ke `APPLIED`, Kapten bisa mengunggah file CV lokal (`.pdf`, `.doc`, `.docx`, maks. 500 KB) memakai `FileReader` (tanpa backend). Nama file otomatis mengisi `cvVersion`, tersimpan di `localStorage` dan ikut ter-backup di Export/Import JSON, serta dilengkapi tombol **Preview** & **Unduh** langsung di Detail Lamaran.
 
 ---
 
@@ -146,6 +148,7 @@ pweb-react-c01-2026/
     │   ├── scheduleConflict.ts        # Deteksi bentrok jadwal interview (< 60 menit)
     │   ├── applicationHelpers.ts      # Anti-duplikat lamaran, Rawan Ghosting (> 14 hari), Offer Comparator
     │   ├── backupJson.ts              # Bonus: Export & validasi Import backup JSON
+    │   ├── cvFile.ts                  # Bonus: Validasi, baca, & preview file CV lokal (FileReader)
     │   └── index.ts                   # Barrel export helper
     ├── App.tsx                        # Komponen utama, navigasi tab, state terpusat, & Export/Import/Reset
     ├── index.css                      # Token tema Windows XP / Retro '98 & Tailwind CSS v4

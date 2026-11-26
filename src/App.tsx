@@ -5,7 +5,9 @@ import {
   ApplicationFormModal,
   ConflictBanner,
   JobExplorer,
+  OfferComparator,
   SkillProfile,
+  StatsDashboard,
   UndoToast,
   WarRoomPipeline,
 } from "./components";
@@ -435,6 +437,9 @@ export function App() {
             onSelectApplication={handleSelectConflictApplication}
           />
 
+          {/* Fitur 7: 5 Kartu Statistik (Derived State) */}
+          <StatsDashboard applications={applications} />
+
           {activeTab === "explorer" && (
             <div className="grid grid-cols-1 lg:grid-cols-[290px_1fr] gap-5 items-start">
               <SkillProfile
@@ -467,14 +472,11 @@ export function App() {
           )}
 
           {activeTab === "comparator" && (
-            <section className="xp-paper p-6 text-center space-y-2">
-              <h2 className="font-display text-xl font-bold text-xp-deep">
-                Offer Comparator ({offerCount} offer tersedia)
-              </h2>
-              <p className="text-xs text-slate-600">
-                Akan diimplementasikan pada tahap Fitur 7 berikutnya.
-              </p>
-            </section>
+            <OfferComparator
+              applications={applications}
+              userSkills={kaptenSkills}
+              onOpenPipeline={() => setActiveTab("pipeline")}
+            />
           )}
         </main>
       </div>

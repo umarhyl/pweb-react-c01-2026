@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   CalendarClock,
   Clock,
@@ -97,6 +97,32 @@ export function WarRoomPipeline({
   );
   const [onlyGhostingRisk, setOnlyGhostingRisk] = useState(false);
   const [sortBy, setSortBy] = useState<ApplicationSortBy>("newest");
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "/" || event.ctrlKey || event.metaKey || event.altKey) {
+        return;
+      }
+
+      const target = event.target as HTMLElement | null;
+      const isEditable =
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        target?.isContentEditable === true;
+
+      if (isEditable) return;
+
+      event.preventDefault();
+      searchInputRef.current?.focus();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   // Cek bentrok WAJIB dari seluruh data, bukan dari data yang sudah ter-filter
   const conflicts = useMemo(
@@ -229,11 +255,12 @@ export function WarRoomPipeline({
               className="xp-pixel absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
             />
             <input
+              ref={searchInputRef}
               id="warroom-search"
               type="text"
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              placeholder="Cari perusahaan, posisi, CV, atau skill..."
+              placeholder="Cari perusahaan, posisi, CV, atau skill... (tekan /)"
               className="xp-input pl-8 text-xs"
             />
           </div>

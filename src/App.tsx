@@ -1,4 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import type { ChangeEvent } from "react";
+import { Download, RotateCcw, Upload, X } from "lucide-react";
 import { RETRO_ICONS } from "./assets/retro";
 import {
   ApplicationDetailModal,
@@ -25,10 +27,12 @@ import type {
 } from "./types";
 import {
   STATUS_LABELS,
+  createBackupJson,
   findInterviewConflicts,
   getConflictingApplicationIds,
   hasDuplicateSkill,
   isDuplicateApplication,
+  parseBackupJson,
 } from "./utils";
 
 type ActiveTab = "explorer" | "pipeline" | "comparator";
@@ -119,6 +123,11 @@ export function App() {
   const [selectedApplicationId, setSelectedApplicationId] = useState<
     string | null
   >(null);
+  const [backupNotice, setBackupNotice] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+  const importInputRef = useRef<HTMLInputElement | null>(null);
 
   const {
     pendingDeleted,
@@ -355,6 +364,75 @@ export function App() {
     setSelectedApplicationId(applicationId);
   };
 
+  // Bonus: Export backup JSON
+  const handleExportBackup = () => {
+    const json = createBackupJson(applications, kaptenSkills);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const dateStamp = new Date().toISOString().slice(0, 10);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `aku-mw-magang-backup-${dateStamp}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    setBackupNotice({
+      type: "success",
+      text: `Backup berhasil diunduh (${applications.length} lamaran, ${kaptenSkills.length} skill).`,
+    });
+  };
+
+  // Bonus: Import backup JSON dengan validasi skema ketat
+  const handleImportBackup = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const content = typeof reader.result === "string" ? reader.result : "";
+      const parsed = parseBackupJson(content);
+
+      if (!parsed.ok) {
+        setBackupNotice({ type: "error", text: parsed.error });
+        return;
+      }
+
+      dismissUndo();
+      setSelectedApplicationId(null);
+      setApplications(parsed.data.applications);
+      setKaptenSkills(parsed.data.kaptenSkills);
+      setBackupNotice({
+        type: "success",
+        text: `Backup berhasil dipulihkan (${parsed.data.applications.length} lamaran, ${parsed.data.kaptenSkills.length} skill).`,
+      });
+    };
+    reader.onerror = () => {
+      setBackupNotice({
+        type: "error",
+        text: "Gagal membaca file backup JSON.",
+      });
+    };
+    reader.readAsText(file);
+  };
+
+  // Reset seluruh data localStorage aplikasi
+  const handleResetAllData = () => {
+    const confirmed = window.confirm(
+      "Reset seluruh lamaran dan kembalikan profil skill Kapten ke default?",
+    );
+    if (!confirmed) return;
+
+    dismissUndo();
+    setSelectedApplicationId(null);
+    setApplications([]);
+    setKaptenSkills(DEFAULT_KAPTEN_SKILLS);
+    setBackupNotice({
+      type: "success",
+      text: "Data berhasil di-reset ke kondisi awal.",
+    });
+  };
+
   return (
     <div className="min-h-screen px-2 sm:px-6 pt-4 sm:pt-7 pb-20">
       <div className="xp-desktop max-w-[1140px] mx-auto overflow-hidden">
@@ -444,20 +522,61 @@ export function App() {
               </button>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setIsFormModalOpen(true)}
-              className="xp-btn xp-btn-green py-1.5 px-3.5"
-            >
-              <img
-                src={RETRO_ICONS.plus}
-                alt=""
-                width={13}
-                height={13}
-                className="xp-pixel brightness-200"
+            <div className="flex flex-wrap items-center gap-1.5">
+              <button
+                type="button"
+                onClick={handleExportBackup}
+                title="Export backup lamaran dan skill ke file JSON"
+                className="xp-btn py-1 px-2.5 text-[11px]"
+              >
+                <Download className="w-3 h-3" aria-hidden="true" />
+                Export JSON
+              </button>
+
+              <button
+                type="button"
+                onClick={() => importInputRef.current?.click()}
+                title="Import backup dari file JSON"
+                className="xp-btn py-1 px-2.5 text-[11px]"
+              >
+                <Upload className="w-3 h-3" aria-hidden="true" />
+                Import JSON
+              </button>
+
+              <button
+                type="button"
+                onClick={handleResetAllData}
+                title="Reset seluruh lamaran & skill ke kondisi awal"
+                className="xp-btn py-1 px-2.5 text-[11px]"
+              >
+                <RotateCcw className="w-3 h-3" aria-hidden="true" />
+                Reset
+              </button>
+
+              <input
+                ref={importInputRef}
+                type="file"
+                accept="application/json,.json"
+                onChange={handleImportBackup}
+                className="hidden"
+                aria-label="Import file backup JSON"
               />
-              Catat Lamaran
-            </button>
+
+              <button
+                type="button"
+                onClick={() => setIsFormModalOpen(true)}
+                className="xp-btn xp-btn-green py-1.5 px-3.5"
+              >
+                <img
+                  src={RETRO_ICONS.plus}
+                  alt=""
+                  width={13}
+                  height={13}
+                  className="xp-pixel brightness-200"
+                />
+                Catat Lamaran
+              </button>
+            </div>
           </nav>
         </header>
 
@@ -497,6 +616,27 @@ export function App() {
 
         {/* Airy Editorial Paper Workspace */}
         <main className="px-5 sm:px-8 py-6 sm:py-8 space-y-7 bg-xp-paper">
+          {backupNotice && (
+            <div
+              role="status"
+              className={`p-3 border text-xs font-bold flex items-center justify-between gap-3 ${
+                backupNotice.type === "success"
+                  ? "bg-emerald-50 border-xp-green text-emerald-950"
+                  : "bg-red-50 border-xp-danger text-red-900"
+              }`}
+            >
+              <span>{backupNotice.text}</span>
+              <button
+                type="button"
+                onClick={() => setBackupNotice(null)}
+                aria-label="Tutup notifikasi backup"
+                className="p-0.5 hover:opacity-70 cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" aria-hidden="true" />
+              </button>
+            </div>
+          )}
+
           {/* Banner Bentrok Global: selalu tampil dari seluruh data meski tab/filter lain aktif */}
           <ConflictBanner
             conflicts={conflicts}

@@ -35,3 +35,6 @@ export type {
   OfferComparisonItem,
   OfferComparisonResult,
 } from "./applicationHelpers";
+
+export { createBackupJson, parseBackupJson } from "./backupJson";
+export type { BackupPayload, ParseBackupResult } from "./backupJson";

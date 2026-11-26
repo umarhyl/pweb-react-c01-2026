@@ -1,26 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  AlertTriangle,
   BookmarkCheck,
   BookmarkPlus,
-  Building2,
-  Check,
-  Database,
   ExternalLink,
   Loader2,
   MapPin,
   RefreshCw,
-  Search,
-  Wallet,
   X,
 } from "lucide-react";
+import { RETRO_ICONS } from "../assets/retro";
 import { useDebounce } from "../hooks";
 import { fetchJobs, isAbortError } from "../services";
 import type { Application, JobDataSource, JobListing } from "../types";
-import {
-  calculateSkillMatch,
-  isDuplicateApplication,
-} from "../utils";
+import { calculateSkillMatch, isDuplicateApplication } from "../utils";
 import type { MatchLevel } from "../utils";
 
 type JobSortOption = "matchDesc" | "matchAsc" | "default";
@@ -37,12 +29,6 @@ const MATCH_BADGE_STYLES: Readonly<Record<MatchLevel, string>> = {
   high: "bg-emerald-100 text-emerald-900 border-emerald-700",
   medium: "bg-amber-100 text-amber-950 border-amber-600",
   low: "bg-red-100 text-red-900 border-red-700",
-};
-
-const MATCH_DOT_STYLES: Readonly<Record<MatchLevel, string>> = {
-  high: "bg-emerald-600",
-  medium: "bg-amber-500",
-  low: "bg-red-600",
 };
 
 function getCompanyInitials(companyName: string): string {
@@ -198,14 +184,41 @@ export function JobExplorer({
   };
 
   return (
-    <section className="space-y-4" aria-label="Eksplorasi Lowongan">
-      {/* Toolbar Search, Filter & Sort */}
-      <div className="xp-window p-3 space-y-2.5">
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_180px_170px] gap-2">
+    <section className="space-y-5" aria-label="Eksplorasi Lowongan">
+      {/* Clean Editorial Toolbar */}
+      <div className="xp-paper p-4 space-y-3.5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <span className="xp-eyebrow">LOWONGAN_FEED.EXE</span>
+            <h2 className="font-display text-xl font-bold text-xp-deep">
+              Daftar Lowongan Magang
+            </h2>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs text-slate-600">
+            <span>
+              <strong className="font-mono text-xp-deep">
+                {enrichedJobs.length}
+              </strong>{" "}
+              / {jobs.length} lowongan &middot;{" "}
+              {dataSource === "live" ? "Remotive Live" : "Dataset Lokal"}
+            </span>
+            {isDebouncing && (
+              <span className="font-mono text-[10px] px-1.5 py-0.5 bg-xp-soft border border-xp-border text-xp-deep">
+                menyaring...
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_185px_175px] gap-2.5">
           <div className="relative">
-            <Search
-              className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
-              aria-hidden="true"
+            <img
+              src={RETRO_ICONS.search}
+              alt=""
+              width={14}
+              height={14}
+              className="xp-pixel absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
             />
             <label htmlFor="job-search-input" className="sr-only">
               Cari posisi, perusahaan, atau skill
@@ -224,7 +237,7 @@ export function JobExplorer({
                 type="button"
                 onClick={() => setKeyword("")}
                 aria-label="Bersihkan pencarian"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-xp-ink cursor-pointer"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-xp-ink cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
@@ -267,25 +280,31 @@ export function JobExplorer({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-700">
-          <div className="flex items-center gap-2">
-            <span>
-              Menampilkan{" "}
-              <strong className="font-mono text-xp-deep">
-                {enrichedJobs.length}
-              </strong>{" "}
-              dari{" "}
-              <strong className="font-mono">{jobs.length}</strong> lowongan (
-              {dataSource === "live" ? "Remotive Live" : "Dataset Lokal"})
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px] text-slate-600">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center gap-1">
+              <img
+                src={RETRO_ICONS.check}
+                alt=""
+                width={12}
+                height={12}
+                className="xp-pixel"
+              />
+              Cocok dengan skill Kapten
             </span>
-            {isDebouncing && (
-              <span className="font-mono text-[10px] px-1.5 py-0.5 bg-xp-soft border border-xp-border text-xp-deep">
-                menyaring...
-              </span>
-            )}
+            <span className="inline-flex items-center gap-1">
+              <img
+                src={RETRO_ICONS.cross}
+                alt=""
+                width={12}
+                height={12}
+                className="xp-pixel"
+              />
+              Missing skill
+            </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             {hasActiveFilters && (
               <button
                 type="button"
@@ -299,7 +318,7 @@ export function JobExplorer({
               type="button"
               onClick={() => setRetryCount((prev) => prev + 1)}
               disabled={isLoading}
-              className="xp-btn px-2 py-1 text-[11px]"
+              className="xp-btn px-2.5 py-1 text-[11px]"
             >
               <RefreshCw
                 className={`w-3 h-3 ${isLoading ? "animate-spin" : ""}`}
@@ -316,17 +335,17 @@ export function JobExplorer({
         <div
           role="status"
           aria-live="polite"
-          className="xp-paper p-8 text-center space-y-3"
+          className="xp-paper p-10 text-center space-y-3"
         >
           <Loader2
             className="w-7 h-7 text-xp-bar animate-spin mx-auto"
             aria-hidden="true"
           />
           <div>
-            <p className="font-bold text-sm text-xp-deep">
+            <p className="font-display font-bold text-base text-xp-deep">
               Mengambil data lowongan...
             </p>
-            <p className="text-xs text-slate-600 mt-0.5">
+            <p className="text-xs text-slate-600 mt-1">
               Sumber:{" "}
               {dataSource === "live"
                 ? "Remotive Live API"
@@ -340,52 +359,67 @@ export function JobExplorer({
       {!isLoading && errorMessage && (
         <div
           role="alert"
-          className="xp-window border-xp-danger bg-red-50/90"
+          className="xp-paper !border-2 !border-xp-danger bg-red-50/80 p-6 space-y-3.5"
         >
-          <div className="px-3 py-1.5 bg-xp-danger text-white text-xs font-bold flex items-center gap-1.5">
-            <AlertTriangle className="w-3.5 h-3.5" aria-hidden="true" />
-            Gagal Memuat Lowongan
+          <div className="flex items-center gap-2 text-red-900">
+            <img
+              src={RETRO_ICONS.conflict}
+              alt=""
+              width={18}
+              height={18}
+              className="xp-pixel"
+            />
+            <h3 className="font-display font-bold text-base">
+              Gagal Memuat Lowongan
+            </h3>
           </div>
-          <div className="p-5 space-y-3">
-            <p className="text-sm font-bold text-red-950">{errorMessage}</p>
-            <p className="text-xs text-red-900">
-              Periksa koneksi internet Anda, klik <strong>Coba Lagi</strong>,
-              atau beralih ke <strong>Dataset Fallback Lokal</strong> agar tetap
-              bisa eksplorasi lowongan.
-            </p>
-            <div className="flex flex-wrap gap-2 pt-1">
+          <p className="text-xs font-bold text-red-950">{errorMessage}</p>
+          <p className="text-xs text-red-900 leading-relaxed">
+            Periksa koneksi internet Anda, klik <strong>Coba Lagi</strong>, atau
+            beralih ke <strong>Dataset Fallback Lokal</strong> agar tetap bisa
+            eksplorasi lowongan secara offline.
+          </p>
+          <div className="flex flex-wrap gap-2 pt-1">
+            <button
+              type="button"
+              onClick={() => setRetryCount((prev) => prev + 1)}
+              className="xp-btn xp-btn-green"
+            >
+              <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
+              Coba Lagi
+            </button>
+            {dataSource === "live" && (
               <button
                 type="button"
-                onClick={() => setRetryCount((prev) => prev + 1)}
-                className="xp-btn xp-btn-green"
+                onClick={() => onChangeDataSource("fallback")}
+                className="xp-btn"
               >
-                <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
-                Coba Lagi
+                <img
+                  src={RETRO_ICONS.folderOpen}
+                  alt=""
+                  width={14}
+                  height={14}
+                  className="xp-pixel"
+                />
+                Gunakan Fallback Lokal
               </button>
-              {dataSource === "live" && (
-                <button
-                  type="button"
-                  onClick={() => onChangeDataSource("fallback")}
-                  className="xp-btn"
-                >
-                  <Database className="w-3.5 h-3.5" aria-hidden="true" />
-                  Gunakan Fallback Lokal
-                </button>
-              )}
-            </div>
+            )}
           </div>
         </div>
       )}
 
       {/* State 3: Empty */}
       {!isLoading && !errorMessage && enrichedJobs.length === 0 && (
-        <div className="xp-paper p-8 text-center space-y-3">
-          <Building2
-            className="w-8 h-8 text-xp-border mx-auto"
-            aria-hidden="true"
+        <div className="xp-paper p-10 text-center space-y-3">
+          <img
+            src={RETRO_ICONS.search}
+            alt=""
+            width={28}
+            height={28}
+            className="xp-pixel mx-auto opacity-75"
           />
           <div>
-            <p className="font-bold text-sm text-xp-deep">
+            <p className="font-display font-bold text-base text-xp-deep">
               Tidak ada lowongan yang cocok
             </p>
             <p className="text-xs text-slate-600 mt-1">
@@ -406,21 +440,21 @@ export function JobExplorer({
         </div>
       )}
 
-      {/* Job Cards Grid */}
+      {/* Spacious Editorial Job Cards Grid */}
       {!isLoading && !errorMessage && enrichedJobs.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {enrichedJobs.map(({ job, match, alreadyApplied }) => (
             <article
               key={`${dataSource}-${job.id}`}
-              className="xp-paper p-4 flex flex-col justify-between gap-3 hover:bg-xp-soft/20 transition-colors"
+              className="xp-paper p-5 flex flex-col justify-between gap-4 hover:shadow-[4px_4px_0_#003399] transition-shadow"
             >
-              <div className="space-y-2.5">
+              <div className="space-y-3.5">
                 {/* Header: Company + Match Score Badge */}
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     <div
                       aria-hidden="true"
-                      className="w-9 h-9 shrink-0 bg-xp-deep text-white font-mono font-bold text-xs flex items-center justify-center border border-xp-ink"
+                      className="w-10 h-10 shrink-0 bg-xp-deep text-white font-retro text-lg flex items-center justify-center border border-xp-ink"
                     >
                       {getCompanyInitials(job.company_name)}
                     </div>
@@ -428,7 +462,7 @@ export function JobExplorer({
                       <p className="text-xs font-bold text-xp-ink truncate">
                         {job.company_name}
                       </p>
-                      <p className="text-[11px] text-slate-600 flex items-center gap-1 truncate">
+                      <p className="text-[11px] text-slate-600 flex items-center gap-1 truncate mt-0.5">
                         <MapPin className="w-3 h-3 shrink-0" aria-hidden="true" />
                         <span className="truncate">
                           {job.candidate_required_location}
@@ -438,89 +472,79 @@ export function JobExplorer({
                   </div>
 
                   <span
-                    className={`shrink-0 inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-mono font-bold border ${MATCH_BADGE_STYLES[match.level]}`}
+                    className={`shrink-0 inline-flex items-center px-2.5 py-0.5 text-xs font-mono font-bold border ${MATCH_BADGE_STYLES[match.level]}`}
                   >
-                    <span
-                      aria-hidden="true"
-                      className={`w-1.5 h-1.5 rounded-full ${MATCH_DOT_STYLES[match.level]}`}
-                    />
                     {match.score}% Match
                   </span>
                 </div>
 
                 {/* Role & Category */}
-                <div>
-                  <h3 className="font-display font-bold text-base text-xp-deep leading-snug">
+                <div className="space-y-1">
+                  <h3 className="font-display font-bold text-lg text-xp-deep leading-snug">
                     {job.title}
                   </h3>
-                  <p className="text-[10px] font-mono uppercase tracking-wider text-slate-500 mt-0.5">
-                    {job.category}
-                  </p>
+                  <p className="xp-eyebrow text-[10px]">{job.category}</p>
                 </div>
 
                 {/* Matched vs Missing Skills */}
-                <div className="space-y-1.5">
-                  {job.tags.length === 0 ? (
-                    <p className="text-[11px] italic text-slate-500">
-                      Tidak ada tag skill spesifik dari sumber lowongan.
-                    </p>
-                  ) : (
-                    <div className="flex flex-wrap gap-1">
-                      {match.matchedSkills.map((skill) => (
-                        <span
-                          key={`matched-${skill}`}
-                          title="Skill cocok dengan profil Kapten"
-                          className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[11px] font-bold bg-emerald-50 text-emerald-900 border border-emerald-600"
-                        >
-                          <Check className="w-3 h-3" aria-hidden="true" />
-                          {skill}
-                        </span>
-                      ))}
-                      {match.missingSkills.map((skill) => (
-                        <span
-                          key={`missing-${skill}`}
-                          title="Missing skill — belum ada di profil Kapten"
-                          className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[11px] bg-red-50 text-red-800 border border-dashed border-red-400"
-                        >
-                          <span aria-hidden="true" className="font-mono text-[10px]">
-                            !
-                          </span>
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  {match.missingSkills.length > 0 && (
-                    <p className="text-[11px] text-red-800">
-                      Missing ({match.missingSkills.length}):{" "}
-                      <span className="font-bold">
-                        {match.missingSkills.join(", ")}
+                {job.tags.length === 0 ? (
+                  <p className="text-[11px] italic text-slate-500">
+                    Tidak ada tag skill spesifik dari sumber lowongan.
+                  </p>
+                ) : (
+                  <div className="flex flex-wrap gap-1.5">
+                    {match.matchedSkills.map((skill) => (
+                      <span
+                        key={`matched-${skill}`}
+                        title="Skill cocok dengan profil Kapten"
+                        className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-bold bg-emerald-50 text-emerald-900 border border-emerald-700"
+                      >
+                        <img
+                          src={RETRO_ICONS.check}
+                          alt=""
+                          width={11}
+                          height={11}
+                          className="xp-pixel"
+                        />
+                        {skill}
                       </span>
-                    </p>
-                  )}
-                </div>
+                    ))}
+                    {match.missingSkills.map((skill) => (
+                      <span
+                        key={`missing-${skill}`}
+                        title="Missing skill — belum ada di profil Kapten"
+                        className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] bg-red-50/90 text-red-900 border border-dashed border-red-400"
+                      >
+                        <img
+                          src={RETRO_ICONS.cross}
+                          alt=""
+                          width={10}
+                          height={10}
+                          className="xp-pixel"
+                        />
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              {/* Footer: Salary + Actions */}
-              <div className="pt-2.5 border-t border-xp-border/60 flex flex-wrap items-center justify-between gap-2">
-                <div className="text-xs font-mono font-bold text-xp-ink flex items-center gap-1">
-                  <Wallet className="w-3.5 h-3.5 text-xp-deep" aria-hidden="true" />
-                  <span>
-                    {job.salary.trim().length > 0
-                      ? job.salary
-                      : "Gaji tidak dicantumkan"}
-                  </span>
-                </div>
+              {/* Footer: Salary + Action */}
+              <div className="pt-3.5 border-t border-xp-cream-border flex flex-wrap items-center justify-between gap-2">
+                <span className="text-xs font-mono font-bold text-xp-ink">
+                  {job.salary.trim().length > 0
+                    ? job.salary
+                    : "Gaji tidak dicantumkan"}
+                </span>
 
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2">
                   {job.url && (
                     <a
                       href={job.url}
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={`Buka halaman lowongan ${job.title}`}
-                      className="xp-btn px-2 py-1.5"
+                      className="xp-btn px-2.5 py-1.5"
                       title="Buka link lowongan"
                     >
                       <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />

@@ -1,4 +1,5 @@
-import { RotateCcw, Trash2, X } from "lucide-react";
+import { X } from "lucide-react";
+import { RETRO_ICONS } from "../assets/retro";
 import type { Application } from "../types";
 
 interface UndoToastProps {
@@ -22,11 +23,17 @@ export function UndoToast({
     <div
       role="status"
       aria-live="polite"
-      className="fixed bottom-14 right-4 z-50 max-w-md xp-window shadow-xl"
+      className="fixed bottom-16 right-5 z-50 max-w-md xp-window"
     >
       <div className="xp-titlebar">
-        <span className="inline-flex items-center gap-1.5 text-xs">
-          <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+        <span className="inline-flex items-center gap-2 text-xs">
+          <img
+            src={RETRO_ICONS.undo}
+            alt=""
+            width={14}
+            height={14}
+            className="xp-pixel"
+          />
           Lamaran Dihapus
         </span>
         <button
@@ -39,7 +46,7 @@ export function UndoToast({
         </button>
       </div>
 
-      <div className="p-3 bg-xp-paper flex items-center justify-between gap-3">
+      <div className="p-3.5 bg-xp-paper flex items-center justify-between gap-4">
         <p className="text-xs text-xp-ink leading-snug">
           Lamaran <strong>{deletedApplication.company}</strong> (
           {deletedApplication.role}) telah dihapus.
@@ -50,7 +57,13 @@ export function UndoToast({
           onClick={onUndo}
           className="xp-btn xp-btn-green shrink-0"
         >
-          <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
+          <img
+            src={RETRO_ICONS.undo}
+            alt=""
+            width={14}
+            height={14}
+            className="xp-pixel"
+          />
           Undo ({secondsRemaining}d)
         </button>
       </div>

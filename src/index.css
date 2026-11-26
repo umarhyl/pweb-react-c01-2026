@@ -1,24 +1,42 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "W95FA";
+  src: url("./assets/retro/fonts/W95FA-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "VT323";
+  src: url("./assets/retro/fonts/VT323-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
-  /* Windows XP + Paper Scrapbook palette (from Modul 1) */
+  /* Windows XP + Retro98 Editorial Paper palette (Modul 1 & Retro98) */
   --color-xp-bar: #0050ee;
   --color-xp-deep: #003399;
   --color-xp-select: #316ac5;
   --color-xp-cream: #ece9d8;
-  --color-xp-cream-border: #b5b3a5;
+  --color-xp-cream-border: #c4c1b0;
   --color-xp-soft: #d2ecff;
   --color-xp-paper: #fffef7;
   --color-xp-ink: #101827;
   --color-xp-border: #7f9db9;
   --color-xp-green: #267c08;
   --color-xp-green-hover: #008d00;
-  --color-xp-danger: #de5c2f;
+  --color-xp-danger: #c93b1a;
   --color-xp-warn: #ffcc00;
   --color-xp-focus: #e68b2c;
 
   --font-sans: Tahoma, Verdana, "Segoe UI", sans-serif;
   --font-display: Georgia, "Times New Roman", serif;
+  --font-os: "W95FA", Tahoma, Verdana, sans-serif;
+  --font-retro: "VT323", "Courier New", ui-monospace, monospace;
   --font-mono: "Courier New", ui-monospace, Consolas, monospace;
 }
 
@@ -33,11 +51,13 @@
     color: var(--color-xp-ink);
     font-family: var(--font-sans);
     font-size: 14px;
-    line-height: 1.55;
-    /* Bliss-inspired retro desktop backdrop without external image dependency */
-    background:
-      radial-gradient(circle at 18% 15%, rgb(255 255 255 / 0.55), transparent 36%),
-      linear-gradient(180deg, #4f94e8 0%, #8bc4f7 52%, #6fb34c 78%, #3c8625 100%);
+    line-height: 1.6;
+    background-color: #4f94e8;
+    background-image:
+      linear-gradient(rgb(16 24 39 / 0.04), rgb(16 24 39 / 0.08)),
+      url("./assets/retro/background.jpg");
+    background-size: cover;
+    background-position: center bottom;
     background-attachment: fixed;
   }
 
@@ -47,29 +67,60 @@
   }
 
   :focus-visible {
-    outline: 3px solid var(--color-xp-focus);
+    outline: 2px solid var(--color-xp-focus);
     outline-offset: 2px;
   }
 }
 
 @layer components {
-  .xp-desktop {
-    background: var(--color-xp-paper);
-    border: 1px solid var(--color-xp-border);
-    border-radius: 9px 9px 0 0;
-    box-shadow: 0 12px 32px rgb(0 51 153 / 0.28);
+  .xp-pixel {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
   }
 
+  /* Main Windows XP Editorial Frame (matches Modul 1 reference) */
+  .xp-desktop {
+    background: var(--color-xp-paper);
+    border: 2px solid var(--color-xp-deep);
+    border-radius: 8px 8px 0 0;
+    box-shadow:
+      0 18px 42px rgb(0 28 96 / 0.34),
+      0 2px 6px rgb(0 0 0 / 0.18);
+  }
+
+  /* Dialog Window (used ONLY for Modals & Toasts — not nested inside page cards) */
   .xp-window {
     background: var(--color-xp-cream);
-    border: 1px solid var(--color-xp-border);
-    border-radius: 5px;
+    border: 2px solid var(--color-xp-deep);
+    border-radius: 6px 6px 2px 2px;
+    box-shadow: 0 16px 40px rgb(0 24 72 / 0.38);
     overflow: hidden;
   }
 
+  /* Clean Editorial Paper Surface inside the main window */
   .xp-paper {
     background: var(--color-xp-paper);
     border: 1px solid var(--color-xp-ink);
+  }
+
+  .xp-card-soft {
+    background: #f8f6ec;
+    border: 1px solid var(--color-xp-cream-border);
+  }
+
+  .xp-eyebrow {
+    font-family: var(--font-os);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #475569;
+  }
+
+  .xp-highlight {
+    background: var(--color-xp-warn);
+    color: var(--color-xp-deep);
+    padding: 0.04em 0.32em;
+    box-decoration-break: clone;
   }
 
   .xp-titlebar {
@@ -77,24 +128,28 @@
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
-    padding: 0.375rem 0.625rem;
+    padding: 0.45rem 0.75rem;
     color: #ffffff;
+    font-family: var(--font-sans);
     font-size: 13px;
     font-weight: 700;
+    letter-spacing: 0.01em;
     background: linear-gradient(
-      #8caae6,
-      #0066ff 14%,
-      var(--color-xp-bar) 65%,
-      var(--color-xp-deep)
+      180deg,
+      #3f8cf3 0%,
+      #0058e6 14%,
+      var(--color-xp-bar) 74%,
+      var(--color-xp-deep) 100%
     );
+    text-shadow: 0 1px 1px rgb(0 20 80 / 0.55);
   }
 
   .xp-grid-bg {
     background-color: var(--color-xp-soft);
     background-image:
-      linear-gradient(rgb(255 255 255 / 0.6) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(255 255 255 / 0.6) 1px, transparent 1px);
-    background-size: 48px 48px;
+      linear-gradient(rgb(255 255 255 / 0.58) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.58) 1px, transparent 1px);
+    background-size: 44px 44px;
   }
 
   .xp-win-ctrl {
@@ -110,6 +165,7 @@
     font-weight: 700;
     line-height: 1;
     cursor: pointer;
+    box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #b5b3a5;
   }
 
   .xp-win-ctrl:hover {
@@ -121,33 +177,42 @@
     color: #ffffff;
   }
 
+  /* Sharp, crisp Retro98/XP Buttons */
   .xp-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.375rem;
-    padding: 0.45rem 0.875rem;
+    gap: 0.4rem;
+    padding: 0.5rem 0.95rem;
     border: 1px solid var(--color-xp-ink);
     background: var(--color-xp-cream);
     color: var(--color-xp-ink);
     font-size: 12px;
     font-weight: 700;
     cursor: pointer;
-    transition: background-color 0.15s ease, opacity 0.15s ease;
+    box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #b5b3a5;
+    transition: background-color 0.14s ease, transform 0.08s ease, opacity 0.14s ease;
   }
 
   .xp-btn:hover:not(:disabled) {
     background: var(--color-xp-soft);
   }
 
+  .xp-btn:active:not(:disabled) {
+    box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff;
+    transform: translateY(1px);
+  }
+
   .xp-btn:disabled {
-    opacity: 0.55;
+    opacity: 0.52;
     cursor: not-allowed;
   }
 
   .xp-btn-green {
     background: var(--color-xp-green);
     color: #ffffff;
+    border-color: #164e05;
+    box-shadow: inset 1px 1px 0 rgb(255 255 255 / 0.25), inset -1px -1px 0 #164e05;
   }
 
   .xp-btn-green:hover:not(:disabled) {
@@ -157,66 +222,92 @@
   .xp-btn-danger {
     background: var(--color-xp-danger);
     color: #ffffff;
+    border-color: #7c1f0c;
+    box-shadow: inset 1px 1px 0 rgb(255 255 255 / 0.22), inset -1px -1px 0 #7c1f0c;
   }
 
   .xp-btn-danger:hover:not(:disabled) {
-    background: #c54a20;
+    background: #a82e12;
   }
 
   .xp-input {
     width: 100%;
-    padding: 0.45rem 0.65rem;
-    border: 1px solid var(--color-xp-border);
+    padding: 0.5rem 0.7rem;
+    border: 1px solid var(--color-xp-ink);
     background: #ffffff;
     color: var(--color-xp-ink);
     font-size: 13px;
+    box-shadow: inset 1px 1px 0 #d4d0c8;
   }
 
+  /* Retro98 Segmented Progress Bar */
+  .xp-progress {
+    height: 12px;
+    background: #ffffff;
+    border: 1px solid var(--color-xp-ink);
+    padding: 2px;
+    overflow: hidden;
+  }
+
+  .xp-progress-fill {
+    height: 100%;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--color-xp-bar) 0px,
+      var(--color-xp-bar) 8px,
+      transparent 8px,
+      transparent 10px
+    );
+    transition: width 0.25s ease;
+  }
+
+  /* Authentic Windows XP Taskbar */
   .xp-taskbar {
     display: flex;
     align-items: center;
     height: 44px;
     color: #ffffff;
     border-top: 2px solid #8caae6;
-    box-shadow: 0 -2px 8px rgb(0 51 153 / 0.25);
+    box-shadow: 0 -2px 10px rgb(0 30 100 / 0.32);
     background: linear-gradient(
-      #8caae6,
-      #0066ff 14%,
-      var(--color-xp-bar) 65%,
-      var(--color-xp-deep)
+      180deg,
+      #3f8cf3 0%,
+      #0062e3 14%,
+      var(--color-xp-bar) 72%,
+      var(--color-xp-deep) 100%
     );
   }
 
   .xp-start {
     display: inline-flex;
     align-items: center;
-    gap: 0.45rem;
+    gap: 0.5rem;
     align-self: stretch;
-    padding: 0 1.25rem 0 0.9rem;
+    padding: 0 1.35rem 0 0.85rem;
     border-radius: 0 16px 16px 0;
-    background: linear-gradient(#5edb5e, #31a431 15%, #008d00 65%, #267c08);
-    box-shadow: inset 0 2px 3px rgb(255 255 255 / 0.5);
+    background: linear-gradient(#5edb5e, #31a431 16%, #008d00 68%, #267c08);
+    box-shadow: inset 0 2px 3px rgb(255 255 255 / 0.55);
     font-style: italic;
     font-weight: 700;
     font-size: 18px;
-    text-shadow: 1px 1px #267c08;
+    text-shadow: 1px 1px #1b5c05;
     cursor: pointer;
   }
 
   .xp-start:hover {
-    filter: brightness(1.08);
+    filter: brightness(1.07);
   }
 
   .xp-task {
     display: inline-flex;
     align-items: center;
-    gap: 0.375rem;
-    padding: 0.3rem 0.75rem;
+    gap: 0.45rem;
+    padding: 0.32rem 0.8rem;
     border: 1px solid #8caae6;
-    border-radius: 4px;
+    border-radius: 3px;
     font-size: 12px;
     background: linear-gradient(#4985df, var(--color-xp-select));
-    box-shadow: inset 0 1px rgb(255 255 255 / 0.25);
+    box-shadow: inset 0 1px rgb(255 255 255 / 0.28);
     cursor: pointer;
   }
 
@@ -227,13 +318,14 @@
   .xp-task-active {
     background: var(--color-xp-deep);
     border-color: #002775;
-    box-shadow: inset 1px 2px 3px #002775;
+    box-shadow: inset 1px 2px 3px #002266;
     font-weight: 700;
   }
 
   .xp-tray {
     display: flex;
     align-items: center;
+    gap: 0.65rem;
     align-self: stretch;
     margin-left: auto;
     padding: 0 1rem;

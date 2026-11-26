@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { Database, Globe, Plus, Sparkles, X } from "lucide-react";
+import { X } from "lucide-react";
+import { RETRO_ICONS } from "../assets/retro";
 import type { JobDataSource } from "../types";
 import { hasDuplicateSkill } from "../utils";
 
@@ -42,96 +43,116 @@ export function SkillProfile({
   };
 
   return (
-    <aside className="space-y-4">
-      <section className="xp-window" aria-label="Profil Skill Kapten">
-        <div className="xp-titlebar">
-          <span className="inline-flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
-            Profil Skill Kapten
-          </span>
-          <span className="font-mono text-[11px] bg-xp-deep/70 px-1.5 py-0.5 rounded-sm">
-            {skills.length} skill
-          </span>
-        </div>
-
-        <div className="p-3.5 space-y-3">
-          <p className="text-xs text-slate-700 leading-relaxed">
-            Digunakan untuk menghitung <strong>Skill Match %</strong> tiap
+    <aside className="space-y-5">
+      {/* Editorial Card 1: Profil Skill Kapten */}
+      <section className="xp-paper p-5 space-y-4" aria-label="Profil Skill Kapten">
+        <div className="space-y-1">
+          <div className="flex items-center justify-between gap-2">
+            <span className="xp-eyebrow">PROFIL_SKILL.TXT</span>
+            <span className="font-mono text-[11px] font-bold text-xp-deep bg-xp-soft px-2 py-0.5 border border-xp-border">
+              {skills.length} skill
+            </span>
+          </div>
+          <h2 className="font-display text-xl font-bold text-xp-deep flex items-center gap-2">
+            <img
+              src={RETRO_ICONS.skill}
+              alt=""
+              width={18}
+              height={18}
+              className="xp-pixel shrink-0"
+            />
+            Skill Kapten
+          </h2>
+          <p className="text-xs text-slate-600 leading-relaxed">
+            Dipakai untuk menghitung <strong>Skill Match %</strong> setiap
             lowongan secara langsung.
           </p>
-
-          <form onSubmit={handleSubmit} className="space-y-1.5" noValidate>
-            <div className="flex gap-1.5">
-              <label htmlFor="kapten-skill-input" className="sr-only">
-                Tambah skill Kapten
-              </label>
-              <input
-                id="kapten-skill-input"
-                type="text"
-                value={skillInput}
-                onChange={(e) => {
-                  setSkillInput(e.target.value);
-                  if (error) setError(null);
-                }}
-                placeholder="Tambah skill (mis. Docker)..."
-                className="xp-input flex-1 text-xs"
-              />
-              <button
-                type="submit"
-                className="xp-btn xp-btn-green shrink-0 px-2.5"
-              >
-                <Plus className="w-3.5 h-3.5" aria-hidden="true" />
-                Tambah
-              </button>
-            </div>
-
-            {error && (
-              <p role="alert" className="text-[11px] font-bold text-red-700">
-                {error}
-              </p>
-            )}
-          </form>
-
-          {skills.length === 0 ? (
-            <p className="text-xs text-slate-600 italic bg-xp-paper border border-dashed border-xp-border p-2.5">
-              Belum ada skill. Tambahkan minimal 1 skill untuk melihat kecocokan
-              lowongan.
-            </p>
-          ) : (
-            <ul className="flex flex-wrap gap-1.5" aria-label="Daftar skill Kapten">
-              {skills.map((skill) => (
-                <li
-                  key={skill}
-                  className="inline-flex items-center gap-1 px-2 py-1 text-xs font-bold bg-xp-paper border border-xp-border text-xp-ink"
-                >
-                  <span>{skill}</span>
-                  <button
-                    type="button"
-                    onClick={() => onRemoveSkill(skill)}
-                    aria-label={`Hapus skill ${skill}`}
-                    className="p-0.5 text-slate-500 hover:text-xp-danger cursor-pointer"
-                  >
-                    <X className="w-3 h-3" aria-hidden="true" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
         </div>
+
+        <form onSubmit={handleSubmit} className="space-y-2" noValidate>
+          <div className="flex gap-2">
+            <label htmlFor="kapten-skill-input" className="sr-only">
+              Tambah skill Kapten
+            </label>
+            <input
+              id="kapten-skill-input"
+              type="text"
+              value={skillInput}
+              onChange={(e) => {
+                setSkillInput(e.target.value);
+                if (error) setError(null);
+              }}
+              placeholder="Tambah skill (mis. Docker)..."
+              className="xp-input flex-1 text-xs"
+            />
+            <button
+              type="submit"
+              className="xp-btn xp-btn-green shrink-0 px-3"
+            >
+              Tambah
+            </button>
+          </div>
+
+          {error && (
+            <p role="alert" className="text-[11px] font-bold text-xp-danger">
+              {error}
+            </p>
+          )}
+        </form>
+
+        {skills.length === 0 ? (
+          <p className="text-xs text-slate-600 italic bg-xp-cream/50 border border-dashed border-xp-border p-3">
+            Belum ada skill. Tambahkan minimal 1 skill untuk menghitung kecocokan
+            lowongan.
+          </p>
+        ) : (
+          <ul className="flex flex-wrap gap-2" aria-label="Daftar skill Kapten">
+            {skills.map((skill) => (
+              <li
+                key={skill}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold bg-xp-cream border border-xp-ink text-xp-ink"
+              >
+                <span>{skill}</span>
+                <button
+                  type="button"
+                  onClick={() => onRemoveSkill(skill)}
+                  aria-label={`Hapus skill ${skill}`}
+                  className="text-slate-500 hover:text-xp-danger cursor-pointer"
+                >
+                  <X className="w-3 h-3" aria-hidden="true" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
-      <section className="xp-window" aria-label="Sumber Data Lowongan">
-        <div className="xp-titlebar">
-          <span className="inline-flex items-center gap-1.5">
-            <Database className="w-3.5 h-3.5" aria-hidden="true" />
-            Sumber Data Lowongan
-          </span>
+      {/* Editorial Card 2: Sumber Data Lowongan */}
+      <section className="xp-paper p-5 space-y-3.5" aria-label="Sumber Data Lowongan">
+        <div className="space-y-1">
+          <span className="xp-eyebrow">SUMBER_DATA.INI</span>
+          <h2 className="font-display text-lg font-bold text-xp-deep flex items-center gap-2">
+            <img
+              src={RETRO_ICONS.folderOpen}
+              alt=""
+              width={18}
+              height={18}
+              className="xp-pixel shrink-0"
+            />
+            Sumber Lowongan
+          </h2>
         </div>
 
-        <fieldset className="p-3.5 space-y-2">
+        <fieldset className="space-y-2.5">
           <legend className="sr-only">Pilih sumber data lowongan</legend>
 
-          <label className="flex items-start gap-2.5 p-2 bg-xp-paper border border-xp-border cursor-pointer hover:bg-xp-soft/50">
+          <label
+            className={`flex items-start gap-2.5 p-3 border cursor-pointer transition-colors ${
+              dataSource === "live"
+                ? "bg-xp-soft/60 border-xp-deep"
+                : "bg-xp-paper border-xp-cream-border hover:bg-xp-cream/50"
+            }`}
+          >
             <input
               type="radio"
               name="job-data-source"
@@ -141,8 +162,7 @@ export function SkillProfile({
               className="mt-0.5 accent-xp-bar"
             />
             <span className="text-xs leading-snug">
-              <span className="font-bold flex items-center gap-1 text-xp-deep">
-                <Globe className="w-3.5 h-3.5" aria-hidden="true" />
+              <span className="font-bold block text-xp-deep">
                 Remotive API (Live)
               </span>
               <span className="text-[11px] text-slate-600 block mt-0.5">
@@ -151,7 +171,13 @@ export function SkillProfile({
             </span>
           </label>
 
-          <label className="flex items-start gap-2.5 p-2 bg-xp-paper border border-xp-border cursor-pointer hover:bg-xp-soft/50">
+          <label
+            className={`flex items-start gap-2.5 p-3 border cursor-pointer transition-colors ${
+              dataSource === "fallback"
+                ? "bg-xp-soft/60 border-xp-deep"
+                : "bg-xp-paper border-xp-cream-border hover:bg-xp-cream/50"
+            }`}
+          >
             <input
               type="radio"
               name="job-data-source"
@@ -161,8 +187,7 @@ export function SkillProfile({
               className="mt-0.5 accent-xp-bar"
             />
             <span className="text-xs leading-snug">
-              <span className="font-bold flex items-center gap-1 text-xp-deep">
-                <Database className="w-3.5 h-3.5" aria-hidden="true" />
+              <span className="font-bold block text-xp-deep">
                 Dataset Magang ID (Lokal)
               </span>
               <span className="text-[11px] text-slate-600 block mt-0.5">

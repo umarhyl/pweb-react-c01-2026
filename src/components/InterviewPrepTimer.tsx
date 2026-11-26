@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Pause, Play, RotateCcw, Timer } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pause, Play, RotateCcw } from "lucide-react";
+import { RETRO_ICONS } from "../assets/retro";
 
 const QUESTION_DURATION_SECONDS = 120;
 
@@ -15,7 +16,7 @@ const INTERVIEW_QUESTIONS: readonly string[] = [
 function formatCountdown(totalSeconds: number): string {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
-  return `${String(minutes).padStart(2, "0")} : ${String(seconds).padStart(2, "0")}`;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
 export function InterviewPrepTimer() {
@@ -23,20 +24,24 @@ export function InterviewPrepTimer() {
   const [secondsLeft, setSecondsLeft] = useState(QUESTION_DURATION_SECONDS);
   const [isRunning, setIsRunning] = useState(false);
 
-  const isActive = isRunning && secondsLeft > 0;
-
   // Wajib cleanup clearInterval agar tidak bocor saat panel ditutup (unmount)
   useEffect(() => {
-    if (!isActive) return;
+    if (!isRunning) return;
 
     const intervalId = window.setInterval(() => {
-      setSecondsLeft((prev) => (prev <= 1 ? 0 : prev - 1));
+      setSecondsLeft((prev) => {
+        if (prev <= 1) {
+          setIsRunning(false);
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
 
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [isActive]);
+  }, [isRunning]);
 
   const handleToggleRun = () => {
     if (secondsLeft === 0) {
@@ -74,25 +79,31 @@ export function InterviewPrepTimer() {
   const isLowTime = secondsLeft > 0 && secondsLeft <= 30;
 
   return (
-    <section className="xp-paper p-3.5 space-y-3" aria-label="Latihan Interview">
+    <section className="xp-paper p-4 space-y-3.5" aria-label="Latihan Interview">
       <div className="flex items-center justify-between gap-2 border-b border-xp-cream-border pb-2">
-        <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-xp-deep">
-          <Timer className="w-4 h-4" aria-hidden="true" />
-          Latihan Interview
+        <span className="inline-flex items-center gap-1.5 xp-eyebrow text-xp-deep">
+          <img
+            src={RETRO_ICONS.timer}
+            alt=""
+            width={16}
+            height={16}
+            className="xp-pixel"
+          />
+          LATIHAN_INTERVIEW.EXE
         </span>
         <span className="font-mono text-xs font-bold text-slate-600">
           Soal {questionIndex + 1} / {INTERVIEW_QUESTIONS.length}
         </span>
       </div>
 
-      <blockquote className="text-xs sm:text-sm text-xp-ink bg-xp-cream/60 border-l-4 border-xp-bar p-2.5 leading-relaxed">
+      <blockquote className="text-xs sm:text-sm text-xp-ink bg-xp-soft/50 border-l-4 border-xp-deep p-3 leading-relaxed">
         &ldquo;{INTERVIEW_QUESTIONS[questionIndex]}&rdquo;
       </blockquote>
 
-      <div className="space-y-1.5">
+      <div className="space-y-2.5">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div
-            className={`font-mono text-2xl sm:text-3xl font-bold tracking-wider ${
+            className={`font-retro text-5xl leading-none tracking-wider ${
               isTimeUp
                 ? "text-xp-danger"
                 : isLowTime
@@ -108,9 +119,9 @@ export function InterviewPrepTimer() {
             <button
               type="button"
               onClick={handleToggleRun}
-              className={`xp-btn ${isActive ? "" : "xp-btn-green"}`}
+              className={`xp-btn ${isRunning ? "" : "xp-btn-green"}`}
             >
-              {isActive ? (
+              {isRunning ? (
                 <>
                   <Pause className="w-3.5 h-3.5" aria-hidden="true" />
                   Jeda
@@ -142,14 +153,14 @@ export function InterviewPrepTimer() {
               onClick={handleNextQuestion}
               className="xp-btn"
             >
-              Soal Berikutnya
+              Lanjut
               <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
           </div>
         </div>
 
         <div
-          className="w-full h-2 bg-xp-cream border border-xp-border overflow-hidden"
+          className="xp-progress"
           role="progressbar"
           aria-valuenow={progressPercent}
           aria-valuemin={0}
@@ -157,20 +168,14 @@ export function InterviewPrepTimer() {
           aria-label="Sisa waktu latihan interview"
         >
           <div
-            className={`h-full transition-all duration-300 ${
-              isTimeUp
-                ? "bg-xp-danger"
-                : isLowTime
-                  ? "bg-xp-warn"
-                  : "bg-xp-bar"
-            }`}
+            className="xp-progress-fill"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
 
         {isTimeUp && (
           <p className="text-[11px] font-bold text-xp-danger">
-            Waktu 02:00 habis! Klik Reset atau lanjut ke Soal Berikutnya.
+            Waktu 02:00 habis! Klik Reset atau lanjut ke soal berikutnya.
           </p>
         )}
       </div>

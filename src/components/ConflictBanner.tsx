@@ -1,4 +1,4 @@
-import { AlertTriangle } from "lucide-react";
+import { RETRO_ICONS } from "../assets/retro";
 import type { ScheduleConflict } from "../utils";
 
 interface ConflictBannerProps {
@@ -31,19 +31,22 @@ export function ConflictBanner({
     <section
       role="alert"
       aria-live="assertive"
-      className="bg-red-50 border-2 border-xp-danger rounded-sm p-3 text-red-950 shadow-sm"
+      className="bg-[#fff7cc] border-2 border-xp-ink p-4 text-xp-ink shadow-[4px_4px_0_#c93b1a]"
     >
-      <div className="flex items-start gap-2.5">
-        <AlertTriangle
-          className="w-5 h-5 text-xp-danger shrink-0 mt-0.5"
-          aria-hidden="true"
+      <div className="flex items-start gap-3">
+        <img
+          src={RETRO_ICONS.conflict}
+          alt=""
+          width={20}
+          height={20}
+          className="xp-pixel shrink-0 mt-0.5"
         />
         <div className="space-y-1.5 flex-1">
           <p className="text-xs font-bold text-red-900">
-            Peringatan Bentrok Jadwal Interview ({conflicts.length} konflik
-            terdeteksi di seluruh pipeline):
+            Jadwal Interview Bentrok ({conflicts.length} konflik terdeteksi di
+            seluruh pipeline)
           </p>
-          <ul className="space-y-1 text-xs">
+          <ul className="space-y-1 text-xs leading-relaxed">
             {conflicts.map((conflict) => (
               <li
                 key={`${conflict.first.id}-${conflict.second.id}`}
@@ -56,7 +59,7 @@ export function ConflictBanner({
                 >
                   {conflict.first.company}
                 </button>
-                <span className="font-mono text-[11px]">
+                <span className="font-mono text-[11px] text-slate-700">
                   ({formatShortDateTime(conflict.first.interviewDateTime)})
                 </span>
                 <span>dan</span>
@@ -67,12 +70,12 @@ export function ConflictBanner({
                 >
                   {conflict.second.company}
                 </button>
-                <span className="font-mono text-[11px]">
+                <span className="font-mono text-[11px] text-slate-700">
                   ({formatShortDateTime(conflict.second.interviewDateTime)})
                 </span>
                 <span>
-                  berselisih{" "}
-                  <strong>{conflict.diffMinutes} menit</strong> (&lt; 60 menit).
+                  berselisih <strong>{conflict.diffMinutes} menit</strong> (&lt;
+                  60 menit).
                 </span>
               </li>
             ))}

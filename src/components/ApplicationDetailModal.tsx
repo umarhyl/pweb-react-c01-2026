@@ -1,19 +1,15 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
-  AlertTriangle,
   ArrowRight,
   CalendarClock,
   CheckCircle2,
-  CheckSquare,
-  FileText,
-  Ghost,
-  History,
   Plus,
   Send,
   Trash2,
   X,
 } from "lucide-react";
+import { RETRO_ICONS } from "../assets/retro";
 import type {
   Application,
   ApplicationStatus,
@@ -132,7 +128,6 @@ export function ApplicationDetailModal({
   const [newChecklistText, setNewChecklistText] = useState("");
   const [manualNote, setManualNote] = useState("");
 
-  // Tutup modal dengan tombol Escape
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -211,7 +206,7 @@ export function ApplicationDetailModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-slate-950/60 flex items-center justify-center p-2 sm:p-4 overflow-y-auto"
+      className="fixed inset-0 z-50 bg-xp-ink/60 backdrop-blur-[1px] flex items-center justify-center p-2.5 sm:p-5 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby="detail-modal-title"
@@ -219,14 +214,20 @@ export function ApplicationDetailModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="xp-window w-full max-w-5xl max-h-[92vh] flex flex-col shadow-2xl">
+      <div className="xp-window w-full max-w-5xl max-h-[92vh] flex flex-col">
         {/* Titlebar XP */}
         <div className="xp-titlebar shrink-0">
           <span
             id="detail-modal-title"
-            className="truncate flex items-center gap-1.5"
+            className="truncate flex items-center gap-2"
           >
-            <FileText className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            <img
+              src={RETRO_ICONS.checklist}
+              alt=""
+              width={15}
+              height={15}
+              className="xp-pixel shrink-0"
+            />
             Detail Lamaran — {application.role} ({application.company})
           </span>
           <button
@@ -240,23 +241,23 @@ export function ApplicationDetailModal({
         </div>
 
         {/* Body */}
-        <div className="p-3.5 sm:p-4 overflow-y-auto space-y-4">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-5 bg-xp-cream">
           {/* Ringkasan Header Lamaran */}
-          <div className="xp-paper p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="space-y-1">
+          <div className="xp-paper p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1.5">
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-base sm:text-lg font-bold text-xp-deep">
+                <h2 className="font-display text-lg sm:text-xl font-bold text-xp-deep">
                   {application.role} — {application.company}
                 </h2>
-                <span className="px-2 py-0.5 text-[11px] font-bold bg-xp-soft text-xp-deep border border-xp-border rounded-sm">
+                <span className="px-2 py-0.5 text-[11px] font-bold bg-xp-soft text-xp-deep border border-xp-ink">
                   {STATUS_LABELS[application.status]}
                 </span>
-                <span className="px-2 py-0.5 text-[11px] font-bold font-mono bg-xp-cream border border-xp-border rounded-sm">
-                  {skillMatch.score}% Skill Match
+                <span className="px-2 py-0.5 text-[11px] font-bold font-mono bg-xp-cream border border-xp-ink">
+                  {skillMatch.score}% Match
                 </span>
               </div>
 
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-700">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-700">
                 <span>
                   Mode: <strong>{application.workMode}</strong>
                 </span>
@@ -279,7 +280,6 @@ export function ApplicationDetailModal({
                       className="w-3.5 h-3.5 text-xp-deep"
                       aria-hidden="true"
                     />
-                    Interview:{" "}
                     <strong className="font-mono">
                       {formatLogTimestamp(application.interviewDateTime)}
                     </strong>
@@ -294,16 +294,28 @@ export function ApplicationDetailModal({
               </div>
 
               {(ghostRisk || hasConflict) && (
-                <div className="flex flex-wrap gap-1.5 pt-1">
+                <div className="flex flex-wrap gap-2 pt-1">
                   {ghostRisk && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-bold bg-red-100 text-red-900 border border-xp-danger rounded-sm">
-                      <Ghost className="w-3 h-3" aria-hidden="true" />
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold bg-[#ffe0b2] text-[#7a2e00] border border-xp-ink">
+                      <img
+                        src={RETRO_ICONS.ghost}
+                        alt=""
+                        width={13}
+                        height={13}
+                        className="xp-pixel"
+                      />
                       Rawan Ghosting ({daysSinceUpdate} hari tanpa update)
                     </span>
                   )}
                   {hasConflict && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-bold bg-amber-100 text-red-900 border border-xp-danger rounded-sm">
-                      <AlertTriangle className="w-3 h-3" aria-hidden="true" />
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold bg-[#fff3a0] text-red-900 border border-xp-ink">
+                      <img
+                        src={RETRO_ICONS.conflict}
+                        alt=""
+                        width={13}
+                        height={13}
+                        className="xp-pixel"
+                      />
                       Bentrok dengan jadwal interview lain (&lt; 60 menit)
                     </span>
                   )}
@@ -311,14 +323,20 @@ export function ApplicationDetailModal({
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
               {canSimulateGhosting && (
                 <button
                   type="button"
                   onClick={() => onSimulateGhosting(application.id)}
                   className="xp-btn"
                 >
-                  <Ghost className="w-3.5 h-3.5" aria-hidden="true" />
+                  <img
+                    src={RETRO_ICONS.ghost}
+                    alt=""
+                    width={14}
+                    height={14}
+                    className="xp-pixel"
+                  />
                   Simulasi +15 Hari
                 </button>
               )}
@@ -337,33 +355,36 @@ export function ApplicationDetailModal({
           </div>
 
           {/* Grid Utama 2 Kolom */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
             {/* Kolom Kiri: State Machine + Nested Checklist */}
-            <div className="lg:col-span-7 space-y-4">
-              {/* Tahap Seleksi & State Machine */}
+            <div className="lg:col-span-7 space-y-5">
+              {/* State Machine */}
               <section
-                className="xp-paper p-3.5 space-y-3"
+                className="xp-paper p-4 sm:p-5 space-y-4"
                 aria-label="Tahap Seleksi dan Transisi Status"
               >
-                <h3 className="text-xs font-bold uppercase tracking-wide text-xp-deep border-b border-xp-cream-border pb-1.5">
-                  Tahap Seleksi (State Machine)
-                </h3>
+                <div className="border-b border-xp-cream-border pb-2">
+                  <span className="xp-eyebrow">STATE_MACHINE.SYS</span>
+                  <h3 className="font-display text-base font-bold text-xp-deep">
+                    Tahap Seleksi &amp; Transisi Status
+                  </h3>
+                </div>
 
                 {/* Visual Stepper */}
-                <ol className="grid grid-cols-5 gap-1.5 text-[11px]">
+                <ol className="grid grid-cols-5 gap-2 text-[11px]">
                   {PIPELINE_STEPS.map((step, index) => {
                     const isPassed =
                       currentStepIndex >= 0 && index <= currentStepIndex;
                     const isCurrent = application.status === step;
                     return (
-                      <li key={step} className="space-y-1">
+                      <li key={step} className="space-y-1.5">
                         <div
-                          className={`h-1.5 rounded-xs ${
+                          className={`h-2 border border-xp-ink ${
                             isCurrent
                               ? "bg-xp-bar"
                               : isPassed
                                 ? "bg-xp-green"
-                                : "bg-xp-cream-border"
+                                : "bg-xp-cream"
                           }`}
                         />
                         <span
@@ -384,7 +405,7 @@ export function ApplicationDetailModal({
 
                 {(application.status === "REJECTED" ||
                   application.status === "GHOSTED") && (
-                  <p className="text-xs font-bold px-2.5 py-1.5 bg-xp-cream border border-xp-border text-xp-ink">
+                  <p className="text-xs px-3 py-2 bg-xp-cream border border-xp-ink text-xp-ink">
                     Status saat ini:{" "}
                     <strong>{STATUS_LABELS[application.status]}</strong>
                     {application.status === "GHOSTED"
@@ -394,13 +415,14 @@ export function ApplicationDetailModal({
                 )}
 
                 {finalStatus ? (
-                  <div className="flex items-center gap-2 p-2.5 bg-emerald-50 border border-xp-border text-xs text-slate-800">
+                  <div className="flex items-center gap-2.5 p-3 bg-emerald-50 border border-xp-green text-xs text-slate-800">
                     <CheckCircle2
                       className="w-4 h-4 text-xp-green shrink-0"
                       aria-hidden="true"
                     />
                     <span>
-                      Status <strong>{STATUS_LABELS[application.status]}</strong>{" "}
+                      Status{" "}
+                      <strong>{STATUS_LABELS[application.status]}</strong>{" "}
                       bersifat <strong>final</strong> sesuai Diagram State
                       Machine dan tidak dapat dipindahkan lagi.
                     </span>
@@ -408,14 +430,14 @@ export function ApplicationDetailModal({
                 ) : (
                   <form
                     onSubmit={handleConfirmTransition}
-                    className="space-y-3 bg-xp-cream/60 border border-xp-cream-border p-3"
+                    className="space-y-3.5 xp-card-soft p-3.5"
                     noValidate
                   >
-                    <div className="space-y-1.5">
+                    <div className="space-y-2">
                       <span className="block text-xs font-bold text-xp-ink">
                         Pindahkan status ke:
                       </span>
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex flex-wrap gap-2">
                         {allowedNextStatuses.map((nextStatus) => {
                           const isSelected = selectedNextStatus === nextStatus;
                           return (
@@ -445,7 +467,7 @@ export function ApplicationDetailModal({
 
                     {/* Input Kondisional: APPLIED */}
                     {selectedNextStatus === "APPLIED" && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                           <label
                             htmlFor="transition-cv-version"
@@ -501,7 +523,7 @@ export function ApplicationDetailModal({
 
                     {/* Input Kondisional: OFFER */}
                     {selectedNextStatus === "OFFER" && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                           <label
                             htmlFor="transition-salary-offer"
@@ -550,7 +572,7 @@ export function ApplicationDetailModal({
                     {transitionErrors.length > 0 && (
                       <ul
                         role="alert"
-                        className="text-xs font-bold text-red-700 bg-red-50 border border-xp-danger p-2 space-y-0.5"
+                        className="text-xs font-bold text-red-800 bg-red-50 border border-xp-danger p-2.5 space-y-0.5"
                       >
                         {transitionErrors.map((err) => (
                           <li key={err}>• {err}</li>
@@ -576,14 +598,22 @@ export function ApplicationDetailModal({
 
               {/* Nested Checklist Persiapan */}
               <section
-                className="xp-paper p-3.5 space-y-3"
+                className="xp-paper p-4 sm:p-5 space-y-3.5"
                 aria-label="Daftar Persiapan"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-xp-deep">
-                    <CheckSquare className="w-4 h-4" aria-hidden="true" />
-                    Daftar Persiapan (Checklist)
-                  </h3>
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={RETRO_ICONS.checklist}
+                      alt=""
+                      width={16}
+                      height={16}
+                      className="xp-pixel"
+                    />
+                    <h3 className="font-display text-base font-bold text-xp-deep">
+                      Daftar Persiapan
+                    </h3>
+                  </div>
                   <span className="font-mono text-xs font-bold text-xp-deep">
                     {completedChecklist} / {totalChecklist} selesai (
                     {checklistPercent}%)
@@ -591,7 +621,7 @@ export function ApplicationDetailModal({
                 </div>
 
                 <div
-                  className="w-full h-2 bg-xp-cream border border-xp-border overflow-hidden"
+                  className="xp-progress"
                   role="progressbar"
                   aria-valuenow={checklistPercent}
                   aria-valuemin={0}
@@ -599,24 +629,24 @@ export function ApplicationDetailModal({
                   aria-label="Progress checklist persiapan"
                 >
                   <div
-                    className="h-full bg-xp-bar transition-all duration-200"
+                    className="xp-progress-fill"
                     style={{ width: `${checklistPercent}%` }}
                   />
                 </div>
 
                 {application.checklist.length === 0 ? (
-                  <p className="text-xs text-slate-600 italic bg-xp-cream/50 border border-dashed border-xp-border p-2.5">
+                  <p className="text-xs text-slate-600 italic bg-xp-cream/50 border border-dashed border-xp-border p-3">
                     Belum ada item persiapan. Tambahkan tugas pertamamu di
                     bawah.
                   </p>
                 ) : (
-                  <ul className="space-y-1.5">
+                  <ul className="space-y-2">
                     {application.checklist.map((item) => (
                       <li
                         key={item.id}
-                        className="flex items-center justify-between gap-2 p-2 bg-white border border-xp-border"
+                        className="flex items-center justify-between gap-2 p-2.5 bg-white border border-xp-ink"
                       >
-                        <label className="flex items-center gap-2 text-xs flex-1 cursor-pointer">
+                        <label className="flex items-center gap-2.5 text-xs flex-1 cursor-pointer">
                           <input
                             type="checkbox"
                             checked={item.done}
@@ -652,7 +682,7 @@ export function ApplicationDetailModal({
 
                 <form
                   onSubmit={handleChecklistSubmit}
-                  className="flex gap-1.5"
+                  className="flex gap-2"
                   noValidate
                 >
                   <label htmlFor="new-checklist-item" className="sr-only">
@@ -679,19 +709,25 @@ export function ApplicationDetailModal({
             </div>
 
             {/* Kolom Kanan: Latihan Interview Timer + Riwayat Aktivitas */}
-            <div className="lg:col-span-5 space-y-4">
+            <div className="lg:col-span-5 space-y-5">
               <InterviewPrepTimer />
 
               {/* Activity Log */}
               <section
-                className="xp-paper p-3.5 space-y-3"
+                className="xp-paper p-4 space-y-3.5"
                 aria-label="Riwayat Aktivitas"
               >
-                <div className="flex items-center justify-between border-b border-xp-cream-border pb-1.5">
-                  <h3 className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-xp-deep">
-                    <History className="w-4 h-4" aria-hidden="true" />
-                    Riwayat Aktivitas
-                  </h3>
+                <div className="flex items-center justify-between border-b border-xp-cream-border pb-2">
+                  <span className="inline-flex items-center gap-1.5 xp-eyebrow text-xp-deep">
+                    <img
+                      src={RETRO_ICONS.activityLog}
+                      alt=""
+                      width={15}
+                      height={15}
+                      className="xp-pixel"
+                    />
+                    RIWAYAT_AKTIVITAS.LOG
+                  </span>
                   <span className="font-mono text-[11px] text-slate-600">
                     {application.activityLogs.length} catatan
                   </span>
@@ -699,7 +735,7 @@ export function ApplicationDetailModal({
 
                 <form
                   onSubmit={handleNoteSubmit}
-                  className="flex gap-1.5"
+                  className="flex gap-2"
                   noValidate
                 >
                   <label htmlFor="manual-activity-note" className="sr-only">
@@ -728,11 +764,11 @@ export function ApplicationDetailModal({
                     Belum ada riwayat aktivitas.
                   </p>
                 ) : (
-                  <ul className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                  <ul className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
                     {application.activityLogs.map((log) => (
                       <li
                         key={log.id}
-                        className="border-l-2 border-xp-bar pl-2.5 py-0.5 space-y-0.5"
+                        className="border-l-2 border-xp-bar pl-3 py-0.5 space-y-0.5"
                       >
                         <span className="block font-mono text-[10px] text-slate-500">
                           {formatLogTimestamp(log.timestamp)}

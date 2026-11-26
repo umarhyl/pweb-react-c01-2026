@@ -334,7 +334,10 @@ export function App() {
     if (!restored) return;
 
     setApplications((prev) => {
-      if (prev.some((app) => app.id === restored.id)) {
+      if (
+        prev.some((app) => app.id === restored.id) ||
+        isDuplicateApplication(prev, restored.company, restored.role)
+      ) {
         return prev;
       }
       return [restored, ...prev];
@@ -487,6 +490,7 @@ export function App() {
       {/* Modal Fitur 4 & 5: Detail Lamaran & Interview Prep Timer */}
       {selectedApplication && (
         <ApplicationDetailModal
+          key={selectedApplication.id}
           application={selectedApplication}
           userSkills={kaptenSkills}
           hasConflict={conflictingIds.has(selectedApplication.id)}

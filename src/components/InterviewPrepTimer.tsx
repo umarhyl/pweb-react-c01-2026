@@ -23,24 +23,20 @@ export function InterviewPrepTimer() {
   const [secondsLeft, setSecondsLeft] = useState(QUESTION_DURATION_SECONDS);
   const [isRunning, setIsRunning] = useState(false);
 
+  const isActive = isRunning && secondsLeft > 0;
+
   // Wajib cleanup clearInterval agar tidak bocor saat panel ditutup (unmount)
   useEffect(() => {
-    if (!isRunning) return;
+    if (!isActive) return;
 
     const intervalId = window.setInterval(() => {
-      setSecondsLeft((prev) => {
-        if (prev <= 1) {
-          setIsRunning(false);
-          return 0;
-        }
-        return prev - 1;
-      });
+      setSecondsLeft((prev) => (prev <= 1 ? 0 : prev - 1));
     }, 1000);
 
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [isRunning]);
+  }, [isActive]);
 
   const handleToggleRun = () => {
     if (secondsLeft === 0) {
@@ -112,9 +108,9 @@ export function InterviewPrepTimer() {
             <button
               type="button"
               onClick={handleToggleRun}
-              className={`xp-btn ${isRunning ? "" : "xp-btn-green"}`}
+              className={`xp-btn ${isActive ? "" : "xp-btn-green"}`}
             >
-              {isRunning ? (
+              {isActive ? (
                 <>
                   <Pause className="w-3.5 h-3.5" aria-hidden="true" />
                   Jeda

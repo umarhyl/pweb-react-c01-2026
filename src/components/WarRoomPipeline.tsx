@@ -36,6 +36,7 @@ interface WarRoomPipelineProps {
   onSimulateGhosting: (applicationId: string) => void;
   onDeleteApplication: (applicationId: string) => void;
   onOpenCreateModal?: () => void;
+  showConflictBanner?: boolean;
 }
 
 const ALL_STATUSES: readonly ApplicationStatus[] = [
@@ -93,6 +94,7 @@ export function WarRoomPipeline({
   onSimulateGhosting,
   onDeleteApplication,
   onOpenCreateModal,
+  showConflictBanner = true,
 }: WarRoomPipelineProps) {
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | ApplicationStatus>(
@@ -190,10 +192,12 @@ export function WarRoomPipeline({
 
   return (
     <div className="space-y-4">
-      <ConflictBanner
-        conflicts={conflicts}
-        onSelectApplication={onSelectApplication}
-      />
+      {showConflictBanner && (
+        <ConflictBanner
+          conflicts={conflicts}
+          onSelectApplication={onSelectApplication}
+        />
+      )}
 
       <section className="xp-window" aria-label="Filter dan Pipeline Lamaran">
         <div className="xp-titlebar">

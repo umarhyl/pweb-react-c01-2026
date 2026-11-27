@@ -495,7 +495,7 @@ export function App() {
                 className="pixel-art shrink-0"
               />
               <span className="truncate">
-                AkuMwMagang.exe - Kapten&apos;s War Room
+                AkuMwKelar.exe - Kapten&apos;s War Room
               </span>
             </div>
             <div className="flex items-center gap-1 shrink-0" aria-hidden="true">
@@ -526,7 +526,7 @@ export function App() {
                 />
               </span>
               <span className="font-pixel text-lg font-bold text-ink tracking-tight">
-                Aku Mw <span className="text-leaf-deep">Magang</span>
+                Aku Mw <span className="text-leaf-deep">Kelar</span>
               </span>
             </button>
 
@@ -858,7 +858,7 @@ export function App() {
             </span>
           </div>
           <span className="font-os">
-            Aku Mw Magang &middot; Praktikum Pemweb 2026
+            Aku Mw Kelar &middot; Praktikum Pemweb 2026
           </span>
         </footer>
         </div>

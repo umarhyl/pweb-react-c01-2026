@@ -1,4 +1,4 @@
-# Aku Mw Magang - Praktikum Pemrograman Web Modul 5 (`pweb-react-c01-2026`)
+# Aku Mw Kelar - Praktikum Pemrograman Web Modul 5 (`pweb-react-c01-2026`)
 
 Aplikasi Frontend React untuk membantu Kapten mengelola seluruh proses pencarian magang secara terarah, mulai dari eksplorasi lowongan, pelacakan pipeline lamaran, latihan interview berwaktu, hingga perbandingan offer.
 

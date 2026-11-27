@@ -110,18 +110,18 @@ export function SkillProfile({
             lowongan.
           </p>
         ) : (
-          <ul className="flex flex-wrap gap-1.5" aria-label="Daftar skill Kapten">
+          <ul className="flex flex-wrap gap-2" aria-label="Daftar skill Kapten">
             {skills.map((skill) => (
               <li
                 key={skill}
-                className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium bg-cream-soft border border-line-strong/80 text-ink rounded-full"
+                className="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1 text-xs font-medium bg-cream-soft border border-line-strong/80 text-ink rounded-full whitespace-nowrap"
               >
                 <span>{skill}</span>
                 <button
                   type="button"
                   onClick={() => onRemoveSkill(skill)}
                   aria-label={`Hapus skill ${skill}`}
-                  className="text-muted hover:text-danger transition-colors cursor-pointer"
+                  className="p-0.5 rounded-full text-muted hover:text-danger hover:bg-danger-soft/80 transition-colors cursor-pointer shrink-0"
                 >
                   <X className="w-3 h-3" aria-hidden="true" />
                 </button>

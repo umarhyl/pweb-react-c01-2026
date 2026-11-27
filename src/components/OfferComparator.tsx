@@ -52,7 +52,7 @@ function OfferComparisonCard({
         <div className="flex items-start justify-between gap-3 pb-3.5 border-b border-line">
           <div className="min-w-0 space-y-1">
             <span className="craft-eyebrow">{label}</span>
-            <h3 className="font-pixel text-xl font-bold text-ink leading-snug">
+            <h3 className="font-sans text-lg font-bold tracking-tight text-ink leading-snug">
               {item.application.company}
             </h3>
             <p className="text-xs text-muted">{item.application.role}</p>
@@ -145,7 +145,7 @@ function OfferComparisonCard({
       >
         <span className="craft-eyebrow text-ink">Total Skor Berbobot</span>
         <span
-          className={`font-pixel text-3xl font-bold leading-none ${
+          className={`font-pixel-num text-[28px] font-normal tabular-nums tracking-tight leading-none ${
             isRecommended ? "text-leaf-deep" : "text-ink"
           }`}
         >

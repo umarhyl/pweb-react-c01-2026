@@ -660,8 +660,8 @@ export function App() {
         <div className="flex-1 min-h-0 overflow-y-auto craft-scroll">
         {/* Blockfolio-style Scenic Voxel Hero with Image-Tinted Shadow & Curved Wave */}
         <section className="relative overflow-hidden">
-          <div className="craft-hero px-6 sm:px-10 pt-8 sm:pt-10 pb-14 sm:pb-16 flex items-center">
-            <div className="relative z-10 max-w-lg space-y-4">
+          <div className="craft-hero px-6 sm:px-10 pt-6 sm:pt-8 pb-12 sm:pb-14 flex items-center">
+            <div className="relative z-10 max-w-lg space-y-3.5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
                 Kapten&apos;s Internship Tracker &middot; Modul 5
               </p>

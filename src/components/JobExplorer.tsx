@@ -5,7 +5,6 @@ import {
   BookmarkPlus,
   ExternalLink,
   Eye,
-  Loader2,
   MapPin,
   RefreshCw,
   Search,
@@ -371,27 +370,47 @@ export function JobExplorer({
         </div>
       </div>
 
-      {/* State 1: Loading */}
+      {/* State 1: Loading (Matching 2-Column Skeleton Cards to prevent layout shift) */}
       {isLoading && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="craft-card p-10 text-center space-y-3"
-        >
-          <Loader2
-            className="w-7 h-7 text-leaf animate-spin mx-auto"
-            aria-hidden="true"
-          />
-          <div>
-            <p className="font-pixel font-bold text-lg text-ink">
-              Mengambil data lowongan...
-            </p>
-            <p className="text-xs text-muted mt-1">
-              Sumber:{" "}
-              {dataSource === "live"
-                ? "Remotive Live API"
-                : "Dataset Magang ID (Lokal)"}
-            </p>
+        <div role="status" aria-live="polite" className="space-y-3">
+          <span className="sr-only">
+            Mengambil data lowongan dari{" "}
+            {dataSource === "live"
+              ? "Remotive Live API"
+              : "Dataset Magang ID Lokal"}
+            ...
+          </span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4" aria-hidden="true">
+            {[0, 1, 2, 3].map((slot) => (
+              <div
+                key={slot}
+                className="craft-card p-5 space-y-4"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="w-10 h-10 rounded-2xl craft-skeleton shrink-0" />
+                    <div className="space-y-2 flex-1">
+                      <div className="h-3.5 w-32 rounded-full craft-skeleton" />
+                      <div className="h-3 w-24 rounded-full craft-skeleton" />
+                    </div>
+                  </div>
+                  <div className="h-5 w-20 rounded-full craft-skeleton shrink-0" />
+                </div>
+                <div className="space-y-2">
+                  <div className="h-4 w-4/5 rounded-full craft-skeleton" />
+                  <div className="h-3 w-28 rounded-full craft-skeleton" />
+                </div>
+                <div className="flex gap-1.5">
+                  <div className="h-5 w-16 rounded-full craft-skeleton" />
+                  <div className="h-5 w-20 rounded-full craft-skeleton" />
+                  <div className="h-5 w-14 rounded-full craft-skeleton" />
+                </div>
+                <div className="pt-3 border-t border-line grid grid-cols-2 gap-2">
+                  <div className="h-8 rounded-full craft-skeleton" />
+                  <div className="h-8 rounded-full craft-skeleton" />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -484,19 +503,35 @@ export function JobExplorer({
       {/* Job Cards Grid */}
       {!isLoading && !errorMessage && enrichedJobs.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {enrichedJobs.map(
-            ({ job, match, existingApplication }) => (
+          {enrichedJobs.map(({ job, match, existingApplication }) => {
+            const MAX_VISIBLE_SKILLS = 6;
+            const visibleMatched = match.matchedSkills.slice(
+              0,
+              MAX_VISIBLE_SKILLS,
+            );
+            const remainingSlots = Math.max(
+              0,
+              MAX_VISIBLE_SKILLS - visibleMatched.length,
+            );
+            const visibleMissing = match.missingSkills.slice(0, remainingSlots);
+            const hiddenSkillCount =
+              match.matchedSkills.length +
+              match.missingSkills.length -
+              visibleMatched.length -
+              visibleMissing.length;
+
+            return (
               <article
                 key={`${dataSource}-${job.id}`}
                 className="craft-card craft-card-hover p-5 flex flex-col justify-between gap-4"
               >
-                <div className="space-y-3.5">
+                <div className="space-y-3">
                   {/* Header: Company + Match Score Badge */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <div
                         aria-hidden="true"
-                        className="w-10 h-10 shrink-0 rounded-2xl bg-gradient-to-br from-cream to-leaf-soft text-leaf-deep font-pixel font-bold text-base flex items-center justify-center border border-line-strong/70"
+                        className="w-10 h-10 shrink-0 rounded-2xl bg-gradient-to-br from-cream to-leaf-soft text-leaf-deep font-sans font-extrabold text-xs tracking-wider flex items-center justify-center border border-line-strong/70"
                       >
                         {getCompanyInitials(job.company_name)}
                       </div>
@@ -517,18 +552,18 @@ export function JobExplorer({
                     </div>
 
                     <span
-                      className={`shrink-0 inline-flex items-center px-2.5 py-0.5 text-xs font-semibold rounded-full border ${MATCH_BADGE_STYLES[match.level]}`}
+                      className={`shrink-0 inline-flex items-center px-2.5 py-0.5 text-xs font-semibold rounded-full border whitespace-nowrap tabular-nums ${MATCH_BADGE_STYLES[match.level]}`}
                     >
                       {match.score}% Match
                     </span>
                   </div>
 
                   {/* Role & Category (klik judul untuk buka Pop-up Detail) */}
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     <button
                       type="button"
                       onClick={() => setSelectedJobId(job.id)}
-                      className="text-left font-pixel font-bold text-lg text-ink hover:text-leaf transition-colors leading-snug cursor-pointer"
+                      className="text-left font-sans font-bold text-[15.5px] tracking-tight text-ink hover:text-leaf transition-colors leading-snug line-clamp-2 cursor-pointer"
                     >
                       {job.title}
                     </button>
@@ -540,7 +575,7 @@ export function JobExplorer({
                           onClick={() =>
                             onOpenInWarRoom(existingApplication.id)
                           }
-                          className="text-[10.5px] font-semibold px-2 py-0.5 rounded-full bg-sky-soft text-sky-deep border border-sky hover:bg-leaf hover:text-white transition-colors cursor-pointer"
+                          className="text-[10.5px] font-semibold px-2 py-0.5 rounded-full bg-sky-soft text-sky-deep border border-sky hover:bg-leaf hover:text-white transition-colors whitespace-nowrap cursor-pointer"
                           title="Buka lamaran ini di War Room"
                         >
                           Status: {STATUS_LABELS[existingApplication.status]}
@@ -549,45 +584,54 @@ export function JobExplorer({
                     </div>
                   </div>
 
-                  {/* Matched vs Missing Skills */}
+                  {/* Matched vs Missing Skills (dibatasi 6 chip agar tinggi kartu tetap seimbang) */}
                   {job.tags.length === 0 ? (
                     <p className="text-[11.5px] italic text-muted">
                       Tidak ada tag skill spesifik dari sumber lowongan.
                     </p>
                   ) : (
                     <div className="flex flex-wrap gap-1.5">
-                      {match.matchedSkills.map((skill) => (
+                      {visibleMatched.map((skill) => (
                         <span
                           key={`matched-${skill}`}
                           title="Skill cocok dengan profil Kapten"
-                          className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700/70"
+                          className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-semibold rounded-full whitespace-nowrap bg-emerald-50 text-emerald-800 border border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700/70"
                         >
                           <img
                             src={RETRO_ICONS.check}
                             alt=""
                             width={10}
                             height={10}
-                            className="pixel-art"
+                            className="pixel-art shrink-0"
                           />
                           {skill}
                         </span>
                       ))}
-                      {match.missingSkills.map((skill) => (
+                      {visibleMissing.map((skill) => (
                         <span
                           key={`missing-${skill}`}
                           title="Missing skill - belum ada di profil Kapten"
-                          className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[11px] rounded-full bg-danger-soft/75 text-danger border border-dashed border-danger/40"
+                          className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[11px] rounded-full whitespace-nowrap bg-danger-soft/75 text-danger border border-dashed border-danger/40"
                         >
                           <img
                             src={RETRO_ICONS.cross}
                             alt=""
                             width={9}
                             height={9}
-                            className="pixel-art"
+                            className="pixel-art shrink-0"
                           />
                           {skill}
                         </span>
                       ))}
+                      {hiddenSkillCount > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedJobId(job.id)}
+                          className="inline-flex items-center px-2.5 py-0.5 text-[11px] font-semibold rounded-full whitespace-nowrap bg-cream-soft text-muted border border-line hover:text-ink hover:border-line-strong transition-colors cursor-pointer"
+                        >
+                          +{hiddenSkillCount} lagi
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -595,12 +639,12 @@ export function JobExplorer({
                 {/* Footer: Salary + Detail + Web Asli + Simpan */}
                 <div className="pt-3.5 border-t border-line space-y-2.5">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-semibold text-ink">
+                    <span className="text-xs font-semibold text-ink tabular-nums truncate">
                       {job.salary.trim().length > 0
                         ? job.salary
                         : "Gaji tidak dicantumkan"}
                     </span>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-2 shrink-0">
                       <button
                         type="button"
                         onClick={() => setSelectedJobId(job.id)}
@@ -689,8 +733,8 @@ export function JobExplorer({
                   )}
                 </div>
               </article>
-            ),
-          )}
+            );
+          })}
         </div>
       )}
 

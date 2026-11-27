@@ -244,12 +244,12 @@ export function ApplicationDetailModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="craft-modal w-full max-w-5xl max-h-[92vh] flex flex-col">
+      <div className="craft-modal craft-animate-in w-full max-w-5xl max-h-[92vh] flex flex-col">
         {/* Header Modal */}
         <div className="craft-modal-header shrink-0">
           <span
             id="detail-modal-title"
-            className="truncate flex items-center gap-2 font-pixel font-bold text-base text-white"
+            className="truncate flex items-center gap-2 font-sans font-bold text-sm tracking-tight text-white"
           >
             <img
               src={RETRO_ICONS.checklist}
@@ -276,7 +276,7 @@ export function ApplicationDetailModal({
           <div className="craft-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="font-pixel text-xl font-bold text-ink">
+                <h2 className="font-sans text-lg font-bold tracking-tight text-ink">
                   {application.role} &middot; {application.company}
                 </h2>
                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-sky-soft text-sky-deep border border-sky">

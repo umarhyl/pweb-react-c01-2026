@@ -170,11 +170,11 @@ export function JobDetailModal({
       }}
       className="fixed inset-0 z-50 bg-slate-950/55 dark:bg-slate-950/75 backdrop-blur-[2px] flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
     >
-      <div className="craft-modal w-full max-w-2xl my-auto">
+      <div className="craft-modal craft-animate-in w-full max-w-2xl my-auto">
         <div className="craft-modal-header">
           <span
             id="job-detail-modal-title"
-            className="inline-flex items-center gap-2 font-pixel font-bold text-base text-white truncate"
+            className="inline-flex items-center gap-2 font-sans font-bold text-sm tracking-tight text-white truncate"
           >
             <img
               src={RETRO_ICONS.briefcase}
@@ -201,7 +201,7 @@ export function JobDetailModal({
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="space-y-1 min-w-0">
                 <span className="craft-eyebrow">{job.category}</span>
-                <h2 className="font-pixel text-2xl font-bold text-ink leading-snug">
+                <h2 className="font-sans text-xl font-bold tracking-tight text-ink leading-snug">
                   {job.title}
                 </h2>
                 <p className="text-xs font-semibold text-muted">
@@ -210,7 +210,7 @@ export function JobDetailModal({
               </div>
 
               <span
-                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border shrink-0 ${MATCH_BADGE_STYLES[match.level]}`}
+                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border whitespace-nowrap tabular-nums shrink-0 ${MATCH_BADGE_STYLES[match.level]}`}
               >
                 {match.score}% Match
               </span>

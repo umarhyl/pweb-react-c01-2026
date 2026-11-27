@@ -9,6 +9,7 @@ import {
   RotateCcw,
   Search,
   Trash2,
+  X,
 } from "lucide-react";
 import { RETRO_ICONS } from "../assets/retro";
 import type {
@@ -269,8 +270,18 @@ export function WarRoomPipeline({
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               placeholder="Cari perusahaan, posisi, CV, atau skill... (/)"
-              className="craft-input pl-9 text-xs"
+              className="craft-input pl-9 pr-8 text-xs"
             />
+            {searchText.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setSearchText("")}
+                aria-label="Bersihkan pencarian"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-muted hover:text-ink cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" aria-hidden="true" />
+              </button>
+            )}
           </div>
 
           <div className="md:col-span-3">
@@ -393,18 +404,19 @@ export function WarRoomPipeline({
             return (
               <article
                 key={app.id}
-                className={`craft-card craft-card-hover p-5 flex flex-col justify-between gap-4 ${
+                className={`craft-card craft-card-hover p-5 flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-6 ${
                   isConflicting ? "border-danger/60 ring-2 ring-danger/15" : ""
                 }`}
               >
-                <div className="space-y-3.5">
+                {/* Kolom Kiri: Info Utama & Metadata */}
+                <div className="min-w-0 flex-1 space-y-3">
                   {/* Header Kartu */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <h3 className="font-pixel text-lg font-bold text-ink leading-snug">
+                  <div className="flex flex-wrap items-start justify-between gap-2.5">
+                    <div className="min-w-0 space-y-0.5">
+                      <h3 className="font-sans text-base font-bold tracking-tight text-ink leading-snug">
                         {app.role}
                       </h3>
-                      <p className="text-xs text-ink font-semibold mt-0.5">
+                      <p className="text-xs text-ink font-semibold">
                         {app.company}{" "}
                         <span className="font-normal text-muted">
                           &middot; {app.workMode}
@@ -412,16 +424,16 @@ export function WarRoomPipeline({
                       </p>
                     </div>
 
-                    <div className="flex flex-wrap items-center justify-end gap-1.5 shrink-0">
+                    <div className="flex flex-wrap items-center gap-1.5 shrink-0">
                       <span
-                        className={`px-2.5 py-0.5 text-[11px] font-semibold rounded-full border ${STATUS_BADGE_CLASS[app.status]}`}
+                        className={`px-2.5 py-0.5 text-[11px] font-semibold rounded-full border whitespace-nowrap ${STATUS_BADGE_CLASS[app.status]}`}
                       >
                         {STATUS_LABELS[app.status]}
                       </span>
                       <span
-                        className={`px-2.5 py-0.5 text-[11px] font-semibold rounded-full border ${MATCH_BADGE_CLASS[match.level]}`}
+                        className={`px-2.5 py-0.5 text-[11px] font-semibold rounded-full border whitespace-nowrap tabular-nums ${MATCH_BADGE_CLASS[match.level]}`}
                       >
-                        {match.score}%
+                        {match.score}% Match
                       </span>
                     </div>
                   </div>
@@ -430,25 +442,25 @@ export function WarRoomPipeline({
                   {(ghostRisk || isConflicting) && (
                     <div className="flex flex-wrap gap-2">
                       {ghostRisk && (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-300 dark:bg-warn-soft dark:text-amber-200 dark:border-amber-500/50">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold whitespace-nowrap bg-amber-50 text-amber-900 border border-amber-300 dark:bg-warn-soft dark:text-amber-200 dark:border-amber-500/50">
                           <img
                             src={RETRO_ICONS.ghost}
                             alt=""
                             width={13}
                             height={13}
-                            className="pixel-art"
+                            className="pixel-art shrink-0"
                           />
                           Rawan Ghosting ({daysSinceUpdate} hari)
                         </span>
                       )}
                       {isConflicting && (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-danger-soft text-danger border border-danger/40">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold whitespace-nowrap bg-danger-soft text-danger border border-danger/40">
                           <img
                             src={RETRO_ICONS.conflict}
                             alt=""
                             width={13}
                             height={13}
-                            className="pixel-art"
+                            className="pixel-art shrink-0"
                           />
                           Jadwal Bentrok (&lt; 60 mnt)
                         </span>
@@ -457,10 +469,10 @@ export function WarRoomPipeline({
                   )}
 
                   {/* Metadata Strip */}
-                  <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-[11.5px] text-muted craft-card-warm px-3.5 py-2.5">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11.5px] text-muted craft-card-warm px-3.5 py-2">
                     <span className="inline-flex items-center gap-1">
                       <FileText
-                        className="w-3.5 h-3.5 text-wood"
+                        className="w-3.5 h-3.5 text-wood shrink-0"
                         aria-hidden="true"
                       />
                       CV: <strong className="text-ink">{app.cvVersion || "-"}</strong>
@@ -469,10 +481,10 @@ export function WarRoomPipeline({
                     {app.interviewDateTime && (
                       <span className="inline-flex items-center gap-1">
                         <CalendarClock
-                          className="w-3.5 h-3.5 text-leaf-deep"
+                          className="w-3.5 h-3.5 text-leaf-deep shrink-0"
                           aria-hidden="true"
                         />
-                        <strong className="font-mono text-ink">
+                        <strong className="font-mono text-ink tabular-nums">
                           {formatDateTime(app.interviewDateTime)}
                         </strong>
                       </span>
@@ -480,7 +492,7 @@ export function WarRoomPipeline({
 
                     {typeof app.salaryOffer === "number" &&
                       app.salaryOffer > 0 && (
-                        <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-300 font-semibold">
+                        <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-300 font-semibold tabular-nums">
                           Offer: {formatCurrency(app.salaryOffer)}
                         </span>
                       )}
@@ -497,28 +509,30 @@ export function WarRoomPipeline({
                       </a>
                     )}
 
-                    <span className="inline-flex items-center gap-1 ml-auto text-muted">
-                      <Clock className="w-3 h-3" aria-hidden="true" />
+                    <span className="inline-flex items-center gap-1 ml-auto text-muted whitespace-nowrap">
+                      <Clock className="w-3 h-3 shrink-0" aria-hidden="true" />
                       {daysSinceUpdate === 0
                         ? "Hari ini"
                         : `${daysSinceUpdate} hari lalu`}
                     </span>
                   </div>
+                </div>
 
-                  {/* Checklist Progress (Soft Track + Retro Segmented Fill) */}
+                {/* Kolom Kanan (Desktop) / Bawah (Mobile): Checklist & Aksi */}
+                <div className="lg:w-72 lg:shrink-0 lg:border-l lg:border-line lg:pl-5 pt-3 lg:pt-0 border-t lg:border-t-0 border-line flex flex-col justify-between gap-3.5">
                   <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-[11.5px]">
+                    <div className="flex items-center justify-between gap-2 text-[11.5px]">
                       <span className="inline-flex items-center gap-1.5 font-semibold text-ink">
                         <img
                           src={RETRO_ICONS.checklist}
                           alt=""
                           width={13}
                           height={13}
-                          className="pixel-art"
+                          className="pixel-art shrink-0"
                         />
-                        Checklist Persiapan
+                        Checklist
                       </span>
-                      <span className="font-mono text-[11px] font-semibold text-leaf-deep">
+                      <span className="font-mono text-[11px] font-semibold text-leaf-deep tabular-nums">
                         {completedChecklist}/{totalChecklist} selesai
                       </span>
                     </div>
@@ -529,25 +543,32 @@ export function WarRoomPipeline({
                       />
                     </div>
                   </div>
-                </div>
 
-                {/* Action Footer */}
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-line">
-                  <button
-                    type="button"
-                    onClick={() => onSelectApplication(app.id)}
-                    className="craft-btn craft-btn-primary py-1.5 px-3.5"
-                  >
-                    <Eye className="w-3.5 h-3.5" aria-hidden="true" />
-                    Buka Detail
-                  </button>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onSelectApplication(app.id)}
+                      className="craft-btn craft-btn-primary flex-1 py-1.5 px-3"
+                    >
+                      <Eye className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                      Buka Detail
+                    </button>
 
-                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onDeleteApplication(app.id)}
+                      aria-label={`Hapus lamaran ${app.company}`}
+                      className="craft-btn craft-btn-danger py-1.5 px-3 shrink-0"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+                      Hapus
+                    </button>
+
                     {canSimulateGhosting && (
                       <button
                         type="button"
                         onClick={() => onSimulateGhosting(app.id)}
-                        className="craft-btn py-1.5 px-3 text-[11.5px]"
+                        className="craft-btn w-full py-1.5 px-3 text-[11.5px]"
                         title="Mundurkan lastUpdatedAt 15 hari untuk uji Rawan Ghosting"
                       >
                         <img
@@ -555,21 +576,11 @@ export function WarRoomPipeline({
                           alt=""
                           width={13}
                           height={13}
-                          className="pixel-art"
+                          className="pixel-art shrink-0"
                         />
                         Simulasi +15 Hari
                       </button>
                     )}
-
-                    <button
-                      type="button"
-                      onClick={() => onDeleteApplication(app.id)}
-                      aria-label={`Hapus lamaran ${app.company}`}
-                      className="craft-btn craft-btn-danger py-1.5 px-3"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
-                      Hapus
-                    </button>
                   </div>
                 </div>
               </article>

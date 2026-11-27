@@ -76,7 +76,7 @@ export function StatsDashboard({ applications }: StatsDashboardProps) {
               />
             </span>
           </div>
-          <p className="font-pixel text-3xl font-bold leading-none text-leaf-deep">
+          <p className="font-pixel-num text-[28px] font-normal tabular-nums tracking-tight leading-none text-leaf-deep">
             {stats.total}
           </p>
           <p className="text-[11.5px] text-muted">
@@ -100,7 +100,7 @@ export function StatsDashboard({ applications }: StatsDashboardProps) {
               />
             </span>
           </div>
-          <p className="font-pixel text-3xl font-bold leading-none text-leaf">
+          <p className="font-pixel-num text-[28px] font-normal tabular-nums tracking-tight leading-none text-leaf">
             {stats.responseRate}%
           </p>
           <p className="text-[11.5px] text-muted">
@@ -124,7 +124,7 @@ export function StatsDashboard({ applications }: StatsDashboardProps) {
               />
             </span>
           </div>
-          <p className="font-pixel text-3xl font-bold leading-none text-indigo-700 dark:text-indigo-300">
+          <p className="font-pixel-num text-[28px] font-normal tabular-nums tracking-tight leading-none text-indigo-700 dark:text-indigo-300">
             {stats.interviewRate}%
           </p>
           <p className="text-[11.5px] text-muted">
@@ -161,7 +161,7 @@ export function StatsDashboard({ applications }: StatsDashboardProps) {
             </span>
           </div>
           <p
-            className={`font-pixel text-3xl font-bold leading-none ${
+            className={`font-pixel-num text-[28px] font-normal tabular-nums tracking-tight leading-none ${
               stats.ghostingRisk > 0 ? "text-danger" : "text-ink"
             }`}
           >
@@ -193,7 +193,7 @@ export function StatsDashboard({ applications }: StatsDashboardProps) {
               />
             </span>
           </div>
-          <p className="font-pixel text-3xl font-bold leading-none text-leaf-deep">
+          <p className="font-pixel-num text-[28px] font-normal tabular-nums tracking-tight leading-none text-leaf-deep">
             {stats.offers}
           </p>
           <p className="text-[11.5px] text-muted">

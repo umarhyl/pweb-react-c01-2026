@@ -275,11 +275,11 @@ export function ApplicationFormModal({
       }}
       className="fixed inset-0 z-50 bg-slate-950/55 dark:bg-slate-950/75 backdrop-blur-[2px] flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
     >
-      <div className="craft-modal w-full max-w-lg my-auto">
+      <div className="craft-modal craft-animate-in w-full max-w-lg my-auto">
         <div className="craft-modal-header">
           <span
             id="manual-application-modal-title"
-            className="inline-flex items-center gap-2 font-pixel font-bold text-base text-white"
+            className="inline-flex items-center gap-2 font-sans font-bold text-sm tracking-tight text-white"
           >
             <img
               src={RETRO_ICONS.plus}

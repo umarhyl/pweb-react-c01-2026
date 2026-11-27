@@ -44,7 +44,7 @@ export function ConflictBanner({
           />
         </span>
         <div className="space-y-1.5 flex-1">
-          <p className="font-pixel text-sm font-bold text-amber-950 dark:text-amber-200">
+          <p className="font-sans text-sm font-bold tracking-tight text-amber-950 dark:text-amber-200">
             Jadwal Interview Bentrok ({conflicts.length} konflik terdeteksi di
             seluruh pipeline)
           </p>

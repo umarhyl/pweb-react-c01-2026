@@ -62,7 +62,7 @@ Sesuai ketentuan modul, proyek ini tidak memakai library state management ekster
 
 Kapten dapat menambah atau menghapus skill miliknya (default awal 5 skill: `React`, `TypeScript`, `CSS`, `Git`, `REST API`). Input kosong dan skill duplikat (case-insensitive) ditolak, dan daftarnya disimpan ke `localStorage`.
 
-Daftar lowongan diambil lewat `useEffect`, `fetch()`, dan `AbortController` di `JobExplorer.tsx` bersama `src/services/jobService.ts`. Tampilan menangani state loading, state error (dengan tombol `Coba Lagi` dan tombol pindah ke fallback lokal), serta state kosong. Kolom pencarian memakai custom hook `useDebounce(keyword, 400)` dan bisa dipadukan dengan filter kategori serta pengurutan berdasarkan Skill Match. Tiap kartu menampilkan skor kecocokan (hijau >= 70%, kuning 40-69%, merah < 40%), pembedaan skill cocok vs missing skill, dan tombol simpan ke Wishlist yang berubah menjadi `Sudah Dilamar` (disabled) jika lowongan sudah ada di daftar lamaran.
+Daftar lowongan diambil lewat `useEffect`, `fetch()`, dan `AbortController` di `JobExplorer.tsx` bersama `src/services/jobService.ts`. Tampilan menangani state loading, state error (dengan tombol `Coba Lagi` dan tombol pindah ke fallback lokal), serta state kosong. Kolom pencarian memakai custom hook `useDebounce(keyword, 400)` dan bisa dipadukan dengan filter kategori serta pengurutan berdasarkan Skill Match. Tiap kartu menampilkan skor kecocokan (hijau >= 70%, kuning 40-69%, merah < 40%), pembedaan skill cocok vs missing skill, dan tombol simpan ke Wishlist yang otomatis disabled bertuliskan `Sudah di Wishlist` (saat status `WISHLIST`) atau `Sudah Dilamar` (saat status sudah `APPLIED` ke atas).
 
 ### 2. Form tambah lamaran manual
 
@@ -200,7 +200,7 @@ Objek `Application` di `src/types/application.ts` menyimpan `id`, `company`, `ro
 | 1 | Fetch & Offline Error | State loading muncul lalu lowongan tampil; saat DevTools Offline dan klik Coba Lagi, pesan error dan tombol Fallback Lokal muncul. |
 | 2 | Skill Match Live | Tambah skill `Docker` di Profil Kapten langsung menaikkan skor Match lowongan yang meminta Docker. |
 | 3 | Debounce Search | Ketik cepat di pencarian hanya menyaring setelah jeda sekitar 400ms; shortcut `/` langsung memfokuskan search bar. |
-| 4 | Anti-Duplikat & Focus | Simpan 1 lowongan mengubah tombol menjadi `Sudah Dilamar`; input `company + role` sama di Form Manual ditolak dan fokus otomatis via `useRef`. |
+| 4 | Anti-Duplikat & Focus | Simpan 1 lowongan membuat tombol otomatis disabled (`Sudah di Wishlist` / `Sudah Dilamar`); input `company + role` sama di Form Manual ditolak dan fokus otomatis via `useRef`. |
 | 5 | State Machine | Alur `WISHLIST -> APPLIED -> SCREENING -> INTERVIEW -> OFFER` berjalan sesuai syarat field; `WISHLIST` tidak bisa langsung ke `OFFER`. |
 | 6 | Simulasi Ghosting | Klik `Simulasi +15 Hari` pada status `APPLIED`/`SCREENING` memunculkan badge Rawan Ghosting dan menaikkan kartu statistik. |
 | 7 | Bentrok Interview | 2 lamaran `INTERVIEW` berselisih 30 menit menampilkan Banner Bentrok di atas halaman meski filter status lain dipilih. |

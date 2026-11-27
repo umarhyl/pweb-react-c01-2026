@@ -639,7 +639,11 @@ export function JobExplorer({
                           className="w-3.5 h-3.5 shrink-0"
                           aria-hidden="true"
                         />
-                        <span className="truncate">Sudah Dilamar</span>
+                        <span className="truncate">
+                          {existingApplication.status === "WISHLIST"
+                            ? "Sudah di Wishlist"
+                            : "Sudah Dilamar"}
+                        </span>
                       </button>
                       <button
                         type="button"

@@ -221,7 +221,9 @@ export function JobDetailModal({
                 <>
                   <button type="button" disabled className="craft-btn">
                     <BookmarkCheck className="w-3.5 h-3.5" aria-hidden="true" />
-                    Sudah Dilamar ({STATUS_LABELS[existingApplication.status]})
+                    {existingApplication.status === "WISHLIST"
+                      ? "Sudah di Wishlist"
+                      : `Sudah Dilamar (${STATUS_LABELS[existingApplication.status]})`}
                   </button>
                   <button
                     type="button"

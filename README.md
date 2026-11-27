@@ -1,200 +1,209 @@
-# Aku Mw Kelar - Praktikum Pemrograman Web Modul 5 (`pweb-react-c01-2026`)
+# Aku Mw Magang (`pweb-react-c01-2026`)
 
-Aplikasi Frontend React untuk membantu Kapten mengelola seluruh proses pencarian magang secara terarah, mulai dari eksplorasi lowongan, pelacakan pipeline lamaran, latihan interview berwaktu, hingga perbandingan offer.
+Laporan dan dokumentasi praktikum Pemrograman Web Modul 5 (Fundamental React dengan TypeScript). Aplikasi ini dibuat untuk membantu Kapten melacak pencarian magang dari awal sampai dapat offer: mencari lowongan dan menghitung kecocokan skill, mencatat status lamaran dengan aturan perpindahan yang ketat, menyiapkan checklist serta latihan interview berwaktu, sampai membandingkan dua offer secara objektif.
 
----
+## Daftar isi
 
-## Cara Menjalankan Project
+1. [Cara menjalankan](#cara-menjalankan)
+2. [Cara reset dan backup data](#cara-reset-dan-backup-data)
+3. [Tech stack dan batasan library](#tech-stack-dan-batasan-library)
+4. [Fitur utama](#fitur-utama)
+5. [Fitur tambahan](#fitur-tambahan)
+6. [Arsitektur dan alur state](#arsitektur-dan-alur-state)
+7. [Struktur folder](#struktur-folder)
+8. [Skema data dan aturan main](#skema-data-dan-aturan-main)
+9. [Sumber data dan API](#sumber-data-dan-api)
+10. [Daftar testcase](#daftar-testcase)
 
-Pastikan **Node.js (v20/v24 LTS)** sudah terpasang, lalu jalankan perintah berikut di dalam folder `pweb-react-c01-2026`:
+## Cara menjalankan
+
+Pastikan Node.js (v20 atau v24 LTS) sudah terpasang di perangkat, lalu jalankan perintah berikut:
 
 ```bash
-# 1. Clone repository
 git clone https://github.com/umarhyl/pweb-react-c01-2026.git
 cd pweb-react-c01-2026
-
-# 2. Install dependencies
 npm install
-
-# 3. Jalankan development server (buka http://localhost:5173)
 npm run dev
 ```
 
-### Perintah Validasi & Build
+Setelah server jalan, buka `http://localhost:5173` di browser.
+
+Perintah untuk cek tipe, lint, dan build:
 
 ```bash
-# Cek TypeScript strict mode (wajib lolos tanpa error)
 npx tsc --noEmit
-
-# Cek ESLint
 npm run lint
-
-# Build production ke folder dist/
 npm run build
-
-# Preview hasil build production secara lokal
 npm run preview
 ```
 
-### Cara Reset & Backup Data (`localStorage`)
+## Cara reset dan backup data
 
-Aplikasi menyimpan data secara otomatis di `localStorage` dengan key:
-- `aku-mw-magang:applications` (daftar seluruh lamaran, lampiran CV lokal, checklist, dan activity log)
-- `aku-mw-magang:kapten-skills` (daftar skill Kapten)
+Semua data tersimpan otomatis di `localStorage` browser pada tiga key:
 
-Untuk me-reset atau mencadangkan data (misalnya sebelum demo ulang):
-1. **Lewat tombol `Backup Data` di navbar atas (paling cepat)**: buka jendela **Backup & Kelola Data** (`BackupDataModal`) untuk memilih:
-   - **Unduh (Export JSON)**: mengunduh seluruh lamaran & profil skill sebagai file `aku-mw-magang-backup-YYYY-MM-DD.json`.
-   - **Pilih File (Import JSON)**: memulihkan data dari file backup `.json` dengan validasi skema runtime ketat (menolak JSON rusak, status tidak sah, ID duplikat, dan pasangan `company + role` duplikat).
-   - **Reset**: mengosongkan seluruh lamaran & mengembalikan skill Kapten ke default (`React, TypeScript, CSS, Git, REST API`) setelah konfirmasi.
-2. **Lewat Browser DevTools**: buka `F12` -> tab **Application** -> **Local Storage** -> hapus key `aku-mw-magang:applications` & `aku-mw-magang:kapten-skills` (atau jalankan `localStorage.clear(); location.reload();` di Console).
+- `aku-mw-magang:applications` untuk daftar lamaran, lampiran CV lokal, checklist, dan riwayat aktivitas.
+- `aku-mw-magang:kapten-skills` untuk daftar skill milik Kapten.
+- `aku-mw-magang:theme` untuk preferensi tema terang atau gelap.
 
----
+Kalau ingin mengosongkan data sebelum demo atau pindah perangkat, ada dua cara:
 
-## Fitur Nilai Tambahan (Bonus)
+1. Lewat tombol `Backup Data` di navbar atas. Di dalam dialog `BackupDataModal`, pilih `Unduh` untuk export semua lamaran dan skill ke file `aku-mw-magang-backup-YYYY-MM-DD.json`, pilih `Pilih File` untuk import file backup, atau pilih `Reset` untuk mengosongkan lamaran dan mengembalikan daftar skill ke nilai awal (`React`, `TypeScript`, `CSS`, `Git`, `REST API`).
+2. Lewat Browser DevTools (`F12`), buka tab Application lalu Local Storage, hapus ketiga key di atas, atau jalankan `localStorage.clear(); location.reload();` di Console.
 
-Tanpa melanggar aturan library (tanpa Redux, Zustand, TanStack Query, React Hook Form, maupun Formik), kelompok kami menambahkan fitur bonus yang relevan untuk alur kerja Kapten dan demo praktikum:
+## Tech stack dan batasan library
 
-1. **Export / Import Backup JSON + Reset Data (`src/utils/backupJson.ts`, `src/components/BackupDataModal.tsx`)**:
-   - Export dan Import seluruh state `applications` (termasuk `checklist`, `activityLogs`, `jobUrl`, & `cvAttachment`) dan `kaptenSkills` memakai `Blob` dan `FileReader` bawaan browser dengan validasi runtime ketat (`unknown` narrowing, tanpa `any`).
-2. **Keyboard Shortcut `/` Fokus Search Bar via `useRef`**:
-   - Menekan tombol **`/`** (ketika tidak sedang mengetik di input dan tidak ada modal terbuka) langsung memfokuskan kolom pencarian di tab **Eksplorasi** (`JobExplorer.tsx`) maupun tab **War Room** (`WarRoomPipeline.tsx`) dengan cleanup `removeEventListener` di `useEffect`.
-3. **Upload, Preview & Unduh File CV Lokal (`src/utils/cvFile.ts`)**:
-   - Di Form Tambah Lamaran Manual (`APPLIED`) dan transisi status ke `APPLIED`, Kapten bisa mengunggah file CV lokal (`.pdf`, `.doc`, `.docx`, maks. 500 KB) memakai `FileReader`. Nama file otomatis mengisi `cvVersion`, tersimpan di `localStorage`, ikut ter-backup di Export/Import JSON, serta dilengkapi tombol **Preview** & **Unduh** di Detail Lamaran.
-4. **Pop-up Detail Lowongan, Quick Apply & Voice Interview Reader**:
-   - `JobDetailModal` menampilkan deskripsi posisi, analisis kecocokan skill, link portal asli perusahaan, dan aksi cepat **Catat Applied** yang otomatis mem-prefill form lamaran.
-   - `InterviewPrepTimer` dilengkapi pembacaan soal otomatis memakai Web Speech API (`speechSynthesis`) + chime akhir waktu (`AudioContext`) yang ikut dibersihkan saat panel ditutup (unmount).
+Aplikasi dibangun memakai React 19, TypeScript (`strict: true`, `noImplicitAny: true`, tanpa `any`), Vite template `react-ts`, Tailwind CSS v4, font lokal (`Inter`, `W95FA`, `VT323`), ikon pixel-art lokal, dan `lucide-react`.
 
----
+Sesuai ketentuan modul, proyek ini tidak memakai library state management eksternal (Redux, Zustand, TanStack Query) maupun library form (React Hook Form, Formik). Semua state, fetch API, validasi form, timer, dan penyimpanan lokal ditulis langsung memakai React Hooks bawaan dan custom hooks sendiri.
 
-## Ringkasan 7 Fitur Utama
+## Fitur utama
 
-1. **Profil Skill Kapten & Eksplorasi Lowongan**:
-   - Manajemen daftar skill Kapten (default 5 skill: `React`, `TypeScript`, `CSS`, `Git`, `REST API`), menolak skill duplikat, dan tersimpan di `localStorage`.
-   - Pengambilan data lowongan dengan `useEffect` + `fetch()` + `AbortController`, lengkap dengan state Loading, Error (tombol Coba Lagi & Fallback Lokal), dan Empty state.
-   - Pencarian dengan Custom Hook `useDebounce(keyword, 400)`, filter kategori, dan pengurutan berdasarkan Skill Match tertinggi/terendah.
-   - Badge Match Score (%) (hijau >= 70%, kuning 40-69%, merah < 40%), pembedaan skill cocok vs missing skill, dan tombol Simpan ke Wishlist yang otomatis disabled bertuliskan `"Sudah Dilamar"` jika sudah ada di pipeline.
-2. **Form Tambah Lamaran Manual**:
-   - Controlled form penuh (`value` + `onChange`) untuk Perusahaan, Posisi/Role, Mode Kerja (`Remote`/`Hybrid`/`Onsite`), Status Awal (`WISHLIST`/`APPLIED`), dan Required Skills (dipisah koma).
-   - Input kondisional `cvVersion` dan `appliedDate` muncul dan wajib diisi saat Status Awal = `APPLIED`.
-   - Validasi input kosong & anti-duplikat (`company + role`, case-insensitive) dengan auto-focus ke input pertama yang error memakai `useRef`.
-3. **War Room Pipeline, Ghosting & Bentrok Jadwal**:
-   - Menampilkan kartu lamaran beserta status, versi CV, progress checklist (`X/Y`), dan Skill Match %.
-   - Filter gabungan: pencarian teks, filter status, toggle `"Rawan Ghosting"`, dan sorting (`Terbaru`, `Jadwal Interview Terdekat`, `Offer Tertinggi`).
-   - Tombol `"Simulasi +15 Hari"` pada status `APPLIED`/`SCREENING` untuk memundurkan `lastUpdatedAt` 15 hari saat uji demo.
-   - Banner Peringatan Bentrok Jadwal global di bagian atas halaman jika ada >= 2 lamaran `INTERVIEW` berselisih < 60 menit (dihitung dari seluruh data meskipun filter/tab lain sedang aktif).
-4. **Detail Lamaran (State Machine, Nested Checklist & Activity Log)**:
-   - Transisi status ketat mengikuti Diagram State Machine dengan input kondisional saat pindah ke `APPLIED`, `INTERVIEW`, dan `OFFER`.
-   - Nested checklist (tambah, centang selesai, hapus) lengkap dengan progress bar dan update secara immutable.
-   - Riwayat aktivitas (`activityLogs[]`) yang tercatat otomatis saat pembuatan/perpindahan status serta form catatan manual Kapten.
-5. **Interview Prep Timer**:
-   - 6 pertanyaan latihan interview magang IT di dalam detail lamaran.
-   - Countdown timer `02:00` per soal dengan tombol Mulai/Jeda, Reset, Soal Sebelumnya, dan Lanjut (otomatis reset ke `02:00`).
-   - Cleanup `useEffect` dengan `return () => clearInterval(...)` agar timer berhenti bersih saat modal ditutup (unmount).
-6. **Undo Delete (5 Detik) & Persistensi Local Storage**:
-   - Toast Undo selama 5 detik saat lamaran dihapus, mengembalikan data utuh beserta checklist dan activity log.
-   - Manajemen timer memakai `useRef` dan `clearTimeout` agar penghapusan beruntun dalam < 5 detik membersihkan timer sebelumnya.
-   - Seluruh state `applications` dan `kaptenSkills` disimpan memakai Custom Hook `useLocalStorage<T>`.
-7. **Dashboard Statistik & Offer Comparator**:
-   - 5 kartu statistik yang dihitung sebagai derived state: Total Lamaran, Response Rate %, Interview Rate %, Rawan Ghosting, dan Offer Diterima.
-   - Offer Comparator untuk membandingkan 2 lamaran berstatus `OFFER` (Offer A vs Offer B) berdasarkan bobot Uang Saku 50%, Mode Kerja 25%, dan Kecocokan Skill 25% beserta badge `"Rekomendasi Terbaik"`.
+### 1. Profil skill Kapten dan eksplorasi lowongan
 
----
+Kapten dapat menambah atau menghapus skill miliknya (default awal 5 skill: `React`, `TypeScript`, `CSS`, `Git`, `REST API`). Input kosong dan skill duplikat (case-insensitive) ditolak, dan daftarnya disimpan ke `localStorage`.
 
-## Tech Stack & Aturan Teknis
+Daftar lowongan diambil lewat `useEffect`, `fetch()`, dan `AbortController` di `JobExplorer.tsx` bersama `src/services/jobService.ts`. Tampilan menangani state loading, state error (dengan tombol `Coba Lagi` dan tombol pindah ke fallback lokal), serta state kosong. Kolom pencarian memakai custom hook `useDebounce(keyword, 400)` dan bisa dipadukan dengan filter kategori serta pengurutan berdasarkan Skill Match. Tiap kartu menampilkan skor kecocokan (hijau >= 70%, kuning 40-69%, merah < 40%), pembedaan skill cocok vs missing skill, dan tombol simpan ke Wishlist yang berubah menjadi `Sudah Dilamar` (disabled) jika lowongan sudah ada di daftar lamaran.
 
-- **React 19** + **TypeScript** (`strict: true`, tanpa tipe `any`)
-- **Vite** (template `react-ts`)
-- **Tailwind CSS v4** + font lokal (`Inter`, `W95FA`, `VT323`) + aset ikon pixel-art lokal + `lucide-react`
-- **Tanpa library state/form eksternal** (tidak menggunakan Redux, Zustand, TanStack Query, React Hook Form, maupun Formik). Seluruh state, fetch, form, timer, dan penyimpanan lokal ditulis dengan React Hooks bawaan dan Custom Hooks buatan sendiri.
+### 2. Form tambah lamaran manual
 
----
+`ApplicationFormModal.tsx` adalah controlled form penuh untuk Perusahaan, Posisi/Role, Mode Kerja (`Remote`, `Hybrid`, `Onsite`), Status Awal (`WISHLIST` atau `APPLIED`), dan Required Skills (dipisah koma). Ketika Status Awal dipilih `APPLIED`, input `cvVersion` dan `appliedDate` muncul otomatis dan wajib diisi. Submit menolak input kosong serta duplikat pasangan `company + role`, lalu memfokuskan kursor ke input pertama yang bermasalah memakai `useRef`.
 
-## Struktur Folder
+### 3. War Room pipeline, ghosting, dan bentrok jadwal
+
+`WarRoomPipeline.tsx` menampilkan seluruh lamaran Kapten lengkap dengan status, versi CV, progress checklist (`X/Y`), dan Skill Match %. Filter gabungan mencakup pencarian teks, filter status, toggle `Rawan Ghosting`, dan sorting (`Terbaru`, `Jadwal Interview Terdekat`, `Offer Tertinggi`).
+
+Untuk keperluan pengujian saat demo, setiap lamaran berstatus `APPLIED` atau `SCREENING` memiliki tombol `Simulasi +15 Hari` yang memundurkan `lastUpdatedAt` sebanyak 15 hari agar badge Rawan Ghosting langsung muncul. Jika ada minimal 2 lamaran `INTERVIEW` yang jadwalnya berselisih kurang dari 60 menit, `ConflictBanner.tsx` tampil di bagian atas halaman berdasarkan seluruh data lamaran, tetap muncul meski tab atau filter status lain sedang aktif.
+
+### 4. Detail lamaran: state machine, checklist, dan activity log
+
+`ApplicationDetailModal.tsx` hanya menampilkan tombol status tujuan yang diizinkan oleh `getAllowedNextStatuses()` di `src/utils/stateMachine.ts`. Perpindahan ke `APPLIED`, `INTERVIEW`, dan `OFFER` memunculkan input syarat masing-masing lalu divalidasi dengan `validateStatusTransition()`.
+
+Di dalam modal yang sama terdapat nested checklist (tambah item, centang selesai, hapus item, progress bar `X/Y`) yang seluruh pembaruannya dibuat immutable memakai `map`, `filter`, dan spread operator. Setiap pembuatan lamaran, perpindahan status, simulasi +15 hari, dan catatan manual Kapten langsung tercatat ke `activityLogs[]`.
+
+### 5. Interview prep timer
+
+`InterviewPrepTimer.tsx` menyediakan 6 pertanyaan latihan interview magang IT dengan countdown `02:00` per soal, tombol Mulai/Jeda, Reset, Soal Sebelumnya, dan Lanjut (otomatis reset ke `02:00`). Interval dibersihkan di cleanup `useEffect` (`return () => clearInterval(...)`) agar timer berhenti ketika modal ditutup dan tidak berlipat ganda saat dibuka kembali.
+
+### 6. Undo delete 5 detik dan persistensi localStorage
+
+Menghapus lamaran memunculkan `UndoToast.tsx` selama 5 detik. Jika tombol Undo ditekan sebelum waktu habis, lamaran kembali utuh beserta checklist, lampiran CV, dan activity log-nya. Timer diatur lewat custom hook `useUndoDelete.ts` yang menyimpan ID `setTimeout` dan `setInterval` di `useRef`, sehingga penghapusan dua lamaran berturut-turut dalam kurang dari 5 detik otomatis membatalkan timer sebelumnya memakai `clearTimeout`.
+
+### 7. Dashboard statistik dan Offer Comparator
+
+`StatsDashboard.tsx` menghitung 5 metrik sebagai derived state langsung dari `applications`: Total Lamaran, Response Rate %, Interview Rate %, Rawan Ghosting, dan Offer Diterima.
+
+`OfferComparator.tsx` aktif jika terdapat minimal 2 lamaran berstatus `OFFER`. Kapten dapat memilih Offer A dan Offer B untuk melihat perbandingan uang saku (bobot 50%), mode kerja (bobot 25%), kecocokan skill (bobot 25%), total skor berbobot, dan badge `Rekomendasi Terbaik`. Jika offer masih kurang dari 2, halaman menampilkan empty state dengan tombol kembali ke Pipeline.
+
+## Fitur tambahan
+
+Di luar 7 fitur wajib, aplikasi menambahkan beberapa fitur pendukung tanpa library eksternal:
+
+1. Dark Mode dengan `useLocalStorage` (`aku-mw-magang:theme`), mengubah tema halaman terang/gelap dan tetap tersimpan setelah refresh.
+2. Export dan Import backup JSON melalui `BackupDataModal.tsx` dan `src/utils/backupJson.ts`, dilengkapi validasi skema runtime (`unknown` narrowing), penolakan ID atau pasangan `company + role` duplikat, serta tombol Reset data.
+3. Keyboard shortcut `/` memakai `useRef` di `JobExplorer.tsx` dan `WarRoomPipeline.tsx` untuk langsung memfokuskan search bar (otomatis nonaktif jika sedang mengetik di input atau ada modal terbuka).
+4. Upload, preview, dan unduh file CV lokal (`.pdf`, `.doc`, `.docx`, batas 500 KB) memakai `FileReader` di `src/utils/cvFile.ts`. Nama file otomatis mengisi `cvVersion` dan ikut terbawa saat Export/Import JSON.
+5. Pop-up detail lowongan (`JobDetailModal.tsx`) dengan deskripsi posisi, link ke portal asli perusahaan, dan tombol `Catat Applied` untuk prefill form lamaran.
+6. Pembaca soal suara pada `InterviewPrepTimer.tsx` memakai Web Speech API (`speechSynthesis`) dan chime waktu habis (`AudioContext`), ikut dihentikan saat modal unmount.
+
+## Arsitektur dan alur state
+
+State utama (`applications`, `kaptenSkills`, `theme`) diletakkan di `src/App.tsx` lalu diturunkan ke komponen anak lewat props dan callback (lifting state up). Tiga custom hook dipakai untuk memisahkan logika yang berulang:
+
+- `useLocalStorage<T>` membaca nilai awal dari `localStorage` secara lazy di `useState` dan menyinkronkannya kembali lewat `useEffect`.
+- `useDebounce<T>` menunda perubahan nilai pencarian selama 400ms dengan cleanup `clearTimeout`.
+- `useUndoDelete` mengelola timer toast Undo 5 detik memakai `useRef` agar aman saat hapus beruntun dan bersih saat unmount.
+
+Semua angka turunan (Match Score %, bentrok jadwal, status Rawan Ghosting, 5 kartu statistik, dan skor Offer Comparator) dihitung langsung dari state sumber melalui `useMemo` dan fungsi murni di `src/utils/`, tidak disimpan sebagai `useState` terpisah.
+
+## Struktur folder
 
 ```text
 pweb-react-c01-2026/
 ├── index.html
 ├── public/
-│   ├── favicon.ico                    # Favicon aplikasi
-│   └── magang-fallback.json           # 15 lowongan magang tech Indonesia (format Remotive API)
+│   ├── favicon.ico
+│   └── magang-fallback.json
 └── src/
     ├── assets/
-    │   └── retro/                     # Wallpaper, ilustrasi hero/footer, font lokal, & 19 ikon pixel-art
+    │   └── retro/
+    │       ├── fonts/
+    │       ├── icons/
+    │       ├── background.jpg
+    │       ├── footer-kapten-horizon.jpg
+    │       ├── hero-kapten-world.jpg
+    │       └── index.ts
     ├── components/
-    │   ├── ApplicationDetailModal.tsx # Fitur 4 & 5: State Machine, Checklist, Activity Log, Prep Timer
-    │   ├── ApplicationFormModal.tsx   # Fitur 2: Form manual terkontrol + auto-focus useRef + upload CV
-    │   ├── BackupDataModal.tsx        # Bonus: Dialog Export/Import JSON & Reset data
-    │   ├── ConflictBanner.tsx         # Fitur 3: Banner peringatan bentrok jadwal interview
-    │   ├── InterviewPrepTimer.tsx     # Fitur 5: Timer 02:00 + cleanup + Web Speech Reader
-    │   ├── JobDetailModal.tsx         # Bonus: Pop-up detail lowongan & Quick Apply
-    │   ├── JobExplorer.tsx            # Fitur 1: Fetch AbortController, debounce search, filter & sort
-    │   ├── OfferComparator.tsx        # Fitur 7: Perbandingan 2 Offer berbobot
-    │   ├── SkillProfile.tsx           # Fitur 1: Manajemen skill Kapten & switch sumber data
-    │   ├── StatsDashboard.tsx         # Fitur 7: 5 kartu statistik (derived state)
-    │   ├── UndoToast.tsx              # Fitur 6: Notifikasi Undo Delete 5 detik
-    │   ├── WarRoomPipeline.tsx        # Fitur 3: Pipeline lamaran, filter gabungan & Simulasi +15 Hari
-    │   └── index.ts                   # Barrel export komponen
+    │   ├── ApplicationDetailModal.tsx
+    │   ├── ApplicationFormModal.tsx
+    │   ├── BackupDataModal.tsx
+    │   ├── ConflictBanner.tsx
+    │   ├── InterviewPrepTimer.tsx
+    │   ├── JobDetailModal.tsx
+    │   ├── JobExplorer.tsx
+    │   ├── OfferComparator.tsx
+    │   ├── SkillProfile.tsx
+    │   ├── StatsDashboard.tsx
+    │   ├── UndoToast.tsx
+    │   ├── WarRoomPipeline.tsx
+    │   └── index.ts
     ├── hooks/
-    │   ├── useDebounce.ts             # Custom Hook debounce (400ms)
-    │   ├── useLocalStorage.ts         # Custom Hook persistensi localStorage generik
-    │   ├── useUndoDelete.ts           # Custom Hook timer Undo Delete berbasis useRef
-    │   └── index.ts                   # Barrel export hooks
+    │   ├── useDebounce.ts
+    │   ├── useLocalStorage.ts
+    │   ├── useUndoDelete.ts
+    │   └── index.ts
     ├── services/
-    │   ├── jobService.ts              # Fetch Remotive Live API & fallback lokal dengan AbortSignal
-    │   └── index.ts                   # Barrel export services
+    │   ├── jobService.ts
+    │   └── index.ts
     ├── types/
-    │   ├── application.ts             # Application, ApplicationStatus, WorkMode, ChecklistItem, ActivityLog, CvAttachment
-    │   ├── job.ts                     # JobListing, RemotiveApiResponse, JobDataSource
-    │   └── index.ts                   # Barrel export tipe
+    │   ├── application.ts
+    │   ├── job.ts
+    │   └── index.ts
     ├── utils/
-    │   ├── stateMachine.ts            # Aturan transisi status & validasi syarat pindah status
-    │   ├── skillMatch.ts              # Hitung Skill Match Score (%), matched/missing skills, duplikat skill
-    │   ├── scheduleConflict.ts        # Deteksi bentrok jadwal interview (< 60 menit)
-    │   ├── applicationHelpers.ts      # Anti-duplikat lamaran, Rawan Ghosting (> 14 hari), Offer Comparator
-    │   ├── backupJson.ts              # Bonus: Export & validasi Import backup JSON
-    │   ├── cvFile.ts                  # Bonus: Validasi, baca, & preview file CV lokal (FileReader)
-    │   └── index.ts                   # Barrel export helper
-    ├── App.tsx                        # Komponen utama, navigasi tab, & state terpusat
-    ├── index.css                      # Token tema & Tailwind CSS v4
+    │   ├── applicationHelpers.ts
+    │   ├── backupJson.ts
+    │   ├── cvFile.ts
+    │   ├── scheduleConflict.ts
+    │   ├── skillMatch.ts
+    │   ├── stateMachine.ts
+    │   └── index.ts
+    ├── App.tsx
+    ├── index.css
     └── main.tsx
 ```
 
----
+## Skema data dan aturan main
 
-## Dataset & Sumber API
+Objek `Application` di `src/types/application.ts` menyimpan `id`, `company`, `role`, `workMode`, `status`, `requiredSkills`, `lastUpdatedAt`, `checklist`, `activityLogs`, serta field opsional `jobUrl`, `cvVersion`, `cvAttachment`, `appliedDate`, `interviewDateTime`, dan `salaryOffer`.
 
-| Sumber | Alamat / Path | Keterangan |
-| :--- | :--- | :--- |
-| **Utama (Live API)** | `https://remotive.com/api/remote-jobs?category=software-dev&limit=30` | Gratis, tanpa API key, mendukung CORS. Field `tags` digunakan sebagai `requiredSkills`. |
-| **Fallback Lokal** | `/magang-fallback.json` (`public/magang-fallback.json`) | 15 lowongan magang tech Indonesia dengan struktur root `{ "jobs": [...] }` yang sama dengan Remotive API. |
-
----
-
-## Ringkasan Aturan Main
-
-| Aturan | Ketentuan & Implementasi |
+| Aturan | Implementasi di kode |
 | :--- | :--- |
-| **Anti-Duplikat Lamaran** | Pasangan `company + role` yang sama (case-insensitive) ditolak di Eksplorasi, Form Manual, maupun Import JSON (`isDuplicateApplication`). |
-| **Transisi Status Ketat** | `WISHLIST -> APPLIED`; `APPLIED -> SCREENING \| REJECTED \| GHOSTED`; `SCREENING -> INTERVIEW \| REJECTED \| GHOSTED`; `INTERVIEW -> OFFER \| REJECTED \| GHOSTED`; `GHOSTED -> SCREENING`; `OFFER` dan `REJECTED` bersifat final (`stateMachine.ts`). |
-| **Syarat Pindah Status** | Ke `APPLIED`: wajib `cvVersion` & `appliedDate`. Ke `INTERVIEW`: wajib `interviewDateTime` valid. Ke `OFFER`: wajib `salaryOffer > 0` & `workMode` (`validateStatusTransition`). |
-| **Rawan Ghosting** | Status `APPLIED` atau `SCREENING` yang tidak berubah > 14 hari otomatis menampilkan badge Rawan Ghosting sebagai derived state (`isGhostingRisk`). |
-| **Bentrok Jadwal Interview** | >= 2 lamaran berstatus `INTERVIEW` yang berselisih < 60 menit memunculkan banner bentrok dari seluruh data (`findInterviewConflicts`). |
-| **Skill Match Score (%)** | `Math.round((jumlahCocok / totalRequired) * 100)`, case-insensitive, dengan kategori hijau (>= 70%), kuning (40-69%), dan merah (< 40%) (`calculateSkillMatch`). |
-| **Undo Delete (5 Detik)** | Menghapus lamaran memunculkan toast Undo 5 detik; penghapusan beruntun membersihkan timer lama melalui `useRef` + `clearTimeout` (`useUndoDelete`). |
-| **Skor Offer Comparator** | `(Normalisasi Gaji x 50%) + (Skor Mode Kerja x 25%) + (Skill Match % x 25%)`, dengan skor mode: Remote `100`, Hybrid `75`, Onsite `50` (`compareOffers`). |
+| Anti-duplikat lamaran | Pasangan `company + role` sama (case-insensitive) ditolak di `isDuplicateApplication` (`applicationHelpers.ts`). |
+| Transisi status ketat | `WISHLIST -> APPLIED`; `APPLIED -> SCREENING \| REJECTED \| GHOSTED`; `SCREENING -> INTERVIEW \| REJECTED \| GHOSTED`; `INTERVIEW -> OFFER \| REJECTED \| GHOSTED`; `GHOSTED -> SCREENING`; `OFFER` dan `REJECTED` final (`stateMachine.ts`). |
+| Syarat pindah status | Ke `APPLIED` wajib `cvVersion` & `appliedDate`; ke `INTERVIEW` wajib `interviewDateTime` valid; ke `OFFER` wajib `salaryOffer > 0` & `workMode` (`validateStatusTransition`). |
+| Rawan Ghosting | Status `APPLIED` atau `SCREENING` yang tidak berubah > 14 hari (`isGhostingRisk`). |
+| Bentrok jadwal interview | Minimal 2 lamaran `INTERVIEW` berselisih < 60 menit dicek dari seluruh data (`findInterviewConflicts`). |
+| Skill Match Score (%) | `Math.round((jumlahCocok / totalRequired) * 100)`, case-insensitive (`calculateSkillMatch`). |
+| Undo Delete | Toast 5 detik; hapus 2x berturut-turut membersihkan timer lama via `useRef` dan `clearTimeout` (`useUndoDelete.ts`). |
+| Skor Offer Comparator | `(Normalisasi Gaji x 50%) + (Skor Mode Kerja x 25%) + (Skill Match % x 25%)`, skor mode Remote 100, Hybrid 75, Onsite 50 (`compareOffers`). |
 
----
+## Sumber data dan API
 
-## Daftar Testcase Verifikasi
+| Sumber | Alamat atau file | Keterangan |
+| :--- | :--- | :--- |
+| Live API | `https://remotive.com/api/remote-jobs?category=software-dev&limit=30` | Endpoint publik tanpa API key; field `tags` dibaca sebagai `requiredSkills`. |
+| Fallback lokal | `public/magang-fallback.json` (`/magang-fallback.json`) | 15 lowongan magang tech Indonesia dengan struktur `{ "jobs": [...] }` yang sama dengan Remotive API. |
 
-1. **Fetch & Offline Error**: Loading tampil lalu daftar lowongan muncul; saat DevTools Offline dan klik Coba Lagi, pesan error + tombol Fallback Lokal muncul.
-2. **Skill Match Live**: Menambah skill `"Docker"` di Profil Kapten langsung menaikkan persentase Match lowongan yang meminta Docker.
-3. **Debounce Search**: Mengetik cepat di kolom pencarian hanya menyaring setelah jeda ~400ms (plus shortcut `/` fokus ke search bar).
-4. **Anti-Duplikat & Auto-Focus**: Lowongan tersimpan berubah menjadi `"Sudah Dilamar"`; input `company + role` sama di Form Manual ditolak dengan fokus otomatis via `useRef`.
-5. **State Machine**: Alur `WISHLIST -> APPLIED -> SCREENING -> INTERVIEW -> OFFER` berjalan sesuai syarat field; `WISHLIST` tidak bisa langsung ke `OFFER`.
-6. **Simulasi Ghosting**: Klik `"Simulasi +15 Hari"` pada status `APPLIED`/`SCREENING` memunculkan badge Rawan Ghosting dan menambah angka statistik.
-7. **Bentrok Interview**: 2 lamaran `INTERVIEW` berselisih 30 menit menampilkan Banner Bentrok secara global meski filter status lain aktif.
-8. **Checklist & Refresh**: Menambah 2 checklist dan mencentang 1 (`1/2`) tetap utuh setelah refresh halaman (`F5`).
-9. **Timer Cleanup**: Menjalankan Interview Prep Timer lalu menutup dan membuka ulang modal tidak menimbulkan error console dan hitungan detik tetap normal.
-10. **Undo & Offer Comparator**: Menghapus lamaran lalu klik Undo < 5 detik mengembalikan data utuh; memindahkan 2 lamaran ke `OFFER` menampilkan skor berbobot di Offer Comparator.
+## Daftar testcase
+
+| No | Skenario | Hasil yang diverifikasi |
+| :--- | :--- | :--- |
+| 1 | Fetch & Offline Error | State loading muncul lalu lowongan tampil; saat DevTools Offline dan klik Coba Lagi, pesan error dan tombol Fallback Lokal muncul. |
+| 2 | Skill Match Live | Tambah skill `Docker` di Profil Kapten langsung menaikkan skor Match lowongan yang meminta Docker. |
+| 3 | Debounce Search | Ketik cepat di pencarian hanya menyaring setelah jeda sekitar 400ms; shortcut `/` langsung memfokuskan search bar. |
+| 4 | Anti-Duplikat & Focus | Simpan 1 lowongan mengubah tombol menjadi `Sudah Dilamar`; input `company + role` sama di Form Manual ditolak dan fokus otomatis via `useRef`. |
+| 5 | State Machine | Alur `WISHLIST -> APPLIED -> SCREENING -> INTERVIEW -> OFFER` berjalan sesuai syarat field; `WISHLIST` tidak bisa langsung ke `OFFER`. |
+| 6 | Simulasi Ghosting | Klik `Simulasi +15 Hari` pada status `APPLIED`/`SCREENING` memunculkan badge Rawan Ghosting dan menaikkan kartu statistik. |
+| 7 | Bentrok Interview | 2 lamaran `INTERVIEW` berselisih 30 menit menampilkan Banner Bentrok di atas halaman meski filter status lain dipilih. |
+| 8 | Checklist & Refresh | Tambah 2 checklist dan centang 1 (`1/2`), lalu refresh (`F5`), semua data tetap utuh di `localStorage`. |
+| 9 | Timer Cleanup | Mulai Interview Prep Timer lalu tutup dan buka lagi modal; tidak ada error console dan hitungan detik tetap normal. |
+| 10 | Undo & Comparator | Hapus 1 lamaran lalu klik Undo < 5 detik mengembalikan data utuh; 2 lamaran `OFFER` dibandingkan otomatis di Offer Comparator. |

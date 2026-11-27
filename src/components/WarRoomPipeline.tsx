@@ -373,7 +373,7 @@ export function WarRoomPipeline({
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           {filteredApplications.map((app) => {
             const match = calculateSkillMatch(userSkills, app.requiredSkills);
             const ghostRisk = isGhostingRisk(app);

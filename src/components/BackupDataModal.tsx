@@ -45,7 +45,7 @@ export function BackupDataModal({
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
-      className="fixed inset-0 z-50 bg-ink/45 backdrop-blur-[2px] flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
+      className="fixed inset-0 z-50 bg-slate-950/55 dark:bg-slate-950/75 backdrop-blur-[2px] flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
     >
       <div className="craft-modal w-full max-w-md my-auto">
         <div className="craft-modal-header">
@@ -79,10 +79,10 @@ export function BackupDataModal({
               cadangan atau pindah laptop.
             </p>
             <div className="flex flex-wrap gap-2 pt-1">
-              <span className="px-2.5 py-0.5 rounded-full bg-white border border-line text-[11px] font-semibold text-ink">
+              <span className="px-2.5 py-0.5 rounded-full bg-surface border border-line text-[11px] font-semibold text-ink">
                 {applicationsCount} Lamaran tersimpan
               </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-white border border-line text-[11px] font-semibold text-ink">
+              <span className="px-2.5 py-0.5 rounded-full bg-surface border border-line text-[11px] font-semibold text-ink">
                 {skillsCount} Skill Kapten
               </span>
             </div>
@@ -90,7 +90,7 @@ export function BackupDataModal({
 
           {/* 3 Aksi Jelas */}
           <div className="space-y-2.5">
-            <div className="craft-card-flat bg-white p-3.5 flex items-center justify-between gap-3">
+            <div className="craft-card-flat bg-surface p-3.5 flex items-center justify-between gap-3">
               <div className="space-y-0.5">
                 <p className="text-xs font-semibold text-ink">
                   Simpan Cadangan (Export)
@@ -112,7 +112,7 @@ export function BackupDataModal({
               </button>
             </div>
 
-            <div className="craft-card-flat bg-white p-3.5 flex items-center justify-between gap-3">
+            <div className="craft-card-flat bg-surface p-3.5 flex items-center justify-between gap-3">
               <div className="space-y-0.5">
                 <p className="text-xs font-semibold text-ink">
                   Pulihkan Data (Import)

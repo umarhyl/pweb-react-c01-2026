@@ -157,7 +157,7 @@ export function SkillProfile({
             className={`flex items-start gap-2.5 p-3 rounded-2xl border cursor-pointer transition-all ${
               dataSource === "live"
                 ? "bg-leaf-soft/75 border-leaf shadow-xs"
-                : "bg-white border-line hover:bg-cream-soft/70"
+                : "bg-surface border-line hover:bg-cream-soft/70"
             }`}
           >
             <input
@@ -182,7 +182,7 @@ export function SkillProfile({
             className={`flex items-start gap-2.5 p-3 rounded-2xl border cursor-pointer transition-all ${
               dataSource === "fallback"
                 ? "bg-leaf-soft/75 border-leaf shadow-xs"
-                : "bg-white border-line hover:bg-cream-soft/70"
+                : "bg-surface border-line hover:bg-cream-soft/70"
             }`}
           >
             <input

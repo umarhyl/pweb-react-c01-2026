@@ -11,6 +11,14 @@
       href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
+    <script>
+      try {
+        if (JSON.parse(localStorage.getItem("aku-mw-magang:theme") || '"light"') === "dark") {
+          document.documentElement.classList.add("dark");
+          document.documentElement.style.colorScheme = "dark";
+        }
+      } catch {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

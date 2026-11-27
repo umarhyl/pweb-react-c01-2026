@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* Local bundled fonts (100% offline-ready saat demo) */
 @font-face {
@@ -59,6 +60,7 @@
   --color-sky-deep: #15539e;
 
   --color-paper: #fbfdff;
+  --color-surface: #ffffff;
   --color-canvas: #f5f8fc;
   --color-ink: #1b2430;
   --color-muted: #586575;
@@ -244,7 +246,7 @@
 
   /* Soft Rounded Cards */
   .craft-card {
-    background: #ffffff;
+    background: var(--color-surface);
     border: 1px solid var(--color-line);
     border-radius: 20px;
     box-shadow: 0 3px 12px rgb(15 44 95 / 0.045);
@@ -255,7 +257,7 @@
   }
 
   .craft-card-flat {
-    background: #ffffff;
+    background: var(--color-surface);
     border: 1px solid var(--color-line);
     border-radius: 20px;
     box-shadow: none;
@@ -290,7 +292,7 @@
     padding: 0.5rem 1.05rem;
     border-radius: 9999px;
     border: 1px solid var(--color-line-strong);
-    background: #ffffff;
+    background: var(--color-surface);
     color: var(--color-ink);
     font-family: var(--font-sans);
     font-size: 12.5px;
@@ -357,7 +359,7 @@
     padding: 0.55rem 0.85rem;
     border-radius: 12px;
     border: 1px solid var(--color-line-strong);
-    background: #ffffff;
+    background: var(--color-surface);
     color: var(--color-ink);
     font-family: var(--font-sans);
     font-size: 13px;
@@ -445,4 +447,195 @@
   .craft-scroll::-webkit-scrollbar-thumb:hover {
     background: #93b2d8;
   }
+}
+
+/* ============================================================================
+ * Dark Mode — Midnight XP x Cozy Craft
+ * ========================================================================== */
+:root.dark {
+  --color-leaf: #4d98ff;
+  --color-leaf-hover: #6aadff;
+  --color-leaf-deep: #9ac8ff;
+  --color-leaf-soft: #152b4d;
+
+  --color-wood: #7aa3d4;
+  --color-wood-deep: #9ec0e8;
+
+  --color-cream: #18253a;
+  --color-cream-soft: #131e30;
+
+  --color-sky: #2d5587;
+  --color-sky-soft: #162946;
+  --color-sky-deep: #8ec5ff;
+
+  --color-paper: #0f1726;
+  --color-surface: #162134;
+  --color-canvas: #0b111d;
+  --color-ink: #eaf1fc;
+  --color-muted: #96aac7;
+  --color-line: #253652;
+  --color-line-strong: #354c70;
+
+  --color-danger: #f57c6b;
+  --color-danger-soft: #381a1e;
+  --color-warn: #f2b441;
+  --color-warn-soft: #332612;
+}
+
+.dark body {
+  background-color: #091326;
+  background-image:
+    linear-gradient(
+      180deg,
+      rgb(5 12 28 / 0.72) 0%,
+      rgb(6 15 34 / 0.82) 100%
+    ),
+    url("./assets/retro/background.jpg");
+}
+
+.dark .craft-sheet {
+  border-color: rgb(148 186 240 / 0.22);
+  box-shadow:
+    0 24px 64px rgb(0 0 0 / 0.62),
+    0 4px 18px rgb(0 0 0 / 0.35),
+    inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+
+.dark .craft-topbar-98,
+.dark .craft-modal-header {
+  background: linear-gradient(
+    180deg,
+    #2f6bc4 0%,
+    #1b4b99 42%,
+    #103470 84%,
+    #164085 100%
+  );
+  border-bottom-color: #0b2452;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.22);
+}
+
+.dark .craft-hero {
+  background-color: #0f1726;
+  background-image:
+    linear-gradient(
+      90deg,
+      #0f1726 0%,
+      rgb(15 23 38 / 0.95) 31%,
+      rgb(15 23 38 / 0.8) 50%,
+      rgb(15 23 38 / 0.45) 72%,
+      rgb(15 23 38 / 0.28) 92%
+    ),
+    linear-gradient(
+      180deg,
+      rgb(15 23 38 / 0.55) 0%,
+      rgb(15 23 38 / 0.2) 28%
+    ),
+    url("./assets/retro/hero-kapten-world.jpg");
+}
+
+.dark .craft-hero-img-shadow {
+  opacity: 0.2;
+}
+
+.dark .craft-footer-horizon {
+  background-color: #0f1726;
+  background-image:
+    linear-gradient(
+      180deg,
+      #0f1726 0%,
+      rgb(15 23 38 / 0.95) 18%,
+      rgb(15 23 38 / 0.68) 42%,
+      rgb(15 23 38 / 0.4) 68%,
+      rgb(15 23 38 / 0.35) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgb(15 23 38 / 0.94) 0%,
+      rgb(15 23 38 / 0.76) 30%,
+      rgb(15 23 38 / 0.3) 58%,
+      rgb(15 23 38 / 0.2) 82%
+    ),
+    url("./assets/retro/footer-kapten-horizon.jpg");
+}
+
+.dark .craft-card {
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.26);
+}
+
+.dark .craft-card-hover:hover {
+  border-color: #4d98ff;
+  box-shadow: 0 12px 30px rgb(0 0 0 / 0.42);
+}
+
+.dark .craft-btn {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.06),
+    0 2px 0 #09101d;
+}
+
+.dark .craft-btn:hover:not(:disabled) {
+  border-color: #4d98ff;
+}
+
+.dark .craft-btn-primary {
+  background: linear-gradient(180deg, #3c8bf5 0%, #1d6be0 100%);
+  color: #ffffff;
+  border-color: #1654b8;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    0 2px 0 #0b2a5e;
+}
+
+.dark .craft-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #5299f8 0%, #2b79ec 100%);
+  border-color: #347be5;
+}
+
+.dark .craft-btn-danger {
+  background: #33191d;
+  color: #f99586;
+  border-color: #6e3034;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    0 2px 0 #1f0d10;
+}
+
+.dark .craft-btn-danger:hover:not(:disabled) {
+  background: #c94a38;
+  color: #ffffff;
+  border-color: #e06150;
+}
+
+.dark .craft-input {
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.35);
+}
+
+.dark .craft-input:focus {
+  box-shadow:
+    inset 0 1px 2px rgb(0 0 0 / 0.25),
+    0 0 0 3px rgb(77 152 255 / 0.28);
+}
+
+.dark .craft-progress {
+  background: #131f33;
+  border-color: #2c4163;
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.4);
+}
+
+.dark .craft-modal {
+  border-color: #31486b;
+  box-shadow: 0 28px 72px rgb(0 0 0 / 0.65);
+}
+
+.dark .craft-scroll::-webkit-scrollbar-track {
+  background: #111b2c;
+}
+
+.dark .craft-scroll::-webkit-scrollbar-thumb {
+  background: #2d4263;
+  border-color: #111b2c;
+}
+
+.dark .craft-scroll::-webkit-scrollbar-thumb:hover {
+  background: #426191;
 }

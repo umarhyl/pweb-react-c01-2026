@@ -33,8 +33,8 @@ interface JobExplorerProps {
 }
 
 const MATCH_BADGE_STYLES: Readonly<Record<MatchLevel, string>> = {
-  high: "bg-emerald-50 text-emerald-800 border-emerald-300",
-  medium: "bg-warn-soft text-amber-900 border-amber-300",
+  high: "bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700/70",
+  medium: "bg-warn-soft text-amber-900 border-amber-300 dark:text-amber-200 dark:border-amber-500/50",
   low: "bg-danger-soft text-danger border-danger/35",
 };
 
@@ -560,7 +560,7 @@ export function JobExplorer({
                         <span
                           key={`matched-${skill}`}
                           title="Skill cocok dengan profil Kapten"
-                          className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300"
+                          className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700/70"
                         >
                           <img
                             src={RETRO_ICONS.check}

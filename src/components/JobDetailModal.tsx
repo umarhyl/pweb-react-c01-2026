@@ -25,8 +25,8 @@ interface JobDetailModalProps {
 }
 
 const MATCH_BADGE_STYLES: Readonly<Record<MatchLevel, string>> = {
-  high: "bg-emerald-50 text-emerald-800 border-emerald-300",
-  medium: "bg-warn-soft text-amber-900 border-amber-300",
+  high: "bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700/70",
+  medium: "bg-warn-soft text-amber-900 border-amber-300 dark:text-amber-200 dark:border-amber-500/50",
   low: "bg-danger-soft text-danger border-danger/35",
 };
 
@@ -69,7 +69,7 @@ export function JobDetailModal({
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
-      className="fixed inset-0 z-50 bg-ink/50 backdrop-blur-[2px] flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
+      className="fixed inset-0 z-50 bg-slate-950/55 dark:bg-slate-950/75 backdrop-blur-[2px] flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
     >
       <div className="craft-modal w-full max-w-2xl my-auto">
         <div className="craft-modal-header">
@@ -153,7 +153,7 @@ export function JobDetailModal({
                 {match.matchedSkills.map((skill) => (
                   <span
                     key={`modal-matched-${skill}`}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700/70"
                   >
                     <img
                       src={RETRO_ICONS.check}

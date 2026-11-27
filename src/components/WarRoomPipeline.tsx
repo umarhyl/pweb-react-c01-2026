@@ -50,16 +50,16 @@ const ALL_STATUSES: readonly ApplicationStatus[] = [
 const STATUS_BADGE_CLASS: Readonly<Record<ApplicationStatus, string>> = {
   WISHLIST: "bg-cream-soft text-ink border-line-strong",
   APPLIED: "bg-sky-soft text-sky-deep border-sky",
-  SCREENING: "bg-indigo-50 text-indigo-800 border-indigo-200",
-  INTERVIEW: "bg-warn-soft text-amber-900 border-amber-300",
-  OFFER: "bg-emerald-50 text-emerald-800 border-emerald-300",
+  SCREENING: "bg-indigo-50 text-indigo-800 border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-700/70",
+  INTERVIEW: "bg-warn-soft text-amber-900 border-amber-300 dark:text-amber-200 dark:border-amber-500/50",
+  OFFER: "bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700/70",
   REJECTED: "bg-danger-soft text-danger border-danger/35",
-  GHOSTED: "bg-purple-50 text-purple-800 border-purple-300 border-dashed",
+  GHOSTED: "bg-purple-50 text-purple-800 border-purple-300 border-dashed dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-700/70",
 };
 
 const MATCH_BADGE_CLASS: Readonly<Record<MatchLevel, string>> = {
-  high: "bg-emerald-50 text-emerald-800 border-emerald-300",
-  medium: "bg-warn-soft text-amber-900 border-amber-300",
+  high: "bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700/70",
+  medium: "bg-warn-soft text-amber-900 border-amber-300 dark:text-amber-200 dark:border-amber-500/50",
   low: "bg-danger-soft text-danger border-danger/35",
 };
 
@@ -430,7 +430,7 @@ export function WarRoomPipeline({
                   {(ghostRisk || isConflicting) && (
                     <div className="flex flex-wrap gap-2">
                       {ghostRisk && (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-300">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-300 dark:bg-warn-soft dark:text-amber-200 dark:border-amber-500/50">
                           <img
                             src={RETRO_ICONS.ghost}
                             alt=""
@@ -480,7 +480,7 @@ export function WarRoomPipeline({
 
                     {typeof app.salaryOffer === "number" &&
                       app.salaryOffer > 0 && (
-                        <span className="inline-flex items-center gap-1 text-emerald-700 font-semibold">
+                        <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-300 font-semibold">
                           Offer: {formatCurrency(app.salaryOffer)}
                         </span>
                       )}

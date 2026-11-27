@@ -273,7 +273,7 @@ export function ApplicationFormModal({
       onClick={(e) => {
         if (e.target === e.currentTarget) handleClose();
       }}
-      className="fixed inset-0 z-50 bg-ink/45 backdrop-blur-[2px] flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
+      className="fixed inset-0 z-50 bg-slate-950/55 dark:bg-slate-950/75 backdrop-blur-[2px] flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
     >
       <div className="craft-modal w-full max-w-lg my-auto">
         <div className="craft-modal-header">
@@ -568,7 +568,7 @@ export function ApplicationFormModal({
                 </div>
 
                 {cvAttachment && (
-                  <div className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-white border border-line text-[11px]">
+                  <div className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-surface border border-line text-[11px]">
                     <span className="inline-flex items-center gap-1.5 min-w-0 truncate">
                       <Paperclip
                         className="w-3 h-3 text-leaf-deep shrink-0"

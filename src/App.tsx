@@ -1,6 +1,6 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
-import { ArrowRight, ArrowUpRight, Database, X } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Database, Moon, Sun, X } from "lucide-react";
 import { RETRO_ICONS } from "./assets/retro";
 import {
   ApplicationDetailModal,
@@ -37,10 +37,12 @@ import {
 } from "./utils";
 
 type ActiveTab = "explorer" | "pipeline" | "comparator";
+type ThemeMode = "light" | "dark";
 
 const STORAGE_KEYS = {
   APPLICATIONS: "aku-mw-magang:applications",
   SKILLS: "aku-mw-magang:kapten-skills",
+  THEME: "aku-mw-magang:theme",
 } as const;
 
 const DEFAULT_KAPTEN_SKILLS: string[] = [
@@ -118,6 +120,20 @@ export function App() {
     STORAGE_KEYS.SKILLS,
     DEFAULT_KAPTEN_SKILLS,
   );
+  const [theme, setTheme] = useLocalStorage<ThemeMode>(
+    STORAGE_KEYS.THEME,
+    "light",
+  );
+
+  useEffect(() => {
+    const isDark = theme === "dark";
+    document.documentElement.classList.toggle("dark", isDark);
+    document.documentElement.style.colorScheme = theme;
+  }, [theme]);
+
+  const handleToggleTheme = () => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  };
   const [dataSource, setDataSource] = useState<JobDataSource>("live");
   const [activeTab, setActiveTab] = useState<ActiveTab>("explorer");
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -522,7 +538,7 @@ export function App() {
                 aria-current={activeTab === "explorer" ? "page" : undefined}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-all ${
                   activeTab === "explorer"
-                    ? "bg-white text-leaf-deep shadow-xs border border-line"
+                    ? "bg-surface text-leaf-deep shadow-xs border border-line"
                     : "text-muted hover:text-ink"
                 }`}
               >
@@ -542,7 +558,7 @@ export function App() {
                 aria-current={activeTab === "pipeline" ? "page" : undefined}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-all ${
                   activeTab === "pipeline"
-                    ? "bg-white text-leaf-deep shadow-xs border border-line"
+                    ? "bg-surface text-leaf-deep shadow-xs border border-line"
                     : "text-muted hover:text-ink"
                 }`}
               >
@@ -562,7 +578,7 @@ export function App() {
                 aria-current={activeTab === "comparator" ? "page" : undefined}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-all ${
                   activeTab === "comparator"
-                    ? "bg-white text-leaf-deep shadow-xs border border-line"
+                    ? "bg-surface text-leaf-deep shadow-xs border border-line"
                     : "text-muted hover:text-ink"
                 }`}
               >
@@ -579,6 +595,35 @@ export function App() {
 
             {/* Right Utilities + Primary Pill CTA */}
             <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={handleToggleTheme}
+                aria-pressed={theme === "dark"}
+                aria-label={
+                  theme === "dark"
+                    ? "Ganti ke mode terang"
+                    : "Ganti ke mode gelap"
+                }
+                title={
+                  theme === "dark"
+                    ? "Ganti ke Mode Terang"
+                    : "Ganti ke Mode Gelap"
+                }
+                className="craft-btn py-1.5 px-3 text-xs"
+              >
+                {theme === "dark" ? (
+                  <>
+                    <Sun className="w-3.5 h-3.5 text-warn" aria-hidden="true" />
+                    Terang
+                  </>
+                ) : (
+                  <>
+                    <Moon className="w-3.5 h-3.5 text-leaf" aria-hidden="true" />
+                    Gelap
+                  </>
+                )}
+              </button>
+
               <button
                 type="button"
                 onClick={() => setIsBackupModalOpen(true)}
@@ -668,7 +713,7 @@ export function App() {
                   </button>
                 )}
 
-                <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/85 backdrop-blur-xs border border-line text-xs text-ink shadow-xs">
+                <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface/85 backdrop-blur-xs border border-line text-xs text-ink shadow-xs">
                   <img
                     src={RETRO_ICONS.sleepingCat}
                     alt=""

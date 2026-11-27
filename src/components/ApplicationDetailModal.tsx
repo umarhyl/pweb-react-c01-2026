@@ -236,7 +236,7 @@ export function ApplicationDetailModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-ink/45 backdrop-blur-[2px] flex items-center justify-center p-2.5 sm:p-5 overflow-y-auto"
+      className="fixed inset-0 z-50 bg-slate-950/55 dark:bg-slate-950/75 backdrop-blur-[2px] flex items-center justify-center p-2.5 sm:p-5 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby="detail-modal-title"
@@ -305,7 +305,7 @@ export function ApplicationDetailModal({
                               openCvPreview(application.cvAttachment);
                             }
                           }}
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sky-soft text-sky-deep border border-sky hover:bg-white cursor-pointer"
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sky-soft text-sky-deep border border-sky hover:bg-surface cursor-pointer"
                         >
                           <ExternalLink className="w-3 h-3" aria-hidden="true" />
                           Preview
@@ -313,7 +313,7 @@ export function ApplicationDetailModal({
                         <a
                           href={application.cvAttachment.dataUrl}
                           download={application.cvAttachment.fileName}
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-cream-soft text-ink border border-line-strong hover:bg-white"
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-cream-soft text-ink border border-line-strong hover:bg-surface"
                         >
                           <Download className="w-3 h-3" aria-hidden="true" />
                           Unduh ({formatFileSize(application.cvAttachment.sizeBytes)})
@@ -343,7 +343,7 @@ export function ApplicationDetailModal({
                 )}
                 {typeof application.salaryOffer === "number" &&
                   application.salaryOffer > 0 && (
-                    <span className="text-emerald-700 font-semibold">
+                    <span className="text-emerald-700 dark:text-emerald-300 font-semibold">
                       Offer: {formatCurrency(application.salaryOffer)}
                     </span>
                   )}
@@ -363,7 +363,7 @@ export function ApplicationDetailModal({
               {(ghostRisk || hasConflict) && (
                 <div className="flex flex-wrap gap-2 pt-1">
                   {ghostRisk && (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-300">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-300 dark:bg-warn-soft dark:text-amber-200 dark:border-amber-500/50">
                       <img
                         src={RETRO_ICONS.ghost}
                         alt=""
@@ -593,7 +593,7 @@ export function ApplicationDetailModal({
                           </div>
 
                           {cvAttachment && (
-                            <div className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-white border border-line text-[11px]">
+                            <div className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-surface border border-line text-[11px]">
                               <span className="inline-flex items-center gap-1.5 min-w-0 truncate">
                                 <Paperclip
                                   className="w-3 h-3 text-leaf-deep shrink-0"

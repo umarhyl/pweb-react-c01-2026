@@ -44,7 +44,7 @@ function OfferComparisonCard({
     <article
       className={`craft-card p-6 flex flex-col justify-between gap-5 ${
         isRecommended
-          ? "border-leaf ring-2 ring-leaf/20 bg-gradient-to-b from-white to-leaf-soft/35"
+          ? "border-leaf ring-2 ring-leaf/20 bg-gradient-to-b from-surface to-leaf-soft/35"
           : ""
       }`}
     >

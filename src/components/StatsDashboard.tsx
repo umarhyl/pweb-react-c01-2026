@@ -60,8 +60,8 @@ export function StatsDashboard({ applications }: StatsDashboardProps) {
   return (
     <section aria-label="Ringkasan Statistik Lamaran">
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-        {/* 1. Total Lamaran (flat solid white, tanpa shadow & gradien) */}
-        <article className="craft-card-flat bg-white p-4 flex flex-col justify-between gap-2.5">
+        {/* 1. Total Lamaran */}
+        <article className="craft-card-flat bg-surface p-4 flex flex-col justify-between gap-2.5">
           <div className="flex items-center justify-between gap-2">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
               Total Lamaran
@@ -85,7 +85,7 @@ export function StatsDashboard({ applications }: StatsDashboardProps) {
         </article>
 
         {/* 2. Response Rate % */}
-        <article className="craft-card-flat bg-white p-4 flex flex-col justify-between gap-2.5">
+        <article className="craft-card-flat bg-surface p-4 flex flex-col justify-between gap-2.5">
           <div className="flex items-center justify-between gap-2">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
               Response Rate
@@ -109,12 +109,12 @@ export function StatsDashboard({ applications }: StatsDashboardProps) {
         </article>
 
         {/* 3. Interview Rate % */}
-        <article className="craft-card-flat bg-white p-4 flex flex-col justify-between gap-2.5">
+        <article className="craft-card-flat bg-surface p-4 flex flex-col justify-between gap-2.5">
           <div className="flex items-center justify-between gap-2">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
               Interview Rate
             </span>
-            <span className="w-7 h-7 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center shrink-0">
+            <span className="w-7 h-7 rounded-xl bg-indigo-50 border border-indigo-200 dark:bg-indigo-950/60 dark:border-indigo-700/70 flex items-center justify-center shrink-0">
               <img
                 src={RETRO_ICONS.timer}
                 alt=""
@@ -124,7 +124,7 @@ export function StatsDashboard({ applications }: StatsDashboardProps) {
               />
             </span>
           </div>
-          <p className="font-pixel text-3xl font-bold leading-none text-indigo-700">
+          <p className="font-pixel text-3xl font-bold leading-none text-indigo-700 dark:text-indigo-300">
             {stats.interviewRate}%
           </p>
           <p className="text-[11.5px] text-muted">
@@ -137,7 +137,7 @@ export function StatsDashboard({ applications }: StatsDashboardProps) {
           className={`craft-card-flat p-4 flex flex-col justify-between gap-2.5 ${
             stats.ghostingRisk > 0
               ? "bg-danger-soft/75 border-danger/45"
-              : "bg-white"
+              : "bg-surface"
           }`}
         >
           <div className="flex items-center justify-between gap-2">
@@ -147,7 +147,7 @@ export function StatsDashboard({ applications }: StatsDashboardProps) {
             <span
               className={`w-7 h-7 rounded-xl border flex items-center justify-center shrink-0 ${
                 stats.ghostingRisk > 0
-                  ? "bg-white border-danger/35"
+                  ? "bg-surface border-danger/35"
                   : "bg-cream-soft border-line"
               }`}
             >
@@ -176,7 +176,7 @@ export function StatsDashboard({ applications }: StatsDashboardProps) {
         {/* 5. Offer Diterima */}
         <article
           className={`craft-card-flat p-4 flex flex-col justify-between gap-2.5 col-span-2 sm:col-span-1 ${
-            stats.offers >= 2 ? "bg-leaf-soft border-leaf/55" : "bg-white"
+            stats.offers >= 2 ? "bg-leaf-soft border-leaf/55" : "bg-surface"
           }`}
         >
           <div className="flex items-center justify-between gap-2">

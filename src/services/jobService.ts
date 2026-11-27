@@ -9,15 +9,35 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-function stripHtmlToPlainText(raw: string): string {
-  return raw
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/\s+/g, " ")
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;|&rsquo;|&lsquo;/gi, "'")
+    .replace(/&ldquo;|&rdquo;/gi, '"')
+    .replace(/&mdash;|&ndash;/gi, "-");
+}
+
+function stripHtmlToStructuredText(raw: string): string {
+  const withStructure = raw
+    .replace(/<h[1-6][^>]*>/gi, "\n\n## ")
+    .replace(/<\/h[1-6]>/gi, "\n")
+    .replace(/<li[^>]*>/gi, "\n- ")
+    .replace(/<\/li>/gi, "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|ul|ol|section)>/gi, "\n\n")
+    .replace(/<[^>]*>/g, " ");
+
+  const decoded = decodeHtmlEntities(withStructure);
+
+  return decoded
+    .split(/\r?\n/)
+    .map((line) => line.replace(/[ \t]+/g, " ").trim())
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
 
@@ -54,7 +74,7 @@ function parseJobListing(item: unknown): JobListing | null {
 
   const cleanedDescription =
     typeof description === "string" && description.trim().length > 0
-      ? stripHtmlToPlainText(description)
+      ? stripHtmlToStructuredText(description)
       : undefined;
 
   return {

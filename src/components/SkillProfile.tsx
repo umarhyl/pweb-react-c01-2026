@@ -43,10 +43,10 @@ export function SkillProfile({
   };
 
   return (
-    <aside className="space-y-4">
+    <div className="grid grid-cols-1 lg:grid-cols-[1.35fr_1fr] gap-5 items-stretch">
       {/* Card 1: Profil Skill Kapten */}
       <section
-        className="craft-card p-5 space-y-4"
+        className="craft-card p-5 space-y-4 flex flex-col justify-between"
         aria-label="Profil Skill Kapten"
       >
         <div className="space-y-1">
@@ -133,12 +133,12 @@ export function SkillProfile({
 
       {/* Card 2: Sumber Data Lowongan */}
       <section
-        className="craft-card p-5 space-y-3.5"
+        className="craft-card p-5 space-y-3.5 flex flex-col justify-between"
         aria-label="Sumber Data Lowongan"
       >
         <div className="space-y-1">
           <span className="craft-eyebrow">Data Source</span>
-          <h2 className="font-pixel text-lg font-bold text-ink flex items-center gap-2">
+          <h2 className="font-pixel text-xl font-bold text-ink flex items-center gap-2">
             <img
               src={RETRO_ICONS.folderOpen}
               alt=""
@@ -148,9 +148,12 @@ export function SkillProfile({
             />
             Sumber Lowongan
           </h2>
+          <p className="text-xs text-muted leading-relaxed">
+            Pilih sumber data live Remotive API atau dataset lokal Indonesia.
+          </p>
         </div>
 
-        <fieldset className="space-y-2.5">
+        <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5">
           <legend className="sr-only">Pilih sumber data lowongan</legend>
 
           <label
@@ -204,6 +207,6 @@ export function SkillProfile({
           </label>
         </fieldset>
       </section>
-    </aside>
+    </div>
   );
 }

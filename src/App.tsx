@@ -780,7 +780,7 @@ export function App() {
           <StatsDashboard applications={applications} />
 
           {activeTab === "explorer" && (
-            <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 items-start">
+            <div className="space-y-6">
               <SkillProfile
                 skills={kaptenSkills}
                 onAddSkill={handleAddSkill}

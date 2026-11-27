@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   ArrowRight,
@@ -25,10 +25,19 @@ interface JobDetailModalProps {
 }
 
 const MATCH_BADGE_STYLES: Readonly<Record<MatchLevel, string>> = {
-  high: "bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700/70",
-  medium: "bg-warn-soft text-amber-900 border-amber-300 dark:text-amber-200 dark:border-amber-500/50",
+  high: "bg-emerald-50 text-emerald-800 border-emerald-300",
+  medium: "bg-warn-soft text-amber-900 border-amber-300",
   low: "bg-danger-soft text-danger border-danger/35",
 };
+
+const DESCRIPTION_PREVIEW_LIMIT = 360;
+
+function truncateAtWord(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text;
+  const sliced = text.slice(0, maxLength);
+  const lastSpace = sliced.lastIndexOf(" ");
+  return `${(lastSpace > 0 ? sliced.slice(0, lastSpace) : sliced).trimEnd()}...`;
+}
 
 export function JobDetailModal({
   job,
@@ -39,6 +48,8 @@ export function JobDetailModal({
   onQuickApply,
   onOpenInWarRoom,
 }: JobDetailModalProps) {
+  const [expandedJobId, setExpandedJobId] = useState<number | null>(null);
+
   useEffect(() => {
     if (!job) return;
 
@@ -56,10 +67,17 @@ export function JobDetailModal({
 
   if (!job || !match) return null;
 
-  const trimmedDescription =
-    job.description && job.description.length > 520
-      ? `${job.description.slice(0, 520)}...`
-      : job.description;
+  const fullDescription =
+    job.description ??
+    `Posisi ${job.title} di ${job.company_name} (${job.candidate_required_location}).`;
+  const isLongDescription = fullDescription.length > DESCRIPTION_PREVIEW_LIMIT;
+  const isExpanded = expandedJobId === job.id;
+  const displayedDescription =
+    isLongDescription && !isExpanded
+      ? truncateAtWord(fullDescription, DESCRIPTION_PREVIEW_LIMIT)
+      : fullDescription;
+
+  const totalSkills = match.matchedSkills.length + match.missingSkills.length;
 
   return createPortal(
     <div
@@ -84,7 +102,7 @@ export function JobDetailModal({
               height={16}
               className="pixel-art shrink-0"
             />
-            Detail Lowongan: {job.company_name}
+            {job.company_name}
           </span>
           <button
             type="button"
@@ -117,7 +135,7 @@ export function JobDetailModal({
               <span
                 className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${MATCH_BADGE_STYLES[match.level]}`}
               >
-                {match.score}% Skill Match
+                {match.score}% Match
               </span>
               <span className="text-xs font-semibold text-ink">
                 {job.salary.trim().length > 0
@@ -127,79 +145,95 @@ export function JobDetailModal({
             </div>
           </div>
 
-          {/* Ringkasan Deskripsi */}
+          {/* Deskripsi */}
           <div className="space-y-2">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">
-              Deskripsi Posisi
-            </h3>
-            <p className="text-xs sm:text-[13px] text-ink leading-relaxed bg-cream-soft border border-line rounded-2xl p-4">
-              {trimmedDescription ??
-                `Posisi ${job.title} di ${job.company_name} (${job.candidate_required_location}). Buka halaman karir resmi untuk membaca detail tanggung jawab, durasi magang, dan form pendaftaran langsung.`}
-            </p>
+            <h3 className="text-xs font-semibold text-muted">Ringkasan</h3>
+            <div className="text-xs sm:text-[13px] text-ink leading-relaxed bg-cream-soft border border-line rounded-2xl p-4 space-y-2">
+              <p>{displayedDescription}</p>
+              {isLongDescription && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setExpandedJobId(isExpanded ? null : job.id)
+                  }
+                  className="text-xs font-semibold text-leaf hover:underline cursor-pointer"
+                >
+                  {isExpanded ? "Tampilkan lebih ringkas" : "Baca selengkapnya"}
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Kecocokan Skill */}
-          <div className="space-y-2">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">
-              Analisis Skill Kapten ({match.matchedSkills.length} dari{" "}
-              {match.matchedSkills.length + match.missingSkills.length} cocok)
-            </h3>
-            {job.tags.length === 0 ? (
+          {/* Kecocokan Skill: dipisah bersih antara Cocok & Belum Dimiliki */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-xs font-semibold text-muted">
+                Skill dibutuhkan ({match.matchedSkills.length}/{totalSkills}{" "}
+                cocok)
+              </h3>
+            </div>
+
+            {totalSkills === 0 ? (
               <p className="text-xs italic text-muted">
                 Tidak ada tag skill spesifik dari sumber lowongan.
               </p>
             ) : (
-              <div className="flex flex-wrap gap-1.5">
-                {match.matchedSkills.map((skill) => (
-                  <span
-                    key={`modal-matched-${skill}`}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700/70"
-                  >
-                    <img
-                      src={RETRO_ICONS.check}
-                      alt=""
-                      width={11}
-                      height={11}
-                      className="pixel-art"
-                    />
-                    {skill}
-                  </span>
-                ))}
-                {match.missingSkills.map((skill) => (
-                  <span
-                    key={`modal-missing-${skill}`}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-full bg-danger-soft/75 text-danger border border-dashed border-danger/40"
-                  >
-                    <img
-                      src={RETRO_ICONS.cross}
-                      alt=""
-                      width={10}
-                      height={10}
-                      className="pixel-art"
-                    />
-                    {skill} (missing)
-                  </span>
-                ))}
+              <div className="space-y-2.5">
+                {match.matchedSkills.length > 0 && (
+                  <div className="space-y-1.5">
+                    <p className="text-[11px] font-semibold text-emerald-700">
+                      Sudah dikuasai ({match.matchedSkills.length})
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {match.matchedSkills.map((skill) => (
+                        <span
+                          key={`modal-matched-${skill}`}
+                          className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300"
+                        >
+                          <img
+                            src={RETRO_ICONS.check}
+                            alt=""
+                            width={10}
+                            height={10}
+                            className="pixel-art"
+                          />
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {match.missingSkills.length > 0 && (
+                  <div className="space-y-1.5">
+                    <p className="text-[11px] font-semibold text-danger">
+                      Belum ada di profil ({match.missingSkills.length})
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {match.missingSkills.map((skill) => (
+                        <span
+                          key={`modal-missing-${skill}`}
+                          className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs rounded-full bg-danger-soft/75 text-danger border border-dashed border-danger/40"
+                        >
+                          <img
+                            src={RETRO_ICONS.cross}
+                            alt=""
+                            width={9}
+                            height={9}
+                            className="pixel-art"
+                          />
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
 
-          {/* Panduan Alur Melamar */}
-          <div className="rounded-2xl bg-sky-soft/75 border border-sky p-4 text-xs text-ink space-y-1">
-            <p className="font-semibold text-leaf-deep">
-              Alur Melamar Lowongan Ini:
-            </p>
-            <p className="text-muted leading-relaxed">
-              1) Klik <strong>Buka Web Asli</strong> untuk melamar di portal
-              resmi perusahaan, lalu 2) klik{" "}
-              <strong>Simpan ke Wishlist</strong> atau{" "}
-              <strong>Catat Sudah Melamar (Applied)</strong> agar progres,
-              versi CV, jadwal interview, dan offer terlacak di War Room.
-            </p>
-          </div>
-
           {/* Action Footer */}
-          <div className="pt-3 border-t border-line flex flex-wrap items-center justify-between gap-2.5">
+          <div className="pt-3.5 border-t border-line flex flex-wrap items-center justify-between gap-2.5">
             {job.url ? (
               <a
                 href={job.url}
